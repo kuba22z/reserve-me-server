@@ -1,14 +1,8 @@
 import type { Prisma } from '@prisma/client'
-import type {
-  EntityClientsOnMeetings,
-} from '../../../generated/nestjs-dto/clientsOnMeetings/entities/clientsOnMeetings.entity'
+import type { EntityClientsOnMeetings } from '../../../generated/nestjs-dto/clientsOnMeetings/entities/clientsOnMeetings.entity'
 import type { EntityEmployee } from '../../../generated/nestjs-dto/employee/entities/employee.entity'
-import type {
-  EntityServicesBookedOnMeetings,
-} from '../../../generated/nestjs-dto/servicesBookedOnMeetings/entities/servicesBookedOnMeetings.entity'
-import type {
-  EntityServicesProvidedOnMeetings,
-} from '../../../generated/nestjs-dto/servicesProvidedOnMeetings/entities/servicesProvidedOnMeetings.entity'
+import type { EntityServicesBookedOnMeetings } from '../../../generated/nestjs-dto/servicesBookedOnMeetings/entities/servicesBookedOnMeetings.entity'
+import type { EntityServicesProvidedOnMeetings } from '../../../generated/nestjs-dto/servicesProvidedOnMeetings/entities/servicesProvidedOnMeetings.entity'
 import { type MeetingScheduleDto } from './meetingSchedule.dto'
 
 export class MeetingDto {
