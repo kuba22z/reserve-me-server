@@ -1,6 +1,6 @@
-import { type DateTimeInterval } from '../../meeting/api/dto/dateTimeInterval'
+import { type DateTimeIntervalDto } from '../../meeting/api/dto/dateTimeInterval.dto'
 import { type LocationDto } from '../../meeting/api/dto/location.dto'
-import { Prisma, RepeatRateUnit } from '@prisma/client'
+import { RepeatRateUnit } from '@prisma/client'
 import { type MeetingScheduleDto } from '../../meeting/api/dto/meetingSchedule.dto'
 import { type MeetingDto } from '../../meeting/api/dto/meeting.dto'
 import * as dayjs from 'dayjs'
@@ -12,12 +12,12 @@ export class DtoFactory {
     employeeId: 1,
     priceFull: null,
     scheduleId: 1,
-    discount: new Prisma.Decimal(1),
+    discount: 1,
     priceFinal: null,
     canceled: false,
     cancellationReason: '',
     employeeIdCreated: null,
-    priceExcepted: new Prisma.Decimal(1),
+    priceExcepted: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     clients: [],
@@ -48,9 +48,9 @@ export class DtoFactory {
     meetingSchedule: undefined,
   })
 
-  static datetimeinterval: () => DateTimeInterval = () => ({
-    from: dayjs(),
-    to: dayjs(),
+  static datetimeinterval: () => DateTimeIntervalDto = () => ({
+    from: dayjs().toDate(),
+    to: dayjs().toDate(),
   })
 
   static clientDto: () => ClientDto = () => ({

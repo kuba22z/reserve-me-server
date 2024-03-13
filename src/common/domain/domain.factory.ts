@@ -1,10 +1,10 @@
 import { type ClientDomain } from '../../client/domain/model/client.domain'
 import { type LocationDomain } from '../../meeting/domain/model/location.domain'
 import { type MeetingScheduleDomain } from '../../meeting/domain/model/meetingSchedule.domain'
-import { type DateTimeInterval } from '../../meeting/api/dto/dateTimeInterval'
 import { Prisma, RepeatRateUnit } from '@prisma/client'
 import * as dayjs from 'dayjs'
 import { type MeetingDomain } from '../../meeting/domain/model/meeting.domain'
+import { type DateTimeInterval } from '../../meeting/domain/model/dateTimeInterval.domain'
 
 export class DomainFactory {
   static meetingDomain: () => MeetingDomain = () => ({

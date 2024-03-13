@@ -7,6 +7,7 @@ import { LocationMapper } from './mapper/location.mapper'
 import { MeetingScheduleMapper } from './mapper/meetingSchedule.mapper'
 import { ClientMapper } from '../client/mapper/client.mapper'
 import { ParseDayjsPipe } from './api/controller/parseDayjs.pipe'
+import { MeetingResolver } from './api/resolver/meeting.resolver'
 
 @Module({
   controllers: [MeetingController],
@@ -17,6 +18,7 @@ import { ParseDayjsPipe } from './api/controller/parseDayjs.pipe'
     MeetingScheduleMapper,
     ClientMapper,
     ParseDayjsPipe,
+    MeetingResolver,
   ],
   imports: [PrismaModule],
 })

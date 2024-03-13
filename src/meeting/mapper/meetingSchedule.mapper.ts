@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common'
 import type { MeetingSchedule } from '@prisma/client'
 import { LocationMapper } from './location.mapper'
 import type { MeetingScheduleModel } from './meeting.mapper'
-import { type MeetingScheduleDomain } from '../domain/model/meetingSchedule.domain'
-import { type MeetingScheduleDto } from '../api/dto/meetingSchedule.dto'
+import { MeetingScheduleDomain } from '../domain/model/meetingSchedule.domain'
+import { MeetingScheduleDto } from '../api/dto/meetingSchedule.dto'
 import * as dayjs from 'dayjs'
-import { type DateTimeInterval } from '../domain/model/dateTimeInterval'
+import { type DateTimeInterval } from '../domain/model/dateTimeInterval.domain'
+import { DateTimeIntervalDto } from '../api/dto/dateTimeInterval.dto'
 
 @Injectable()
 export class MeetingScheduleMapper {
@@ -13,13 +14,13 @@ export class MeetingScheduleMapper {
 
   // Map Meeting to MeetingEntity
   public toDomain(schedule: MeetingScheduleModel): MeetingScheduleDomain {
-    return {
+    return new MeetingScheduleDomain({
       ...schedule,
       startDate: dayjs(schedule.startDate),
       endDate: dayjs(schedule.endDate),
       //   dateTimeRanges: [],
       location: this.locationMapper.toDomain(schedule.location),
-    }
+    })
   }
 
   // Map MeetingEntity to Meeting
@@ -33,15 +34,21 @@ export class MeetingScheduleMapper {
 
   public toDto(
     domain: MeetingScheduleDomain,
-    intervals: DateTimeInterval[]
+    intervals: DateTimeInterval
   ): MeetingScheduleDto {
-    return {
+    return new MeetingScheduleDto({
       id: domain.id,
       repeatRate: domain.repeatRate,
       repeatRateUnit: domain.repeatRateUnit,
       locationId: domain.locationId,
       location: this.locationMapper.toDto(domain.location),
-      intervals,
-    }
+      intervals: domain.computeScheduleByInterval(intervals).map(
+        (interval) =>
+          new DateTimeIntervalDto({
+            from: interval.from.toDate(),
+            to: interval.to.toDate(),
+          })
+      ),
+    })
   }
 }

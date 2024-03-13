@@ -106,3 +106,6 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+optional: add it to nest-cli.json to use this plugin
+//      },"@nestjs/swagger/plugin"]

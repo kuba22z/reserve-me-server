@@ -1,0 +1,33 @@
+import { Args, Query, Resolver } from '@nestjs/graphql'
+import { MeetingDto } from '../dto/meeting.dto'
+import { MeetingService } from '../../domain/service/meeting.service'
+import { MeetingMapper } from '../../mapper/meeting.mapper'
+import * as dayjs from 'dayjs'
+
+@Resolver()
+export class MeetingResolver {
+  constructor(
+    private readonly meetingService: MeetingService,
+    private readonly mapper: MeetingMapper
+  ) {}
+
+  @Query(() => [MeetingDto])
+  async meetings(): Promise<MeetingDto[]> {
+    return await this.meetingService
+      .findAll()
+      .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
+  }
+
+  @Query(() => [MeetingDto])
+  async meetingsByInterval(
+    @Args('from', { type: () => Date }) from: Date,
+    @Args('to', { type: () => Date }) to: Date
+  ): Promise<MeetingDto[]> {
+    const interval = { from: dayjs(from), to: dayjs(to) }
+    return await this.meetingService
+      .findAllByInterval(interval)
+      .then((meetings) =>
+        meetings.map((meeting) => this.mapper.toDto(meeting, interval))
+      )
+  }
+}

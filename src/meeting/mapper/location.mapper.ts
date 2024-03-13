@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import type { Location } from '@prisma/client'
-import { type LocationDomain } from '../domain/model/location.domain'
-import { type LocationDto } from '../api/dto/location.dto'
+import { LocationDomain } from '../domain/model/location.domain'
+import { LocationDto } from '../api/dto/location.dto'
 
 @Injectable()
 export class LocationMapper {
   // Map Meeting to MeetingEntity
   public toDomain(location: Location): LocationDomain {
-    return { ...location }
+    return new LocationDomain({ ...location })
   }
 
   // Map MeetingEntity to Meeting
@@ -18,9 +18,8 @@ export class LocationMapper {
   }
 
   public toDto(entity: LocationDomain): LocationDto {
-    return {
+    return new LocationDto({
       ...entity,
-      meetingSchedule: [],
-    }
+    })
   }
 }
