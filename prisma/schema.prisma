@@ -5,19 +5,51 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator docs {
-  provider = "node node_modules/prisma-docs-generator"
-}
-
-generator custom_generator {
-  provider = "prisma-generator-fake-data"
-  output   = "../prisma/fake-data.ts"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+generator fake_data_generator {
+  provider = "prisma-generator-fake-data"
+  output   = "../prisma/fake-data.ts"
+}
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  output              = "../dbml"
+  outputName          = "schema.dbml"
+  projectName         = "reserve-me"
+  projectDatabaseType = "PostgreSQL"
+  projectNote         = "Test pro ject description"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+}
+
+// https://github.com/vegardit/prisma-generator-nestjs-dto
+// generator nestjsDto {
+//   provider                        = "prisma-generator-nestjs-dto"
+//   output                          = "../src/generated/nestjs-dto"
+//   outputToNestJsResourceStructure = "true"
+//   exportRelationModifierClasses   = "true"
+//   reExport                        = "false"
+//   createDtoPrefix                 = "Create"
+//   updateDtoPrefix                 = "Update"
+//   dtoSuffix                       = "Dto"
+//   entityPrefix                    = "Entity"
+//   entitySuffix                    = ""
+//   fileNamingStyle                 = "camel"
+// }
+
+// https://github.com/unlight/prisma-nestjs-graphql
+// generator nestgraphql {
+//   provider = "node node_modules/prisma-nestjs-graphql"
+//   // for yarn monorepos
+//   // provider = "prisma-nestjs-graphql"
+//   output = "../src/@generated"
+// }
 
 model Meeting {
   id                       Int                          @id @default(autoincrement())
