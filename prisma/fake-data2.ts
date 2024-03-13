@@ -69,7 +69,7 @@ export const generateMeetingSchedule = (
   startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
   endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
   repeatRate: 2,
-  repeatRateUnit: 'day',
+  repeatRateUnit: RepeatRateUnit.day,
 })
 
 export const generateClient = (): Client => ({

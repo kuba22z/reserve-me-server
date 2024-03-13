@@ -1,8 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { MeetingService } from '../../domain/service/meeting.service'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
-import * as dayjs from 'dayjs'
+import { Dayjs } from 'dayjs'
+import { ParseDayjsPipe } from './parseDayjs.pipe'
 
 @Controller('meeting')
 export class MeetingController {
@@ -14,10 +24,13 @@ export class MeetingController {
   }
 
   @Get()
-  async findAll() {
-    return await this.meetingService.findMeetingsByInterval({
-      from: dayjs(new Date(2018, 0, 7, 21, 0, 0, 0)),
-      to: dayjs(new Date(2018, 2, 8, 21, 0, 0, 0)),
+  async findAllByInterval(
+    @Query('from', new ParseDayjsPipe()) from: Dayjs,
+    @Query('to', new ParseDayjsPipe()) to: Dayjs
+  ) {
+    return await this.meetingService.findAllByInterval({
+      from,
+      to,
     })
   }
 
