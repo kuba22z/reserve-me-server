@@ -48,7 +48,7 @@ export class MeetingService {
     return `This action returns a #${id} meeting`
   }
 
-  async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
+  async findAllByInterval(dateTimeInterval: DateTimeInterval) {
     const meetingModels: MeetingModel[] = await this.prisma.meeting.findMany({
       include: {
         clientsOnMeetings: { include: { client: true } },
@@ -98,7 +98,6 @@ export class MeetingService {
       interval.to.diff(schedule.startDate, schedule.repeatRateUnit) /
         schedule.repeatRate
     )
-
     // If end date is before start date, skip this item
     if (numRepetitions < 0) return []
     const schedulesUntilIntervalEnd: DateTimeInterval[] = Array.from(
@@ -114,11 +113,10 @@ export class MeetingService {
         ),
       })
     )
-
     return schedulesUntilIntervalEnd.filter(
       (schedule) =>
-        schedule.to.isBefore(interval.to) &&
-        schedule.from.isAfter(interval.from)
+        schedule.to.isAfter(interval.from) &&
+        schedule.from.isBefore(interval.to)
     )
   }
 }

@@ -1,4 +1,10 @@
-import { type Client, type ClientsOnMeetings, type Location, type Meeting, type MeetingSchedule } from '@prisma/client'
+import {
+  type Client,
+  type ClientsOnMeetings,
+  type Location,
+  type Meeting,
+  type MeetingSchedule,
+} from '@prisma/client'
 import { type MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meetingSchedule.mapper'
