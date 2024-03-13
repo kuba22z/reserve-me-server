@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Meeting {
+  id                       Int                          @id @default(autoincrement())
+  clientsOnMeetings        ClientsOnMeetings[]
+  employeeId               Int
+  employee                 Employee?                    @relation(fields: [employeeId], references: [id])
+  locationId               Int
+  location                 Location                     @relation(fields: [locationId], references: [id])
+  meetingScheduleId        Int                          @unique
+  meetingSchedule          MeetingSchedule              @relation(fields: [meetingScheduleId], references: [id])
+  priceExcepted            Decimal                      @db.Decimal(10, 2)
+  priceFull                Decimal?                     @db.Decimal(10, 2)
+  discount                 Decimal                      @default(0) @db.Decimal(3, 2)
+  priceFinal               Decimal?                     @db.Decimal(8, 2)
+  canceled                 Boolean                      @default(false)
+  cancellationReason       String                       @default("")
+  employeeIdCreated        Int?
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  EmployeeSchedule         EmployeeSchedule?            @relation(fields: [employeeScheduleId], references: [id])
+  employeeScheduleId       Int?
+  SerivcesOnMeetings       ServicesProvidedOnMeetings[]
+  SerivcesBookedOnMeetings ServicesBookedOnMeetings[]
+}
+
+model Client {
+  id                Int                 @id @default(autoincrement())
+  clientsOnMeetings ClientsOnMeetings[]
+  phoneNumber       String
+  firstName         String?
+  lastName          String?
+}
+
+model ClientsOnMeetings {
+  clientId   Int
+  client     Client   @relation(fields: [clientId], references: [id])
+  meetingId  Int
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  assignedAt DateTime @default(now())
+
+  // MAYBE: assignedBy String
+  @@id([clientId, meetingId])
+}
+
+model Employee {
+  id               Int                @id @default(autoincrement())
+  meetings         Meeting[]
+  firstName        String
+  lastName         String
+  EmployeeSchedule EmployeeSchedule[]
+}
+
+model EmployeeSchedule {
+  id             Int            @id @default(autoincrement())
+  employeeId     Int
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+  locationId     Int
+  location       Location       @relation(fields: [locationId], references: [id])
+  Meeting        Meeting[]
+  startTime      DateTime       @db.Timetz() // time with time zone
+  endTime        DateTime       @db.Timetz() // time with time zone
+  startDate      DateTime       @db.Date // date
+  endDate        DateTime?      @db.Date // date
+  repeatRate     Int            @default(0)
+  repeatRateUnit RepeatRateUnit @default(DAY)
+}
+
+model MeetingSchedule {
+  id             Int            @id @default(autoincrement())
+  meeting        Meeting?
+  startTime      DateTime       @db.Timetz() // time with time zone
+  endTime        DateTime       @db.Timetz() // time with time zone
+  startDate      DateTime       @db.Date // date
+  endDate        DateTime?      @db.Date // date
+  repeatRate     Int            @default(0)
+  repeatRateUnit RepeatRateUnit @default(DAY)
+}
+
+model Location {
+  id               Int                @id @default(autoincrement())
+  meetings         Meeting[]
+  EmployeeSchedule EmployeeSchedule[]
+  name             String
+  street           String
+  houseNumber      Int                @db.SmallInt
+  city             String
+  postalCode       Int
+}
+
+model Service {
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  price                      Decimal                      @db.Decimal(10, 2)
+  servicesBookedOnMeetings   ServicesBookedOnMeetings[]
+  servicesProvidedOnMeetings ServicesProvidedOnMeetings[]
+}
+
+model ServicesProvidedOnMeetings {
+  clientId   Int
+  serivce    Service  @relation(fields: [clientId], references: [id])
+  meetingId  Int
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  assignedAt DateTime @default(now())
+
+  // MAYBE: assignedBy String
+  @@id([clientId, meetingId])
+}
+
+model ServicesBookedOnMeetings {
+  serivceId  Int
+  serivce    Service  @relation(fields: [serivceId], references: [id])
+  meetingId  Int
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  assignedAt DateTime @default(now())
+
+  // MAYBE: assignedBy String
+  @@id([serivceId, meetingId])
+}
+
+enum RepeatRateUnit {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
