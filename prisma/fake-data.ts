@@ -15,8 +15,7 @@ export function fakeMeetingComplete() {
   return {
     id: faker.number.int(),
     employeeId: faker.number.int(),
-    locationId: faker.number.int(),
-    meetingScheduleId: faker.number.int(),
+    scheduleId: faker.number.int(),
     priceExcepted: new Decimal(faker.number.float()),
     priceFull: undefined,
     discount: new Decimal(0),
@@ -26,12 +25,30 @@ export function fakeMeetingComplete() {
     employeeIdCreated: undefined,
     createdAt: new Date(),
     updatedAt: faker.date.anytime(),
-    employeeScheduleId: undefined,
+  }
+}
+export function fakeMeetingSchedule() {
+  return {
+    startTime: faker.date.anytime(),
+    endTime: faker.date.anytime(),
+    startDate: faker.date.anytime(),
+  }
+}
+export function fakeMeetingScheduleComplete() {
+  return {
+    id: faker.number.int(),
+    locationId: faker.number.int(),
+    startTime: faker.date.anytime(),
+    endTime: faker.date.anytime(),
+    startDate: faker.date.anytime(),
+    endDate: new Date(),
+    repeatRate: 0,
+    repeatRateUnit: RepeatRateUnit.DAY,
   }
 }
 export function fakeClient() {
   return {
-    phoneNumber: faker.phone.number(),
+    phoneNumber: faker.lorem.words(5),
     firstName: undefined,
     lastName: undefined,
   }
@@ -39,7 +56,7 @@ export function fakeClient() {
 export function fakeClientComplete() {
   return {
     id: faker.number.int(),
-    phoneNumber: faker.phone.number(),
+    phoneNumber: faker.lorem.words(5),
     firstName: undefined,
     lastName: undefined,
   }
@@ -69,7 +86,6 @@ export function fakeEmployeeSchedule() {
     startTime: faker.date.anytime(),
     endTime: faker.date.anytime(),
     startDate: faker.date.anytime(),
-    endDate: undefined,
   }
 }
 export function fakeEmployeeScheduleComplete() {
@@ -80,26 +96,7 @@ export function fakeEmployeeScheduleComplete() {
     startTime: faker.date.anytime(),
     endTime: faker.date.anytime(),
     startDate: faker.date.anytime(),
-    endDate: undefined,
-    repeatRate: 0,
-    repeatRateUnit: RepeatRateUnit.DAY,
-  }
-}
-export function fakeMeetingSchedule() {
-  return {
-    startTime: faker.date.anytime(),
-    endTime: faker.date.anytime(),
-    startDate: faker.date.anytime(),
-    endDate: undefined,
-  }
-}
-export function fakeMeetingScheduleComplete() {
-  return {
-    id: faker.number.int(),
-    startTime: faker.date.anytime(),
-    endTime: faker.date.anytime(),
-    startDate: faker.date.anytime(),
-    endDate: undefined,
+    endDate: new Date(),
     repeatRate: 0,
     repeatRateUnit: RepeatRateUnit.DAY,
   }
@@ -110,7 +107,7 @@ export function fakeLocation() {
     street: faker.lorem.words(5),
     houseNumber: faker.number.int(),
     city: faker.lorem.words(5),
-    postalCode: faker.number.int(),
+    postalCode: faker.lorem.words(5),
   }
 }
 export function fakeLocationComplete() {
@@ -120,7 +117,7 @@ export function fakeLocationComplete() {
     street: faker.lorem.words(5),
     houseNumber: faker.number.int(),
     city: faker.lorem.words(5),
-    postalCode: faker.number.int(),
+    postalCode: faker.lorem.words(5),
   }
 }
 export function fakeService() {
