@@ -3,17 +3,17 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
-generator fake_data_generator {
-  provider = "prisma-generator-fake-data"
-  output   = "../prisma/fake-data.ts"
-}
+// generator fake_data_generator {
+//   provider = "prisma-generator-fake-data"
+//   output   = "../prisma/fake-data.ts"
+// }
 
 generator dbml {
   provider            = "prisma-dbml-generator"
   output              = "../dbml"
-  projectDatabaseType = "PostgreSQL"
   projectName         = "reserve-me"
   projectNote         = "Test pro ject description"
+  projectDatabaseType = "PostgreSQL"
   outputName          = "schema.dbml"
 }
 
@@ -21,62 +21,31 @@ generator docs {
   provider = "node node_modules/prisma-docs-generator"
 }
 
-//https://github.com/vegardit/prisma-generator-nestjs-dto
 generator nestjsDto {
   provider                        = "prisma-generator-nestjs-dto"
   output                          = "../src/generated/nestjs-dto"
-  outputToNestJsResourceStructure = "true"
-  exportRelationModifierClasses   = "true"
-  reExport                        = "false"
-  createDtoPrefix                 = "Create"
+  entitySuffix                    = ""
   updateDtoPrefix                 = "Update"
   dtoSuffix                       = "Dto"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
   entityPrefix                    = "Entity"
-  entitySuffix                    = ""
+  outputToNestJsResourceStructure = "true"
+  exportRelationModifierClasses   = "true"
   fileNamingStyle                 = "camel"
 }
-
-// https://github.com/unlight/prisma-nestjs-graphql
-// generator nestgraphql {
-//   provider = "node node_modules/prisma-nestjs-graphql"
-//   // for yarn monorepos
-//   // provider = "prisma-nestjs-graphql"
-//   output = "../src/@generated"
-// }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Meeting {
-  id                         Int                          @id @default(autoincrement())
-  employeeId                 Int
-  priceExcepted              Decimal                      @db.Decimal(8, 2)
-  priceFull                  Decimal?                     @db.Decimal(8, 2)
-  discount                   Decimal                      @default(0) @db.Decimal(3, 2)
-  priceFinal                 Decimal?                     @db.Decimal(8, 2)
-  canceled                   Boolean                      @default(false)
-  cancellationReason         String                       @default("")
-  employeeIdCreated          Int?
-  createdAt                  DateTime                     @default(now())
-  updatedAt                  DateTime                     @updatedAt
-  scheduleId                 Int                          @unique
-  clientsOnMeetings          ClientsOnMeetings[]
-  employee                   Employee                     @relation(fields: [employeeId], references: [id])
-  schedule                   MeetingSchedule              @relation(fields: [scheduleId], references: [id])
-  serivcesBookedOnMeetings   ServicesBookedOnMeetings[]
-  serivcesProvidedOnMeetings ServicesProvidedOnMeetings[]
-}
-
 model MeetingSchedule {
   id             Int            @id @default(autoincrement())
-  startTime      DateTime       @db.Timetz(6)
-  endTime        DateTime       @db.Timetz(6)
-  startDate      DateTime       @db.Date
-  endDate        DateTime       @default(now()) @db.Date
+  startDate      DateTime
+  endDate        DateTime
   repeatRate     Int            @default(0)
-  repeatRateUnit RepeatRateUnit @default(DAY)
+  repeatRateUnit RepeatRateUnit @default(day)
   locationId     Int
   meeting        Meeting?
   location       Location       @relation(fields: [locationId], references: [id])
@@ -105,19 +74,17 @@ model Employee {
   firstName String
   lastName  String
   schedule  EmployeeSchedule[]
-  meetings  Meeting[]
+  meeting   Meeting[]
 }
 
 model EmployeeSchedule {
   id             Int            @id @default(autoincrement())
   employeeId     Int
   locationId     Int
-  startTime      DateTime       @db.Timetz(6)
-  endTime        DateTime       @db.Timetz(6)
-  startDate      DateTime       @db.Date
-  endDate        DateTime       @default(now()) @db.Date
+  startDate      DateTime
+  endDate        DateTime
   repeatRate     Int            @default(0)
-  repeatRateUnit RepeatRateUnit @default(DAY)
+  repeatRateUnit RepeatRateUnit @default(day)
   employee       Employee       @relation(fields: [employeeId], references: [id])
   location       Location       @relation(fields: [locationId], references: [id])
 }
@@ -130,7 +97,7 @@ model Location {
   city              String
   postalCode        String
   employeeSchedules EmployeeSchedule[]
-  meetingSchedule   MeetingSchedule[]
+  meetingSchedules  MeetingSchedule[]
 }
 
 model Service {
@@ -161,9 +128,29 @@ model ServicesBookedOnMeetings {
   @@id([serivceId, meetingId])
 }
 
+model Meeting {
+  id                         Int                          @id @default(autoincrement())
+  employeeId                 Int
+  priceExcepted              Decimal                      @db.Decimal(8, 2)
+  priceFull                  Decimal?                     @db.Decimal(8, 2)
+  discount                   Decimal                      @default(0) @db.Decimal(3, 2)
+  priceFinal                 Decimal?                     @db.Decimal(8, 2)
+  canceled                   Boolean                      @default(false)
+  cancellationReason         String                       @default("")
+  employeeIdCreated          Int?
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime
+  scheduleId                 Int                          @unique
+  clientsOnMeetings          ClientsOnMeetings[]
+  employee                   Employee                     @relation(fields: [employeeId], references: [id])
+  schedule                   MeetingSchedule              @relation(fields: [scheduleId], references: [id])
+  serivcesBookedOnMeetings   ServicesBookedOnMeetings[]
+  serivcesProvidedOnMeetings ServicesProvidedOnMeetings[]
+}
+
 enum RepeatRateUnit {
-  DAY
-  WEEK
-  MONTH
-  YEAR
+  day
+  week
+  month
+  year
 }

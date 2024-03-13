@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import generateFakeData from './fake-data2'
-import { ITXClientDenyList } from '@prisma/client/runtime/library'
+import { type ITXClientDenyList } from '@prisma/client/runtime/library'
 
 const prisma = new PrismaClient()
 
@@ -9,9 +9,9 @@ async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
     where: { id: 1 },
     create: fakeClient(),
     update: {},
-  })*/
+  }) */
 
-  //const addUsers = async () => await prisma.user.createMany({ data: users });
+  // const addUsers = async () => await prisma.user.createMany({ data: users });
 
   const fakeData = generateFakeData()
 
@@ -54,16 +54,20 @@ async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
   await tx.servicesBookedOnMeetings.createMany({
     data: fakeData.servicesBookedOnMeetings,
   })
-  //const addUsers = async () => await prisma.user.createMany({ data: users });
+  // const addUsers = async () => await prisma.user.createMany({ data: users });
 }
 const trans = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return prisma.$transaction(async (tx) => initializeDatabase(tx))
+  await prisma.$transaction(async (tx) => {
+    await initializeDatabase(tx)
+  })
 }
 
 trans()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .then((_) => console.log('Database seeded successfully!'))
+  .then((_) => {
+    console.log('Database seeded successfully!')
+  })
   .catch((e) => {
     console.error(e)
     process.exit(1)

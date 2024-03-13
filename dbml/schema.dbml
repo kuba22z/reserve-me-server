@@ -7,34 +7,12 @@ Project "reserve-me" {
   Note: 'Test pro ject description'
 }
 
-Table Meeting {
-  id Int [pk, increment]
-  employeeId Int [not null]
-  priceExcepted Decimal [not null]
-  priceFull Decimal
-  discount Decimal [not null, default: 0]
-  priceFinal Decimal
-  canceled Boolean [not null, default: false]
-  cancellationReason String [not null, default: '']
-  employeeIdCreated Int
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  scheduleId Int [unique, not null]
-  clientsOnMeetings ClientsOnMeetings [not null]
-  employee Employee [not null]
-  schedule MeetingSchedule [not null]
-  serivcesBookedOnMeetings ServicesBookedOnMeetings [not null]
-  serivcesProvidedOnMeetings ServicesProvidedOnMeetings [not null]
-}
-
 Table MeetingSchedule {
   id Int [pk, increment]
-  startTime DateTime [not null]
-  endTime DateTime [not null]
   startDate DateTime [not null]
-  endDate DateTime [default: `now()`, not null]
+  endDate DateTime [not null]
   repeatRate Int [not null, default: 0]
-  repeatRateUnit RepeatRateUnit [not null, default: 'DAY']
+  repeatRateUnit RepeatRateUnit [not null, default: 'day']
   locationId Int [not null]
   meeting Meeting
   location Location [not null]
@@ -65,19 +43,17 @@ Table Employee {
   firstName String [not null]
   lastName String [not null]
   schedule EmployeeSchedule [not null]
-  meetings Meeting [not null]
+  meeting Meeting [not null]
 }
 
 Table EmployeeSchedule {
   id Int [pk, increment]
   employeeId Int [not null]
   locationId Int [not null]
-  startTime DateTime [not null]
-  endTime DateTime [not null]
   startDate DateTime [not null]
-  endDate DateTime [default: `now()`, not null]
+  endDate DateTime [not null]
   repeatRate Int [not null, default: 0]
-  repeatRateUnit RepeatRateUnit [not null, default: 'DAY']
+  repeatRateUnit RepeatRateUnit [not null, default: 'day']
   employee Employee [not null]
   location Location [not null]
 }
@@ -90,7 +66,7 @@ Table Location {
   city String [not null]
   postalCode String [not null]
   employeeSchedules EmployeeSchedule [not null]
-  meetingSchedule MeetingSchedule [not null]
+  meetingSchedules MeetingSchedule [not null]
 }
 
 Table Service {
@@ -125,16 +101,32 @@ Table ServicesBookedOnMeetings {
   }
 }
 
-Enum RepeatRateUnit {
-  DAY
-  WEEK
-  MONTH
-  YEAR
+Table Meeting {
+  id Int [pk, increment]
+  employeeId Int [not null]
+  priceExcepted Decimal [not null]
+  priceFull Decimal
+  discount Decimal [not null, default: 0]
+  priceFinal Decimal
+  canceled Boolean [not null, default: false]
+  cancellationReason String [not null, default: '']
+  employeeIdCreated Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  scheduleId Int [unique, not null]
+  clientsOnMeetings ClientsOnMeetings [not null]
+  employee Employee [not null]
+  schedule MeetingSchedule [not null]
+  serivcesBookedOnMeetings ServicesBookedOnMeetings [not null]
+  serivcesProvidedOnMeetings ServicesProvidedOnMeetings [not null]
 }
 
-Ref: Meeting.employeeId > Employee.id
-
-Ref: Meeting.scheduleId - MeetingSchedule.id
+Enum RepeatRateUnit {
+  day
+  week
+  month
+  year
+}
 
 Ref: MeetingSchedule.locationId > Location.id
 
@@ -153,3 +145,7 @@ Ref: ServicesProvidedOnMeetings.meetingId > Meeting.id
 Ref: ServicesBookedOnMeetings.meetingId > Meeting.id
 
 Ref: ServicesBookedOnMeetings.serivceId > Service.id
+
+Ref: Meeting.employeeId > Employee.id
+
+Ref: Meeting.scheduleId - MeetingSchedule.id
