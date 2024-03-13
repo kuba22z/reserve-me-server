@@ -5,11 +5,11 @@ import {
   type Meeting,
   type MeetingSchedule,
 } from '@prisma/client'
-import { type MeetingDomain } from '../domain/model/meeting.domain'
+import { MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meetingSchedule.mapper'
-import { type MeetingDto } from '../api/dto/meeting.dto'
-import { type DateTimeInterval } from '../domain/model/dateTimeInterval'
+import { MeetingDto } from '../api/dto/meeting.dto'
+import { type DateTimeInterval } from '../domain/model/dateTimeInterval.domain'
 import { ClientMapper } from '../../client/mapper/client.mapper'
 
 export type ClientsOnMeetingsModel = ClientsOnMeetings & { client: Client }
@@ -33,13 +33,13 @@ export class MeetingMapper {
   // Map Meeting to MeetingEntity
   public toDomain(meeting: MeetingModel): MeetingDomain {
     const { clientsOnMeetings, ...reduced } = meeting
-    return {
+    return new MeetingDomain({
       ...reduced,
       schedule: this.meetingScheduleMapper.toDomain(meeting.schedule),
       clients: meeting.clientsOnMeetings.map((clientOnMeetings) =>
         this.clientMapper.toDomain(clientOnMeetings.client)
       ),
-    }
+    })
   }
 
   // Map MeetingEntity to Meeting
@@ -49,15 +49,21 @@ export class MeetingMapper {
 
   public toDto(
     domain: MeetingDomain,
-    scheduleIntervals: DateTimeInterval[]
+    scheduleIntervals?: DateTimeInterval
   ): MeetingDto {
-    return {
-      ...domain,
-      schedule: this.meetingScheduleMapper.toDto(
-        domain.schedule,
-        scheduleIntervals
-      ),
+    const { priceFinal, priceExcepted, discount, priceFull, ...reduced } =
+      domain
+    return new MeetingDto({
+      ...reduced,
+      priceFinal: priceFinal.toNumber(),
+      priceExcepted: priceExcepted.toNumber(),
+      discount: discount.toNumber(),
+      priceFull: priceFull.toNumber(),
+      schedule:
+        scheduleIntervals !== undefined
+          ? this.meetingScheduleMapper.toDto(domain.schedule, scheduleIntervals)
+          : undefined,
       clients: domain.clients.map((client) => this.clientMapper.toDto(client)),
-    }
+    })
   }
 }

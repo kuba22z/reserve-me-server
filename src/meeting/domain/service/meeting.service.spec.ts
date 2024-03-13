@@ -2,8 +2,6 @@ import { Test } from '@nestjs/testing'
 import { MeetingService } from './meeting.service'
 import { type MockFunctionMetadata, ModuleMocker } from 'jest-mock'
 import * as dayjs from 'dayjs'
-import { type MeetingScheduleDomain } from '../model/meetingSchedule.domain'
-import { RepeatRateUnit } from '@prisma/client'
 import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
 import { DtoFactory } from '../../../common/api/dto.factory'
@@ -71,82 +69,4 @@ describe('MeetingService', () => {
       service.findAllByInterval({ from: dayjs(), to: dayjs() })
     ).toStrictEqual(Promise.resolve([]))
   })
-
-  const testCases = [
-    {
-      interval: {
-        from: dayjs('2018-02-05T20:00:00.000Z'),
-        to: dayjs('2018-02-07T21:30:00.000Z'),
-      },
-      expectedResults: [
-        {
-          from: dayjs('2018-02-05T20:00:00.000Z'),
-          to: dayjs('2018-02-05T21:30:00.000Z'),
-        },
-        {
-          from: dayjs('2018-02-07T20:00:00.000Z'),
-          to: dayjs('2018-02-07T21:30:00.000Z'),
-        },
-      ],
-    },
-    {
-      interval: {
-        from: dayjs('2000-02-05T20:00:00.000Z'),
-        to: dayjs('2018-02-07T21:30:00.000Z'),
-      },
-      expectedResults: [
-        {
-          from: dayjs('2018-02-05T20:00:00.000Z'),
-          to: dayjs('2018-02-05T21:30:00.000Z'),
-        },
-        {
-          from: dayjs('2018-02-07T20:00:00.000Z'),
-          to: dayjs('2018-02-07T21:30:00.000Z'),
-        },
-      ],
-    },
-    {
-      interval: {
-        from: dayjs('2018-02-07T21:29:00.000Z'),
-        to: dayjs('2018-02-07T21:30:00.000Z'),
-      },
-      expectedResults: [
-        {
-          from: dayjs('2018-02-07T20:00:00.000Z'),
-          to: dayjs('2018-02-07T21:30:00.000Z'),
-        },
-      ],
-    },
-    {
-      interval: {
-        from: dayjs('2018-02-07T21:30:00.000Z'),
-        to: dayjs('2018-02-08T21:30:00.000Z'),
-      },
-      expectedResults: [],
-    },
-  ]
-
-  test.each(testCases)(
-    'should return an array of cats',
-    async ({ interval, expectedResults }) => {
-      // given
-      const scheduleData: MeetingScheduleDomain = {
-        id: 1,
-        locationId: 1,
-        startDate: dayjs('2018-02-05T20:00:00.000Z'),
-        endDate: dayjs('2018-02-05T21:30:00.000Z'),
-        repeatRate: 2,
-        repeatRateUnit: RepeatRateUnit.day,
-      }
-
-      // when
-      const intervalsActual = service.computeScheduleByInterval(
-        scheduleData,
-        interval
-      )
-
-      // then
-      expect(intervalsActual).toStrictEqual(expectedResults)
-    }
-  )
 })

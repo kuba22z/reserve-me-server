@@ -13,10 +13,14 @@ import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
 import { Dayjs } from 'dayjs'
 import { ParseDayjsPipe } from './parseDayjs.pipe'
+import { MeetingMapper } from '../../mapper/meeting.mapper'
 
 @Controller('meeting')
 export class MeetingController {
-  constructor(private readonly meetingService: MeetingService) {}
+  constructor(
+    private readonly meetingService: MeetingService,
+    private readonly mapper: MeetingMapper
+  ) {}
 
   @Post()
   create(@Body() createMeetingDto: CreateMeetingDto) {
@@ -28,15 +32,19 @@ export class MeetingController {
     @Query('from', new ParseDayjsPipe()) from: Dayjs,
     @Query('to', new ParseDayjsPipe()) to: Dayjs
   ) {
-    return await this.meetingService.findAllByInterval({
-      from,
-      to,
-    })
+    return await this.meetingService
+      .findAllByInterval({
+        from,
+        to,
+      })
+      .then((meetings) =>
+        meetings.map((meeting) => this.mapper.toDto(meeting, { from, to }))
+      )
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.meetingService.findOne(+id)
+    //  return this.meetingService.findOne(+id)
   }
 
   @Patch(':id')

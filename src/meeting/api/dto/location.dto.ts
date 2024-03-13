@@ -1,15 +1,23 @@
-import { type EmployeeSchedule } from '@prisma/client'
-import { type MeetingScheduleDto } from './meetingSchedule.dto'
+import { ObjectType } from '@nestjs/graphql'
 
+@ObjectType({ description: 'Location' })
 export class LocationDto {
-  constructor(
-    public id: number,
-    public name: string,
-    public street: string,
-    public houseNumber: number,
-    public city: string,
-    public postalCode: string,
-    public employeeSchedules?: EmployeeSchedule[],
-    public meetingSchedule?: MeetingScheduleDto[]
-  ) {}
+  id: number
+
+  name: string
+
+  street: string
+
+  houseNumber: number
+
+  city: string
+
+  postalCode: string
+
+  // employeeSchedules?: EmployeeSchedule[]
+  // meetingSchedule?: MeetingScheduleDto[]
+
+  constructor(data: LocationDto) {
+    Object.assign(this, data)
+  }
 }
