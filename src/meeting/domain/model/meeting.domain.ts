@@ -1,8 +1,10 @@
-import { type Prisma } from '@prisma/client'
-import { type EntityClientsOnMeetings } from '../../../generated/nestjs-dto/clientsOnMeetings/entities/clientsOnMeetings.entity'
-import { type EntityEmployee } from '../../../generated/nestjs-dto/employee/entities/employee.entity'
-import { type EntityServicesBookedOnMeetings } from '../../../generated/nestjs-dto/servicesBookedOnMeetings/entities/servicesBookedOnMeetings.entity'
-import { type EntityServicesProvidedOnMeetings } from '../../../generated/nestjs-dto/servicesProvidedOnMeetings/entities/servicesProvidedOnMeetings.entity'
+import {
+  type ClientsOnMeetings,
+  type Employee,
+  type Prisma,
+  type ServicesBookedOnMeetings,
+  type ServicesProvidedOnMeetings,
+} from '@prisma/client'
 import { type MeetingScheduleDomain } from './meetingSchedule.domain'
 
 export class MeetingDomain {
@@ -20,9 +22,9 @@ export class MeetingDomain {
     public createdAt: Date,
     public updatedAt: Date,
     public schedule?: MeetingScheduleDomain,
-    public clientsOnMeetings?: EntityClientsOnMeetings[],
-    public employee?: EntityEmployee,
-    public serivcesBookedOnMeetings?: EntityServicesBookedOnMeetings[],
-    public serivcesProvidedOnMeetings?: EntityServicesProvidedOnMeetings[]
+    public clientsOnMeetings?: ClientsOnMeetings[],
+    public employee?: Employee,
+    public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[],
+    public serivcesProvidedOnMeetings?: ServicesProvidedOnMeetings[]
   ) {}
 }
