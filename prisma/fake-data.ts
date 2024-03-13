@@ -15,7 +15,6 @@ export function fakeMeetingComplete() {
   return {
     id: faker.number.int(),
     employeeId: faker.number.int(),
-    scheduleId: faker.number.int(),
     priceExcepted: new Decimal(faker.number.float()),
     priceFull: undefined,
     discount: new Decimal(0),
@@ -25,6 +24,7 @@ export function fakeMeetingComplete() {
     employeeIdCreated: undefined,
     createdAt: new Date(),
     updatedAt: faker.date.anytime(),
+    scheduleId: faker.number.int(),
   }
 }
 export function fakeMeetingSchedule() {
@@ -37,13 +37,13 @@ export function fakeMeetingSchedule() {
 export function fakeMeetingScheduleComplete() {
   return {
     id: faker.number.int(),
-    locationId: faker.number.int(),
     startTime: faker.date.anytime(),
     endTime: faker.date.anytime(),
     startDate: faker.date.anytime(),
     endDate: new Date(),
     repeatRate: 0,
     repeatRateUnit: RepeatRateUnit.DAY,
+    locationId: faker.number.int(),
   }
 }
 export function fakeClient() {
