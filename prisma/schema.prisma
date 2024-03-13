@@ -21,6 +21,29 @@ generator docs {
   provider = "node node_modules/prisma-docs-generator"
 }
 
+//https://github.com/vegardit/prisma-generator-nestjs-dto
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/generated/nestjs-dto"
+  outputToNestJsResourceStructure = "true"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = "Entity"
+  entitySuffix                    = ""
+  fileNamingStyle                 = "camel"
+}
+
+// https://github.com/unlight/prisma-nestjs-graphql
+// generator nestgraphql {
+//   provider = "node node_modules/prisma-nestjs-graphql"
+//   // for yarn monorepos
+//   // provider = "prisma-nestjs-graphql"
+//   output = "../src/@generated"
+// }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
