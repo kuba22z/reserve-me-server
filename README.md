@@ -39,11 +39,14 @@ $ yarn install
 docker run --name reserve-me-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16.1
 ```
 
-#### Generate database schema from prisma schema
+#### Generate initial database schema from prisma schema
 ```bash
 npx prisma migrate dev --name init
 ```
-
+#### Create some assets (for example the prisma client) that you defined in your schema
+```bash
+prisma generate
+```
 #### Add some example data to the database
 ```bash
 npx prisma db seed
