@@ -1,9 +1,5 @@
-import {
-  type EntityEmployeeSchedule,
-} from '../../../generated/nestjs-dto/employeeSchedule/entities/employeeSchedule.entity'
-import {
-  type EntityMeetingSchedule,
-} from '../../../generated/nestjs-dto/meetingSchedule/entities/meetingSchedule.entity'
+import { type EmployeeSchedule } from '@prisma/client'
+import { type MeetingScheduleDto } from './meetingSchedule.dto'
 
 export class LocationDto {
   constructor(
@@ -13,7 +9,7 @@ export class LocationDto {
     public houseNumber: number,
     public city: string,
     public postalCode: string,
-    public employeeSchedules?: EntityEmployeeSchedule[],
-    public meetingSchedule?: EntityMeetingSchedule[]
+    public employeeSchedules?: EmployeeSchedule[],
+    public meetingSchedule?: MeetingScheduleDto[]
   ) {}
 }
