@@ -1,12 +1,12 @@
 import { type RepeatRateUnit } from '@prisma/client'
 import { type LocationDto } from './location.dto'
 import { type MeetingDto } from './meeting.dto'
-import { type DateTimeIntervalDto } from './dateTimeInterval.dto'
+import { type DateTimeInterval } from './dateTimeInterval'
 
 export class MeetingScheduleDto {
   constructor(
     public id: number,
-    public intervals: DateTimeIntervalDto[],
+    public intervals: DateTimeInterval[],
     public repeatRate: number,
     public repeatRateUnit: RepeatRateUnit,
     public locationId: number,

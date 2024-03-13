@@ -3,7 +3,7 @@ import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
 import { type UpdateMeetingDto } from '../../api/dto/update-meeting.dto'
 import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
-import { type DateTimeInterval } from '../model/dateTimeInterval.dto'
+import { type DateTimeInterval } from '../model/dateTimeInterval'
 import { type MeetingScheduleDomain } from '../model/meetingSchedule.domain'
 
 @Injectable()
@@ -30,8 +30,8 @@ export class MeetingService {
     return 'This action adds a new meeting'
   }
 
-  async findAll() {
-    const d: MeetingModel = await this.prisma.meeting.findFirst({
+  async findAll(): Promise<null> {
+    const d = await this.prisma.meeting.findFirst({
       include: {
         schedule: {
           include: {
@@ -41,9 +41,6 @@ export class MeetingService {
       },
     })
     console.log(d)
-    if (d != null) {
-      return this.mapper.toDomain(d)
-    }
     return null
   }
 
@@ -54,6 +51,7 @@ export class MeetingService {
   async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
     const meetingModels: MeetingModel[] = await this.prisma.meeting.findMany({
       include: {
+        clientsOnMeetings: { include: { client: true } },
         schedule: {
           include: {
             location: true,
