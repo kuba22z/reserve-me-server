@@ -1,20 +1,22 @@
 import { faker } from '@faker-js/faker'
 import {
-  Client,
-  ClientsOnMeetings,
-  Employee,
-  EmployeeSchedule,
-  Location,
-  Meeting,
-  MeetingSchedule,
+  type Client,
+  type ClientsOnMeetings,
+  type Employee,
+  type EmployeeSchedule,
+  type Location,
+  type Meeting,
+  type MeetingSchedule,
   Prisma,
-  Service,
-  ServicesBookedOnMeetings,
-  ServicesProvidedOnMeetings,
+  RepeatRateUnit,
+  type Service,
+  type ServicesBookedOnMeetings,
+  type ServicesProvidedOnMeetings,
 } from '@prisma/client' // Replace './prisma-schema' with the path to your Prisma schema file
+const id = 1
 
 export const generateEmployee = (): Employee => ({
-  id: 1,
+  id,
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
 })
@@ -23,22 +25,20 @@ export const generateEmployeeSchedule = (
   employeeId: number,
   locationId: number
 ): EmployeeSchedule => ({
-  id: 1,
+  id,
   employeeId,
-  locationId: locationId,
-  startTime: new Date(),
-  endTime: new Date(),
+  locationId,
   startDate: new Date(),
   endDate: new Date(),
   repeatRate: 0,
-  repeatRateUnit: 'DAY',
+  repeatRateUnit: RepeatRateUnit.day,
 })
 
 export const generateLocation = (): Location => ({
-  id: 1,
+  id,
   name: faker.company.name(),
   street: faker.location.street.name,
-  houseNumber: faker.number.int({ min: 1, max: 300 }),
+  houseNumber: faker.number.int({ min: id, max: 300 }),
   city: faker.location.city(),
   postalCode: faker.location.zipCode(),
 })
@@ -47,7 +47,7 @@ export const generateMeeting = (
   employeeId: number,
   scheduleId: number
 ): Meeting => ({
-  id: 1,
+  id,
   employeeId,
   scheduleId,
   canceled: false,
@@ -55,27 +55,25 @@ export const generateMeeting = (
   employeeIdCreated: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-  priceExcepted: new Prisma.Decimal(faker.number.float({ precision: 2 })),
-  priceFinal: new Prisma.Decimal(faker.number.float({ precision: 2 })),
-  priceFull: new Prisma.Decimal(faker.number.float({ precision: 2 })),
+  priceExcepted: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
+  priceFinal: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
+  priceFull: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
   discount: new Prisma.Decimal(0),
 })
 
 export const generateMeetingSchedule = (
   locationId: number
 ): MeetingSchedule => ({
-  id: 1,
-  locationId: locationId,
-  startTime: new Date(),
-  endTime: new Date(),
-  startDate: new Date(),
-  endDate: new Date(),
-  repeatRate: 0,
-  repeatRateUnit: 'DAY',
+  id,
+  locationId,
+  startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
+  endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
+  repeatRate: 2,
+  repeatRateUnit: 'day',
 })
 
 export const generateClient = (): Client => ({
-  id: 1,
+  id,
   phoneNumber: faker.phone.number(),
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
@@ -91,9 +89,9 @@ export const generateClientsOnMeetings = (
 })
 
 export const generateService = (): Service => ({
-  id: 1,
+  id,
   name: faker.commerce.productName(),
-  price: new Prisma.Decimal(faker.number.float({ precision: 2 })),
+  price: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
 })
 
 export const generateServicesProvidedOnMeetings = (

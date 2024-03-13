@@ -12,14 +12,12 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
     "noImplicitAny": true,
-    "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true
-  },
-
-  // For auto mapper
-  "experimentalDecorators": true,
-  "emitDecoratorMetadata": true
+    "noFallthroughCasesInSwitch": true,
+ //   "strictNullChecks": true,
+   // "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true
   }
+}
