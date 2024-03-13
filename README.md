@@ -52,6 +52,21 @@ prisma generate
 npx prisma db seed
 ```
 
+#### Sync schema with db: creates and deploys new migration file
+```bash
+npx prisma migrate dev -n migation_name
+```
+#### Creates a empty migration file
+```bash
+npx prisma migrate dev -n migation_name --create-only
+```
+#### Executes new files for migrations
+```bash
+npx prisma migrate deploy
+```
+
+
+
 ## Running the app
 
 ```bash

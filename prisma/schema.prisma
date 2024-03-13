@@ -11,10 +11,10 @@ generator fake_data_generator {
 generator dbml {
   provider            = "prisma-dbml-generator"
   output              = "../dbml"
-  projectNote         = "Test pro ject description"
-  outputName          = "schema.dbml"
   projectDatabaseType = "PostgreSQL"
   projectName         = "reserve-me"
+  projectNote         = "Test pro ject description"
+  outputName          = "schema.dbml"
 }
 
 generator docs {
@@ -29,7 +29,6 @@ datasource db {
 model Meeting {
   id                         Int                          @id @default(autoincrement())
   employeeId                 Int
-  scheduleId                 Int                          @unique
   priceExcepted              Decimal                      @db.Decimal(8, 2)
   priceFull                  Decimal?                     @db.Decimal(8, 2)
   discount                   Decimal                      @default(0) @db.Decimal(3, 2)
@@ -39,6 +38,7 @@ model Meeting {
   employeeIdCreated          Int?
   createdAt                  DateTime                     @default(now())
   updatedAt                  DateTime                     @updatedAt
+  scheduleId                 Int                          @unique
   clientsOnMeetings          ClientsOnMeetings[]
   employee                   Employee                     @relation(fields: [employeeId], references: [id])
   schedule                   MeetingSchedule              @relation(fields: [scheduleId], references: [id])
@@ -48,15 +48,15 @@ model Meeting {
 
 model MeetingSchedule {
   id             Int            @id @default(autoincrement())
-  locationId     Int
   startTime      DateTime       @db.Timetz(6)
   endTime        DateTime       @db.Timetz(6)
   startDate      DateTime       @db.Date
   endDate        DateTime       @default(now()) @db.Date
   repeatRate     Int            @default(0)
   repeatRateUnit RepeatRateUnit @default(DAY)
-  location       Location       @relation(fields: [locationId], references: [id])
+  locationId     Int
   meeting        Meeting?
+  location       Location       @relation(fields: [locationId], references: [id])
 }
 
 model Client {
@@ -74,7 +74,6 @@ model ClientsOnMeetings {
   client     Client   @relation(fields: [clientId], references: [id])
   meeting    Meeting  @relation(fields: [meetingId], references: [id])
 
-  // MAYBE: assignedBy String
   @@id([clientId, meetingId])
 }
 
@@ -126,7 +125,6 @@ model ServicesProvidedOnMeetings {
   serivce    Service  @relation(fields: [clientId], references: [id])
   meeting    Meeting  @relation(fields: [meetingId], references: [id])
 
-  // MAYBE: assignedBy String
   @@id([clientId, meetingId])
 }
 
