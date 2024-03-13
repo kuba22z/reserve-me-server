@@ -36,7 +36,7 @@ $ yarn install
 
 #### Running the database
 ```bash
-docker run --name reserve-me-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16.1
+docker compose up -d
 ```
 
 #### Generate initial database schema from prisma schema
