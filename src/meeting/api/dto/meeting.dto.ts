@@ -1,11 +1,11 @@
 import type {
-  ClientsOnMeetings,
   Employee,
   Prisma,
   ServicesBookedOnMeetings,
   ServicesProvidedOnMeetings,
 } from '@prisma/client'
 import { type MeetingScheduleDto } from './meetingSchedule.dto'
+import { type ClientDomain } from '../../../client/domain/model/client.domain'
 
 export class MeetingDto {
   constructor(
@@ -21,8 +21,8 @@ export class MeetingDto {
     public priceExcepted: Prisma.Decimal,
     public createdAt: Date,
     public updatedAt: Date,
+    public clients: ClientDomain[],
     public schedule?: MeetingScheduleDto,
-    public clientsOnMeetings?: ClientsOnMeetings[],
     public employee?: Employee,
     public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[],
     public serivcesProvidedOnMeetings?: ServicesProvidedOnMeetings[]

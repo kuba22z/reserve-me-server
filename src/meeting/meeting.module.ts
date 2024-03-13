@@ -5,6 +5,7 @@ import { PrismaModule } from 'nestjs-prisma'
 import { MeetingMapper } from './mapper/meeting.mapper'
 import { LocationMapper } from './mapper/location.mapper'
 import { MeetingScheduleMapper } from './mapper/meetingSchedule.mapper'
+import { ClientMapper } from '../client/mapper/client.mapper'
 
 @Module({
   controllers: [MeetingController],
@@ -13,6 +14,7 @@ import { MeetingScheduleMapper } from './mapper/meetingSchedule.mapper'
     MeetingMapper,
     LocationMapper,
     MeetingScheduleMapper,
+    ClientMapper,
   ],
   imports: [PrismaModule],
 })

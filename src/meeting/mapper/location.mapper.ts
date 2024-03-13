@@ -11,7 +11,7 @@ export class LocationMapper {
   }
 
   // Map MeetingEntity to Meeting
-  public toModel(entity: LocationDomain): LocationDto {
+  public toModel(entity: LocationDomain): Location {
     return {
       ...entity,
     }
@@ -20,6 +20,7 @@ export class LocationMapper {
   public toDto(entity: LocationDomain): LocationDto {
     return {
       ...entity,
+      meetingSchedule: [],
     }
   }
 }

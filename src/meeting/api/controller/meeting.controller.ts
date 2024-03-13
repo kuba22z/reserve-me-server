@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { MeetingService } from '../../domain/service/meeting.service'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
-import dayjs from 'dayjs'
+import * as dayjs from 'dayjs'
 
 @Controller('meeting')
 export class MeetingController {
@@ -16,8 +16,8 @@ export class MeetingController {
   @Get()
   async findAll() {
     return await this.meetingService.findMeetingsByInterval({
-      from: dayjs(new Date(2018, 3, 7, 21, 0, 0, 0)),
-      to: dayjs(new Date(2018, 6, 8, 21, 0, 0, 0)),
+      from: dayjs(new Date(2018, 0, 7, 21, 0, 0, 0)),
+      to: dayjs(new Date(2018, 2, 8, 21, 0, 0, 0)),
     })
   }
 

@@ -4,8 +4,8 @@ import { LocationMapper } from './location.mapper'
 import type { MeetingScheduleModel } from './meeting.mapper'
 import { type MeetingScheduleDomain } from '../domain/model/meetingSchedule.domain'
 import { type MeetingScheduleDto } from '../api/dto/meetingSchedule.dto'
-import dayjs from 'dayjs'
-import { type DateTimeInterval } from '../domain/model/dateTimeInterval.dto'
+import * as dayjs from 'dayjs'
+import { type DateTimeInterval } from '../domain/model/dateTimeInterval'
 
 @Injectable()
 export class MeetingScheduleMapper {

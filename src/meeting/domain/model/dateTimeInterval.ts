@@ -1,6 +1,6 @@
 import { type Dayjs } from 'dayjs'
 
-export class DateTimeIntervalDto {
+export class DateTimeInterval {
   constructor(
     public from: Dayjs,
     public to: Dayjs

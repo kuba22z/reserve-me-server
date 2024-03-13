@@ -1,5 +1,5 @@
 import {
-  type ClientsOnMeetings,
+  type Client,
   type Employee,
   type Prisma,
   type ServicesBookedOnMeetings,
@@ -21,8 +21,8 @@ export class MeetingDomain {
     public priceExcepted: Prisma.Decimal,
     public createdAt: Date,
     public updatedAt: Date,
+    public clients: Client[],
     public schedule?: MeetingScheduleDomain,
-    public clientsOnMeetings?: ClientsOnMeetings[],
     public employee?: Employee,
     public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[],
     public serivcesProvidedOnMeetings?: ServicesProvidedOnMeetings[]
