@@ -21,19 +21,19 @@ generator docs {
   provider = "node node_modules/prisma-docs-generator"
 }
 
-generator nestjsDto {
-  provider                        = "prisma-generator-nestjs-dto"
-  output                          = "../src/generated/nestjs-dto"
-  entitySuffix                    = ""
-  updateDtoPrefix                 = "Update"
-  dtoSuffix                       = "Dto"
-  reExport                        = "false"
-  createDtoPrefix                 = "Create"
-  entityPrefix                    = "Entity"
-  outputToNestJsResourceStructure = "true"
-  exportRelationModifierClasses   = "true"
-  fileNamingStyle                 = "camel"
-}
+// generator nestjsDto {
+//   provider                        = "prisma-generator-nestjs-dto"
+//   output                          = "../src/generated/nestjs-dto"
+//   entitySuffix                    = ""
+//   updateDtoPrefix                 = "Update"
+//   dtoSuffix                       = "Dto"
+//   reExport                        = "false"
+//   createDtoPrefix                 = "Create"
+//   entityPrefix                    = "Entity"
+//   outputToNestJsResourceStructure = "true"
+//   exportRelationModifierClasses   = "true"
+//   fileNamingStyle                 = "camel"
+// }
 
 datasource db {
   provider = "postgresql"
@@ -130,7 +130,7 @@ model ServicesBookedOnMeetings {
 
 model Meeting {
   id                         Int                          @id @default(autoincrement())
-  employeeId                 Int
+  employeeId                 Int?
   priceExcepted              Decimal                      @db.Decimal(8, 2)
   priceFull                  Decimal?                     @db.Decimal(8, 2)
   discount                   Decimal                      @default(0) @db.Decimal(3, 2)
@@ -139,10 +139,10 @@ model Meeting {
   cancellationReason         String                       @default("")
   employeeIdCreated          Int?
   createdAt                  DateTime                     @default(now())
-  updatedAt                  DateTime
+  updatedAt                  DateTime                     @updatedAt
   scheduleId                 Int                          @unique
   clientsOnMeetings          ClientsOnMeetings[]
-  employee                   Employee                     @relation(fields: [employeeId], references: [id])
+  employee                   Employee?                     @relation(fields: [employeeId], references: [id])
   schedule                   MeetingSchedule              @relation(fields: [scheduleId], references: [id])
   serivcesBookedOnMeetings   ServicesBookedOnMeetings[]
   serivcesProvidedOnMeetings ServicesProvidedOnMeetings[]

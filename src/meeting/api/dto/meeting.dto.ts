@@ -1,4 +1,4 @@
-import { type MeetingScheduleDto } from './meetingSchedule.dto'
+import { type MeetingScheduleDto } from './meeting-schedule.dto'
 import { type ClientDto } from '../../../client/api/dto/client.dto'
 import { ObjectType } from '@nestjs/graphql'
 

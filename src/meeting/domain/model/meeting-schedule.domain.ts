@@ -2,7 +2,7 @@ import { type RepeatRateUnit } from '@prisma/client'
 import { type MeetingDomain } from './meeting.domain'
 import { type LocationDomain } from './location.domain'
 import { type Dayjs } from 'dayjs'
-import type { DateTimeInterval } from './dateTimeInterval.domain'
+import type { DateTimeInterval } from './datetime-interval.domain'
 
 export class MeetingScheduleDomain {
   public id: number

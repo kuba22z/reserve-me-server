@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'nestjs-prisma'
 import { type ClientModel } from '../../mapper/client.mapper'
-import type { DateTimeInterval } from '../../../meeting/domain/model/dateTimeInterval.domain'
+import type { DateTimeInterval } from '../../../meeting/domain/model/datetime-interval.domain'
 
 @Injectable()
 export class ClientService {

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common'
 import type { MeetingSchedule } from '@prisma/client'
 import { LocationMapper } from './location.mapper'
 import type { MeetingScheduleModel } from './meeting.mapper'
-import { MeetingScheduleDomain } from '../domain/model/meetingSchedule.domain'
-import { MeetingScheduleDto } from '../api/dto/meetingSchedule.dto'
+import { MeetingScheduleDomain } from '../domain/model/meeting-schedule.domain'
+import { MeetingScheduleDto } from '../api/dto/meeting-schedule.dto'
 import * as dayjs from 'dayjs'
-import { type DateTimeInterval } from '../domain/model/dateTimeInterval.domain'
-import { DateTimeIntervalDto } from '../api/dto/dateTimeInterval.dto'
+import { type DateTimeInterval } from '../domain/model/datetime-interval.domain'
+import { DatetimeIntervalDto } from '../api/dto/datetime-interval.dto'
 
 @Injectable()
 export class MeetingScheduleMapper {
@@ -44,7 +44,7 @@ export class MeetingScheduleMapper {
       location: this.locationMapper.toDto(domain.location),
       intervals: domain.computeScheduleByInterval(intervals).map(
         (interval) =>
-          new DateTimeIntervalDto({
+          new DatetimeIntervalDto({
             from: interval.from.toDate(),
             to: interval.to.toDate(),
           })

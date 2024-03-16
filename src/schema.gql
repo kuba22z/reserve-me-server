@@ -10,13 +10,32 @@ type ClientDto {
   phoneNumber: String!
 }
 
+input CreateMeetingDto {
+  discount: Float
+  employeeId: Float
+  employeeIdCreated: Float!
+  priceExcepted: Float
+  priceFinal: Float
+  priceFull: Float
+  schedule: CreateMeetingScheduleDto!
+}
+
+"""CreateMeetingSchedule"""
+input CreateMeetingScheduleDto {
+  endDate: DateTime!
+  locationId: Float!
+  repeatRate: Float!
+  repeatRateUnit: RepeatRateUnit!
+  startDate: DateTime!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
-"""DateTimeIntervalDto"""
-type DateTimeIntervalDto {
+"""DatetimeIntervalDto"""
+type DatetimeIntervalDto {
   from: DateTime!
   to: DateTime!
 }
@@ -52,12 +71,16 @@ type MeetingDto {
 """MeetingSchedule"""
 type MeetingScheduleDto {
   id: Float!
-  intervals: [DateTimeIntervalDto!]!
+  intervals: [DatetimeIntervalDto!]!
   location: LocationDto
   locationId: Float!
   meeting: MeetingDto
   repeatRate: Float!
   repeatRateUnit: RepeatRateUnit!
+}
+
+type Mutation {
+  createMeeting(meeting: CreateMeetingDto!): MeetingDto!
 }
 
 type Query {
