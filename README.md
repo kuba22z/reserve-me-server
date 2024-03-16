@@ -64,6 +64,11 @@ npx prisma migrate dev -n migation_name --create-only
 ```bash
 npx prisma migrate deploy
 ```
+#### Rollback a migration
+```bash
+prisma migrate resolve --rolled-back "20240316090552_add_end_date_after_start_date_constraint"
+```
+
 
 
 

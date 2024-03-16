@@ -103,7 +103,7 @@ Table ServicesBookedOnMeetings {
 
 Table Meeting {
   id Int [pk, increment]
-  employeeId Int [not null]
+  employeeId Int
   priceExcepted Decimal [not null]
   priceFull Decimal
   discount Decimal [not null, default: 0]
@@ -115,7 +115,7 @@ Table Meeting {
   updatedAt DateTime [not null]
   scheduleId Int [unique, not null]
   clientsOnMeetings ClientsOnMeetings [not null]
-  employee Employee [not null]
+  employee Employee
   schedule MeetingSchedule [not null]
   serivcesBookedOnMeetings ServicesBookedOnMeetings [not null]
   serivcesProvidedOnMeetings ServicesProvidedOnMeetings [not null]

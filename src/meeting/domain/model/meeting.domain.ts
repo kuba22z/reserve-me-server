@@ -1,5 +1,5 @@
 import { type Prisma } from '@prisma/client'
-import { type MeetingScheduleDomain } from './meetingSchedule.domain'
+import { type MeetingScheduleDomain } from './meeting-schedule.domain'
 import { type ClientDomain } from '../../../client/domain/model/client.domain'
 
 export class MeetingDomain {

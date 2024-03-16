@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
 import { type UpdateMeetingDto } from '../../api/dto/update-meeting.dto'
 import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
-import { type DateTimeInterval } from '../model/dateTimeInterval.domain'
+import { type DateTimeInterval } from '../model/datetime-interval.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
+import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
 
 @Injectable()
 export class MeetingService {
@@ -26,8 +26,39 @@ export class MeetingService {
     private readonly mapper: MeetingMapper
   ) {}
 
-  create(createMeetingDto: CreateMeetingDto) {
-    return 'This action adds a new meeting'
+  async create(createMeetingDto: CreateMeetingDto) {
+    return await this.prisma.meeting
+      .create({
+        include: {
+          clientsOnMeetings: { include: { client: true } },
+          schedule: {
+            include: {
+              location: true,
+            },
+          },
+        },
+        data: {
+          employeeIdCreated: createMeetingDto.employeeIdCreated,
+          priceExcepted: createMeetingDto.priceExcepted,
+          priceFinal: createMeetingDto.priceFinal,
+          priceFull: createMeetingDto.priceFull,
+          discount: createMeetingDto.discount,
+          schedule: {
+            create: {
+              startDate: createMeetingDto.schedule.startDate,
+              endDate: createMeetingDto.schedule.endDate,
+              repeatRate: createMeetingDto.schedule.repeatRate,
+              repeatRateUnit: createMeetingDto.schedule.repeatRateUnit,
+              location: {
+                connect: {
+                  id: createMeetingDto.schedule.locationId,
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((meeting: MeetingModel) => this.mapper.toDomain(meeting))
   }
 
   async findAll(): Promise<MeetingDomain[]> {
@@ -80,11 +111,13 @@ export class MeetingService {
   remove(id: number) {
     return `This action removes a #${id} meeting`
   }
+
+  validateSchedule() {}
 }
 
 // computeSchedulesByInterval(
 //   meetings: MeetingDomain[],
-//   dateTimeRange: DateTimeIntervalDto
+//   dateTimeRange: DatetimeIntervalDto
 // ) {
 //   return meetings.reduce((acc, meeting) => {
 //     const startDate = dayjs(meeting.schedule.startDate)

@@ -1,7 +1,7 @@
-import { type DateTimeIntervalDto } from '../../meeting/api/dto/dateTimeInterval.dto'
+import { type DatetimeIntervalDto } from '../../meeting/api/dto/datetime-interval.dto'
 import { type LocationDto } from '../../meeting/api/dto/location.dto'
 import { RepeatRateUnit } from '@prisma/client'
-import { type MeetingScheduleDto } from '../../meeting/api/dto/meetingSchedule.dto'
+import { type MeetingScheduleDto } from '../../meeting/api/dto/meeting-schedule.dto'
 import { type MeetingDto } from '../../meeting/api/dto/meeting.dto'
 import * as dayjs from 'dayjs'
 import { type ClientDto } from '../../client/api/dto/client.dto'
@@ -48,7 +48,7 @@ export class DtoFactory {
     meetingSchedule: undefined,
   })
 
-  static datetimeinterval: () => DateTimeIntervalDto = () => ({
+  static datetimeinterval: () => DatetimeIntervalDto = () => ({
     from: dayjs().toDate(),
     to: dayjs().toDate(),
   })

@@ -9,7 +9,7 @@ import { MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meetingSchedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
-import { type DateTimeInterval } from '../domain/model/dateTimeInterval.domain'
+import { type DateTimeInterval } from '../domain/model/datetime-interval.domain'
 import { ClientMapper } from '../../client/mapper/client.mapper'
 
 export type ClientsOnMeetingsModel = ClientsOnMeetings & { client: Client }
