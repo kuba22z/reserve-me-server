@@ -17,6 +17,7 @@ input CreateMeetingDto {
   priceExcepted: Float
   priceFinal: Float
   priceFull: Float
+  repeatRate: String!
   schedule: CreateMeetingScheduleDto!
 }
 
@@ -24,8 +25,6 @@ input CreateMeetingDto {
 input CreateMeetingScheduleDto {
   endDate: DateTime!
   locationId: Float!
-  repeatRate: Float!
-  repeatRateUnit: RepeatRateUnit!
   startDate: DateTime!
 }
 
@@ -33,12 +32,6 @@ input CreateMeetingScheduleDto {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-"""DatetimeIntervalDto"""
-type DatetimeIntervalDto {
-  from: DateTime!
-  to: DateTime!
-}
 
 """Location"""
 type LocationDto {
@@ -52,8 +45,6 @@ type LocationDto {
 
 """Meeting"""
 type MeetingDto {
-  canceled: Boolean!
-  cancellationReason: String!
   clients: [ClientDto!]!
   createdAt: DateTime!
   discount: Float!
@@ -63,20 +54,20 @@ type MeetingDto {
   priceExcepted: Float!
   priceFinal: Float!
   priceFull: Float!
-  schedule: MeetingScheduleDto
-  scheduleId: Float!
+  repeatRate: String
+  schedules: [MeetingScheduleDto!]!
   updatedAt: DateTime!
 }
 
 """MeetingSchedule"""
 type MeetingScheduleDto {
+  canceled: Boolean!
+  cancellationReason: String
+  endDate: DateTime!
   id: Float!
-  intervals: [DatetimeIntervalDto!]!
   location: LocationDto
   locationId: Float!
-  meeting: MeetingDto
-  repeatRate: Float!
-  repeatRateUnit: RepeatRateUnit!
+  startDate: DateTime!
 }
 
 type Mutation {
@@ -85,12 +76,5 @@ type Mutation {
 
 type Query {
   meetings: [MeetingDto!]!
-  meetingsByInterval(from: DateTime!, to: DateTime!): [MeetingDto!]!
-}
-
-enum RepeatRateUnit {
-  day
-  month
-  week
-  year
+  meetingsByInterval(canceled: Boolean, from: DateTime!, to: DateTime!): [MeetingDto!]!
 }

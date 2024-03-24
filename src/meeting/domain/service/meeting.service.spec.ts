@@ -69,4 +69,63 @@ describe('MeetingService', () => {
       service.findAllByInterval({ from: dayjs(), to: dayjs() })
     ).toStrictEqual(Promise.resolve([]))
   })
+
+  describe('isAllowed', () => {
+    test.each([
+      // Test case 1: No repetition, non-overlapping ranges
+      [
+        { repeatRate: 0, startDate: '2024-01-01', endDate: '2024-01-05' },
+        { repeatRate: 0, startDate: '2025-01-01', endDate: '2025-01-05' },
+        true,
+      ],
+      // Test case 2: No repetition, overlapping ranges
+      [
+        { repeatRate: 0, startDate: '2024-01-01', endDate: '2024-01-05' },
+        { repeatRate: 0, startDate: '2024-01-03', endDate: '2024-01-07' },
+        true,
+      ],
+      // Test case 3: Daily repetition, non-overlapping ranges
+      [
+        { repeatRate: 1, startDate: '2024-01-01', endDate: '2024-01-05' },
+        { repeatRate: 1, startDate: '2025-01-01', endDate: '2025-01-05' },
+        false,
+      ],
+      // Test case 4: Daily repetition, overlapping ranges
+      [
+        { repeatRate: 1, startDate: '2024-01-01', endDate: '2024-01-05' },
+        { repeatRate: 1, startDate: '2024-01-03', endDate: '2024-01-07' },
+        false,
+      ],
+      [
+        { repeatRate: 3, startDate: '2024-01-01', endDate: '2024-01-01' },
+        { repeatRate: 7, startDate: '2024-01-03', endDate: '2024-01-03' },
+        true,
+      ],
+      [
+        { repeatRate: 3, startDate: '2024-01-01', endDate: '2024-01-01' },
+        { repeatRate: 7, startDate: '2024-01-01', endDate: '2024-01-03' },
+        false,
+      ],
+      [
+        { repeatRate: 3, startDate: '2024-01-01', endDate: '2024-01-01' },
+        { repeatRate: 2, startDate: '2024-01-02', endDate: '2024-01-02' },
+        false,
+      ],
+      // Add more test cases as needed...
+    ])('isAllowed', (toCreateData, toCheckData, expected) => {
+      const toCreate = DomainFactory.meetingScheduleDomain()
+      toCreate.startDate = dayjs(toCreateData.startDate)
+      toCreate.endDate = dayjs(toCreateData.endDate)
+      toCreate.repeatRate = toCreateData.repeatRate
+      toCreate.repeatRateUnit = 'day'
+
+      const toCheck = DomainFactory.meetingScheduleDomain()
+      toCheck.startDate = dayjs(toCheckData.startDate)
+      toCheck.endDate = dayjs(toCheckData.endDate)
+      toCheck.repeatRate = toCheckData.repeatRate
+      toCheck.repeatRateUnit = 'day'
+
+      expect(service.isAllowed(toCreate, toCheck)).toEqual(expected)
+    })
+  })
 })

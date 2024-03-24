@@ -9,13 +9,16 @@ Project "reserve-me" {
 
 Table MeetingSchedule {
   id Int [pk, increment]
+  meetingId Int [not null]
+  meeting Meeting [not null]
+  locationId Int [not null]
+  location Location [not null]
   startDate DateTime [not null]
   endDate DateTime [not null]
-  repeatRate Int [not null, default: 0]
-  repeatRateUnit RepeatRateUnit [not null, default: 'day']
-  locationId Int [not null]
-  meeting Meeting
-  location Location [not null]
+  canceled Boolean [not null, default: false]
+  cancellationReason String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
 Table Client {
@@ -24,14 +27,17 @@ Table Client {
   firstName String
   lastName String
   clientsOnMeetings ClientsOnMeetings [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
 Table ClientsOnMeetings {
   clientId Int [not null]
   meetingId Int [not null]
-  assignedAt DateTime [default: `now()`, not null]
   client Client [not null]
   meeting Meeting [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 
   indexes {
     (clientId, meetingId) [pk]
@@ -52,10 +58,13 @@ Table EmployeeSchedule {
   locationId Int [not null]
   startDate DateTime [not null]
   endDate DateTime [not null]
-  repeatRate Int [not null, default: 0]
-  repeatRateUnit RepeatRateUnit [not null, default: 'day']
+  canceled Boolean [not null, default: false]
+  cancellationReason String
+  repeatRate String
   employee Employee [not null]
   location Location [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
 Table Location {
@@ -75,12 +84,13 @@ Table Service {
   price Decimal [not null]
   servicesBookedOnMeetings ServicesBookedOnMeetings [not null]
   servicesProvidedOnMeetings ServicesProvidedOnMeetings [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
 Table ServicesProvidedOnMeetings {
   clientId Int [not null]
   meetingId Int [not null]
-  assignedAt DateTime [default: `now()`, not null]
   serivce Service [not null]
   meeting Meeting [not null]
 
@@ -92,9 +102,10 @@ Table ServicesProvidedOnMeetings {
 Table ServicesBookedOnMeetings {
   serivceId Int [not null]
   meetingId Int [not null]
-  assignedAt DateTime [default: `now()`, not null]
   meeting Meeting [not null]
   serivce Service [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 
   indexes {
     (serivceId, meetingId) [pk]
@@ -108,25 +119,18 @@ Table Meeting {
   priceFull Decimal
   discount Decimal [not null, default: 0]
   priceFinal Decimal
-  canceled Boolean [not null, default: false]
-  cancellationReason String [not null, default: '']
   employeeIdCreated Int
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  scheduleId Int [unique, not null]
+  repeatRate String
   clientsOnMeetings ClientsOnMeetings [not null]
   employee Employee
-  schedule MeetingSchedule [not null]
+  schedules MeetingSchedule [not null]
   serivcesBookedOnMeetings ServicesBookedOnMeetings [not null]
   serivcesProvidedOnMeetings ServicesProvidedOnMeetings [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
-Enum RepeatRateUnit {
-  day
-  week
-  month
-  year
-}
+Ref: MeetingSchedule.meetingId > Meeting.id
 
 Ref: MeetingSchedule.locationId > Location.id
 
@@ -147,5 +151,3 @@ Ref: ServicesBookedOnMeetings.meetingId > Meeting.id
 Ref: ServicesBookedOnMeetings.serivceId > Service.id
 
 Ref: Meeting.employeeId > Employee.id
-
-Ref: Meeting.scheduleId - MeetingSchedule.id

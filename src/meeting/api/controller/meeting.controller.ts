@@ -23,8 +23,8 @@ export class MeetingController {
   ) {}
 
   @Post()
-  create(@Body() createMeetingDto: CreateMeetingDto) {
-    return this.meetingService.create(createMeetingDto)
+  async create(@Body() createMeetingDto: CreateMeetingDto) {
+    return await this.meetingService.create(createMeetingDto)
   }
 
   @Get()
@@ -37,9 +37,7 @@ export class MeetingController {
         from,
         to,
       })
-      .then((meetings) =>
-        meetings.map((meeting) => this.mapper.toDto(meeting, { from, to }))
-      )
+      .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
   }
 
   @Get(':id')

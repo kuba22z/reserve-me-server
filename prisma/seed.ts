@@ -27,12 +27,11 @@ async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
     data: fakeData.employeeSchedules,
   })
 
-  await tx.meetingSchedule.createMany({
-    data: fakeData.meetingSchedules,
-  })
-
   await tx.meeting.createMany({
     data: fakeData.meetings,
+  })
+  await tx.meetingSchedule.createMany({
+    data: fakeData.meetingSchedules,
   })
 
   await tx.client.createMany({

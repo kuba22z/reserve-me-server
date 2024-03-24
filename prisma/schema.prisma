@@ -21,34 +21,23 @@ generator docs {
   provider = "node node_modules/prisma-docs-generator"
 }
 
-// generator nestjsDto {
-//   provider                        = "prisma-generator-nestjs-dto"
-//   output                          = "../src/generated/nestjs-dto"
-//   entitySuffix                    = ""
-//   updateDtoPrefix                 = "Update"
-//   dtoSuffix                       = "Dto"
-//   reExport                        = "false"
-//   createDtoPrefix                 = "Create"
-//   entityPrefix                    = "Entity"
-//   outputToNestJsResourceStructure = "true"
-//   exportRelationModifierClasses   = "true"
-//   fileNamingStyle                 = "camel"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model MeetingSchedule {
-  id             Int            @id @default(autoincrement())
-  startDate      DateTime
-  endDate        DateTime
-  repeatRate     Int            @default(0)
-  repeatRateUnit RepeatRateUnit @default(day)
-  locationId     Int
-  meeting        Meeting?
-  location       Location       @relation(fields: [locationId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  meetingId          Int
+  meeting            Meeting  @relation(fields: [meetingId], references: [id])
+  locationId         Int
+  location           Location @relation(fields: [locationId], references: [id])
+  startDate          DateTime
+  endDate            DateTime
+  canceled           Boolean  @default(false)
+  cancellationReason String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Client {
@@ -57,14 +46,17 @@ model Client {
   firstName         String?
   lastName          String?
   clientsOnMeetings ClientsOnMeetings[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 model ClientsOnMeetings {
-  clientId   Int
-  meetingId  Int
-  assignedAt DateTime @default(now())
-  client     Client   @relation(fields: [clientId], references: [id])
-  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  clientId  Int
+  meetingId Int
+  client    Client   @relation(fields: [clientId], references: [id])
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@id([clientId, meetingId])
 }
@@ -78,15 +70,18 @@ model Employee {
 }
 
 model EmployeeSchedule {
-  id             Int            @id @default(autoincrement())
-  employeeId     Int
-  locationId     Int
-  startDate      DateTime
-  endDate        DateTime
-  repeatRate     Int            @default(0)
-  repeatRateUnit RepeatRateUnit @default(day)
-  employee       Employee       @relation(fields: [employeeId], references: [id])
-  location       Location       @relation(fields: [locationId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  employeeId         Int
+  locationId         Int
+  startDate          DateTime
+  endDate            DateTime
+  canceled           Boolean  @default(false)
+  cancellationReason String?
+  repeatRate         String?
+  employee           Employee @relation(fields: [employeeId], references: [id])
+  location           Location @relation(fields: [locationId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Location {
@@ -106,24 +101,26 @@ model Service {
   price                      Decimal                      @db.Decimal(10, 2)
   servicesBookedOnMeetings   ServicesBookedOnMeetings[]
   servicesProvidedOnMeetings ServicesProvidedOnMeetings[]
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
 }
 
 model ServicesProvidedOnMeetings {
-  clientId   Int
-  meetingId  Int
-  assignedAt DateTime @default(now())
-  serivce    Service  @relation(fields: [clientId], references: [id])
-  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  clientId  Int
+  meetingId Int
+  serivce   Service @relation(fields: [clientId], references: [id])
+  meeting   Meeting @relation(fields: [meetingId], references: [id])
 
   @@id([clientId, meetingId])
 }
 
 model ServicesBookedOnMeetings {
-  serivceId  Int
-  meetingId  Int
-  assignedAt DateTime @default(now())
-  meeting    Meeting  @relation(fields: [meetingId], references: [id])
-  serivce    Service  @relation(fields: [serivceId], references: [id])
+  serivceId Int
+  meetingId Int
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  serivce   Service  @relation(fields: [serivceId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@id([serivceId, meetingId])
 }
@@ -135,22 +132,13 @@ model Meeting {
   priceFull                  Decimal?                     @db.Decimal(8, 2)
   discount                   Decimal                      @default(0) @db.Decimal(3, 2)
   priceFinal                 Decimal?                     @db.Decimal(8, 2)
-  canceled                   Boolean                      @default(false)
-  cancellationReason         String                       @default("")
   employeeIdCreated          Int?
-  createdAt                  DateTime                     @default(now())
-  updatedAt                  DateTime                     @updatedAt
-  scheduleId                 Int                          @unique
+  repeatRate                 String?
   clientsOnMeetings          ClientsOnMeetings[]
-  employee                   Employee?                     @relation(fields: [employeeId], references: [id])
-  schedule                   MeetingSchedule              @relation(fields: [scheduleId], references: [id])
+  employee                   Employee?                    @relation(fields: [employeeId], references: [id])
+  schedules                  MeetingSchedule[]
   serivcesBookedOnMeetings   ServicesBookedOnMeetings[]
   serivcesProvidedOnMeetings ServicesProvidedOnMeetings[]
-}
-
-enum RepeatRateUnit {
-  day
-  week
-  month
-  year
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
 }

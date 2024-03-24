@@ -1,22 +1,16 @@
-import { RepeatRateUnit } from '@prisma/client'
 import { type LocationDto } from './location.dto'
-import { type MeetingDto } from './meeting.dto'
-import { type DatetimeIntervalDto } from './datetime-interval.dto'
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql'
-
-registerEnumType(RepeatRateUnit, { name: 'RepeatRateUnit' })
+import { ObjectType } from '@nestjs/graphql'
 
 @ObjectType({ description: 'MeetingSchedule' })
 export class MeetingScheduleDto {
   public id: number
-  public intervals: DatetimeIntervalDto[]
-  public repeatRate: number
-  @Field(() => RepeatRateUnit)
-  public repeatRateUnit: RepeatRateUnit
-
+  public startDate: Date
+  public endDate: Date
+  public canceled: boolean
+  public cancellationReason?: string
   public locationId: number
   public location?: LocationDto
-  public meeting?: MeetingDto | null
+  // public meeting?: MeetingDto | null
 
   constructor(data: MeetingScheduleDto) {
     Object.assign(this, data)
