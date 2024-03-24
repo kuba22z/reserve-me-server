@@ -1,6 +1,4 @@
-import { type DatetimeIntervalDto } from '../../meeting/api/dto/datetime-interval.dto'
 import { type LocationDto } from '../../meeting/api/dto/location.dto'
-import { RepeatRateUnit } from '@prisma/client'
 import { type MeetingScheduleDto } from '../../meeting/api/dto/meeting-schedule.dto'
 import { type MeetingDto } from '../../meeting/api/dto/meeting.dto'
 import * as dayjs from 'dayjs'
@@ -21,7 +19,7 @@ export class DtoFactory {
     createdAt: new Date(),
     updatedAt: new Date(),
     clients: [],
-    schedule: undefined,
+    schedules: [],
     employee: undefined,
     serivcesBookedOnMeetings: undefined,
     serivcesProvidedOnMeetings: undefined,
@@ -30,8 +28,10 @@ export class DtoFactory {
   static meetingscheduleDto: () => MeetingScheduleDto = () => ({
     id: 1,
     intervals: [],
-    repeatRate: 1,
-    repeatRateUnit: RepeatRateUnit.day,
+    startDate: dayjs().toDate(),
+    endDate: dayjs().add(1, 'day').toDate(),
+    repeatRate: dayjs.duration({ days: 1 }).toISOString(),
+    canceled: false,
     locationId: 1,
     location: undefined,
     meeting: undefined,
@@ -46,11 +46,6 @@ export class DtoFactory {
     postalCode: '12345',
     employeeSchedules: undefined,
     meetingSchedule: undefined,
-  })
-
-  static datetimeinterval: () => DatetimeIntervalDto = () => ({
-    from: dayjs().toDate(),
-    to: dayjs().toDate(),
   })
 
   static clientDto: () => ClientDto = () => ({

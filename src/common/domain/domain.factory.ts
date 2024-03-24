@@ -1,7 +1,7 @@
 import { type ClientDomain } from '../../client/domain/model/client.domain'
 import { type LocationDomain } from '../../meeting/domain/model/location.domain'
 import { type MeetingScheduleDomain } from '../../meeting/domain/model/meeting-schedule.domain'
-import { Prisma, RepeatRateUnit } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import * as dayjs from 'dayjs'
 import { type MeetingDomain } from '../../meeting/domain/model/meeting.domain'
 import { type DateTimeInterval } from '../../meeting/domain/model/datetime-interval.domain'
@@ -21,7 +21,7 @@ export class DomainFactory {
     createdAt: new Date(),
     updatedAt: new Date(),
     clients: [],
-    schedule: undefined,
+    schedules: [],
     employee: undefined,
     serivcesBookedOnMeetings: undefined,
     serivcesProvidedOnMeetings: undefined,
@@ -50,9 +50,10 @@ export class DomainFactory {
     id: 1,
     startDate: dayjs(),
     endDate: dayjs(),
-    repeatRate: 1,
-    repeatRateUnit: RepeatRateUnit.day,
+    canceled: false,
     locationId: 1,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   })
 
   static dateTimeInterval: () => DateTimeInterval = () => ({

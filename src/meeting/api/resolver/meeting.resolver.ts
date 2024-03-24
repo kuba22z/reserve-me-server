@@ -22,14 +22,13 @@ export class MeetingResolver {
   @Query(() => [MeetingDto])
   async meetingsByInterval(
     @Args('from', { type: () => Date }) from: Date,
-    @Args('to', { type: () => Date }) to: Date
+    @Args('to', { type: () => Date }) to: Date,
+    @Args('canceled', { nullable: true, type: () => Boolean })
+    canceled?: boolean
   ): Promise<MeetingDto[]> {
-    const interval = { from: dayjs(from), to: dayjs(to) }
     return await this.meetingService
-      .findAllByInterval(interval)
-      .then((meetings) =>
-        meetings.map((meeting) => this.mapper.toDto(meeting, interval))
-      )
+      .findAllByInterval({ from: dayjs(from), to: dayjs(to) }, canceled)
+      .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
   }
 
   @Mutation(() => MeetingDto)

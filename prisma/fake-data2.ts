@@ -8,12 +8,12 @@ import {
   type Meeting,
   type MeetingSchedule,
   Prisma,
-  RepeatRateUnit,
   type Service,
   type ServicesBookedOnMeetings,
   type ServicesProvidedOnMeetings,
-} from '@prisma/client' // Replace './prisma-schema' with the path to your Prisma schema file
-const id = 1
+} from '@prisma/client'
+
+const id = 10
 
 export const generateEmployee = (): Employee => ({
   id,
@@ -28,10 +28,13 @@ export const generateEmployeeSchedule = (
   id,
   employeeId,
   locationId,
-  startDate: new Date(),
-  endDate: new Date(),
-  repeatRate: 0,
-  repeatRateUnit: RepeatRateUnit.day,
+  startDate: new Date(2018, 1, 5, 20, 30, 0, 0),
+  endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
+  canceled: false,
+  cancellationReason: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  repeatRate: null,
 })
 
 export const generateLocation = (): Location => ({
@@ -43,15 +46,10 @@ export const generateLocation = (): Location => ({
   postalCode: faker.location.zipCode(),
 })
 
-export const generateMeeting = (
-  employeeId: number,
-  scheduleId: number
-): Meeting => ({
+export const generateMeeting = (employeeId: number): Meeting => ({
   id,
   employeeId,
-  scheduleId,
-  canceled: false,
-  cancellationReason: '',
+  repeatRate: null,
   employeeIdCreated: null,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -62,14 +60,18 @@ export const generateMeeting = (
 })
 
 export const generateMeetingSchedule = (
-  locationId: number
+  locationId: number,
+  meetingId: number
 ): MeetingSchedule => ({
   id,
   locationId,
+  meetingId,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
   endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
-  repeatRate: 2,
-  repeatRateUnit: RepeatRateUnit.day,
+  canceled: false,
+  cancellationReason: '',
 })
 
 export const generateClient = (): Client => ({
@@ -77,6 +79,8 @@ export const generateClient = (): Client => ({
   phoneNumber: faker.phone.number(),
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 
 export const generateClientsOnMeetings = (
@@ -85,13 +89,16 @@ export const generateClientsOnMeetings = (
 ): ClientsOnMeetings => ({
   clientId,
   meetingId,
-  assignedAt: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 
 export const generateService = (): Service => ({
   id,
   name: faker.commerce.productName(),
   price: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 
 export const generateServicesProvidedOnMeetings = (
@@ -100,7 +107,6 @@ export const generateServicesProvidedOnMeetings = (
 ): ServicesProvidedOnMeetings => ({
   clientId,
   meetingId,
-  assignedAt: new Date(),
 })
 
 export const generateServicesBookedOnMeetings = (
@@ -109,7 +115,8 @@ export const generateServicesBookedOnMeetings = (
 ): ServicesBookedOnMeetings => ({
   serivceId: serviceId,
   meetingId,
-  assignedAt: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 
 export const generateFakeData = (): {
@@ -129,11 +136,10 @@ export const generateFakeData = (): {
   const employeeSchedules: EmployeeSchedule[] = [
     generateEmployeeSchedule(employees[0].id, locations[0].id),
   ]
+
+  const meetings: Meeting[] = [generateMeeting(employees[0].id)]
   const meetingSchedules: MeetingSchedule[] = [
-    generateMeetingSchedule(locations[0].id),
-  ]
-  const meetings: Meeting[] = [
-    generateMeeting(employees[0].id, meetingSchedules[0].id),
+    generateMeetingSchedule(locations[0].id, meetings[0].id),
   ]
   const clients: Client[] = [generateClient()]
   const clientsOnMeetings: ClientsOnMeetings[] = [

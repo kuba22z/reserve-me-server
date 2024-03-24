@@ -6,18 +6,16 @@ import { ObjectType } from '@nestjs/graphql'
 export class MeetingDto {
   public id: number
   public employeeId: number
+  public repeatRate?: string
   public priceFull: number | null
-  public scheduleId: number
   public discount: number
   public priceFinal: number | null
-  public canceled: boolean
-  public cancellationReason: string
   public employeeIdCreated: number | null
   public priceExcepted: number
   public createdAt: Date
   public updatedAt: Date
   public clients: ClientDto[]
-  public schedule?: MeetingScheduleDto
+  public schedules: MeetingScheduleDto[]
   // public employee?: Employee
   //  public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[]
   //  public serivcesProvidedOnMeetings?: ServicesProvidedOnMeetings[]

@@ -1,6 +1,5 @@
 import * as dayjs from 'dayjs'
 import { MeetingScheduleDomain } from './meeting-schedule.domain'
-import { RepeatRateUnit } from '@prisma/client'
 
 describe('MeetingScheduleDomain', () => {
   const testCases = [
