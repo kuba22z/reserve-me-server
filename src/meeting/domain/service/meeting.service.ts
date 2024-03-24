@@ -5,10 +5,22 @@ import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
 import { type DateTimeInterval } from '../model/datetime-interval.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
-import { Prisma, type PrismaClient } from '@prisma/client'
+import {
+  type Meeting,
+  type MeetingSchedule,
+  Prisma,
+  type PrismaClient,
+} from '@prisma/client'
 import * as dayjs from 'dayjs'
 import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
+
+type MeetingRawQuery = Meeting &
+  Omit<MeetingSchedule, 'createdAt' | 'updatedAt' | 'id'> & {
+    scheduleCreatedAt: Date
+    scheduleUpdatedAt: Date
+    scheduleId: number
+  }
 
 @Injectable()
 export class MeetingService {
@@ -60,11 +72,11 @@ export class MeetingService {
   }
 
   async createMeetings(
-    tx: Omit<PrismaClient, ITXClientDenyList>,
+    prisma: Omit<PrismaClient, ITXClientDenyList>,
     schedules: DateTimeInterval[],
     createMeetingDto: CreateMeetingDto
   ): Promise<MeetingDomain> {
-    const meeting: MeetingModel = await tx.meeting.create({
+    const meeting: MeetingModel = await prisma.meeting.create({
       include: { schedules: true },
       data: {
         employeeIdCreated: createMeetingDto.employeeIdCreated,
@@ -86,7 +98,7 @@ export class MeetingService {
       }
     )
 
-    await tx.meetingSchedule.createMany({
+    await prisma.meetingSchedule.createMany({
       data: createSchedulesModel,
     })
     return this.mapper.toDomain(meeting)
@@ -159,27 +171,7 @@ export class MeetingService {
                       WHERE (startDate, endDate) OVERLAPS ("MeetingSchedule"."startDate", "MeetingSchedule"."endDate"))`
     console.log('await tx.$queryRaw(query)')
     console.log(await prisma.$queryRaw(query))
-    const results: Array<{
-      id: number
-      employeeId: number
-      priceExcepted: Prisma.Decimal
-      priceFull: Prisma.Decimal
-      discount: Prisma.Decimal
-      priceFinal: Prisma.Decimal
-      employeeIdCreated: number
-      createdAt: Date
-      updatedAt: Date
-      startDate: Date
-      endDate: Date
-      meetingId: number
-      repeatRate: string
-      locationId: number
-      canceled: boolean
-      cancellationReason: string
-      scheduleId: number
-      scheduleCreatedAt: Date
-      scheduleUpdatedAt: Date
-    }> = await prisma.$queryRaw(query)
+    const results: MeetingRawQuery[] = await prisma.$queryRaw(query)
 
     return results.map((result) => {
       const {
@@ -194,7 +186,6 @@ export class MeetingService {
         scheduleId,
         ...meeting
       } = result
-
       return {
         ...meeting,
         schedules: [
