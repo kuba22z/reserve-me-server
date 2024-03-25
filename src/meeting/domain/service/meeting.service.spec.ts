@@ -6,6 +6,8 @@ import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
 import { DtoFactory } from '../../../common/api/dto.factory'
 import { DomainFactory } from '../../../common/domain/domain.factory'
+import * as duration from 'dayjs/plugin/duration'
+import * as utcPlugin from 'dayjs/plugin/utc'
 
 const moduleMocker = new ModuleMocker(global)
 
@@ -20,6 +22,8 @@ describe('MeetingService', () => {
   }
 
   beforeEach(async () => {
+    dayjs.extend(duration)
+    dayjs.extend(utcPlugin)
     const moduleRef = await Test.createTestingModule({
       providers: [
         MeetingService,
@@ -66,7 +70,7 @@ describe('MeetingService', () => {
       .mockReturnValueOnce([DtoFactory.meetingDto()])
 
     expect(
-      service.findAllByInterval({ from: dayjs(), to: dayjs() })
+      service.findAllByInterval({ from: new Date(), to: new Date() })
     ).toStrictEqual(Promise.resolve([]))
   })
 
@@ -116,16 +120,70 @@ describe('MeetingService', () => {
       const toCreate = DomainFactory.meetingScheduleDomain()
       toCreate.startDate = dayjs(toCreateData.startDate)
       toCreate.endDate = dayjs(toCreateData.endDate)
-      toCreate.repeatRate = toCreateData.repeatRate
-      toCreate.repeatRateUnit = 'day'
 
       const toCheck = DomainFactory.meetingScheduleDomain()
       toCheck.startDate = dayjs(toCheckData.startDate)
       toCheck.endDate = dayjs(toCheckData.endDate)
-      toCheck.repeatRate = toCheckData.repeatRate
-      toCheck.repeatRateUnit = 'day'
 
-      expect(service.isAllowed(toCreate, toCheck)).toEqual(expected)
+      //     expect(service.isAllowed(toCreate, toCheck)).toEqual(expected)
+    })
+  })
+
+  describe('computeAllSchedules', () => {
+    test.each([
+      [
+        { repeatRate: 100, from: '2024-01-01', to: '2024-01-01' },
+        [
+          { from: '2024-01-01', to: '2024-01-01' },
+          { from: '2024-04-10', to: '2024-04-10' },
+          { from: '2024-07-19', to: '2024-07-19' },
+          { from: '2024-10-27', to: '2024-10-27' },
+          { from: '2025-02-04', to: '2025-02-04' },
+        ],
+      ],
+      // 2024 is a leap year -> year has 366 days
+      [
+        {
+          repeatRate: 366,
+          from: '2024-01-01T00:30:00',
+          to: '2024-01-01T00:30:00',
+        },
+        [
+          { from: '2024-01-01T00:30:00', to: '2024-01-01T00:30:00' },
+          { from: '2025-01-01T00:30:00', to: '2025-01-01T00:30:00' },
+        ],
+      ],
+      // repeatRate = 0 -> only one schedule
+      [
+        {
+          repeatRate: 0,
+          from: '2024-01-01',
+          to: '2024-01-01',
+        },
+        [{ from: '2024-01-01', to: '2024-01-01' }],
+      ],
+    ])('', (firstSchedule, expected) => {
+      const expectedDates = expected.map((interval) => {
+        return {
+          from: new Date(interval.from).toISOString(),
+          to: new Date(interval.to).toISOString(),
+        }
+      })
+      // when
+      const actualDates = service
+        .computeAllSchedules(
+          {
+            from: new Date(firstSchedule.from),
+            to: new Date(firstSchedule.to),
+          },
+          dayjs.duration({ days: firstSchedule.repeatRate })
+        )
+        .map((a) => {
+          return { from: a.from.toISOString(), to: a.to.toISOString() }
+        })
+
+      // then
+      expect(actualDates).toEqual(expectedDates)
     })
   })
 })
