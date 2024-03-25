@@ -1,8 +1,6 @@
-import { type Dayjs } from 'dayjs'
-
 export class DateTimeInterval {
-  public from: Dayjs
-  public to: Dayjs
+  public from: Date
+  public to: Date
 
   constructor(data: DateTimeInterval) {
     Object.assign(this, data)

@@ -24,19 +24,6 @@ type MeetingRawQuery = Meeting &
 
 @Injectable()
 export class MeetingService {
-  // private readonly xprisma = this.prisma.$extends({
-  //   result: {
-  //     meetingSchedule: {
-  //       date: {
-  //         needs: { repeatRate: true, repeatRateUnit: true },
-  //         compute(repeat) {
-  //           return `${repeat.repeatRate} ${repeat.repeatRateUnit}`
-  //         },
-  //       },
-  //     },
-  //   },
-  // })
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly mapper: MeetingMapper
@@ -45,8 +32,8 @@ export class MeetingService {
   async create(createMeetingDto: CreateMeetingDto): Promise<MeetingDomain> {
     const allSchedules = this.computeAllSchedules(
       {
-        from: dayjs(createMeetingDto.schedule.startDate),
-        to: dayjs(createMeetingDto.schedule.endDate),
+        from: createMeetingDto.schedule.startDate,
+        to: createMeetingDto.schedule.endDate,
       },
       dayjs.duration(createMeetingDto.repeatRate)
     )
@@ -71,7 +58,7 @@ export class MeetingService {
     })
   }
 
-  async createMeetings(
+  private async createMeetings(
     prisma: Omit<PrismaClient, ITXClientDenyList>,
     schedules: DateTimeInterval[],
     createMeetingDto: CreateMeetingDto
@@ -91,8 +78,8 @@ export class MeetingService {
       (schedule): Prisma.MeetingScheduleCreateManyInput => {
         return {
           meetingId: meeting.id,
-          startDate: schedule.from.toDate(),
-          endDate: schedule.to.toDate(),
+          startDate: schedule.from,
+          endDate: schedule.to,
           locationId: createMeetingDto.schedule.locationId,
         }
       }
@@ -132,10 +119,10 @@ export class MeetingService {
           schedules: {
             where: {
               startDate: {
-                gte: dateTimeInterval.from.toDate(), // Start of date range
+                gte: dateTimeInterval.from, // Start of date range
               },
               endDate: {
-                lte: dateTimeInterval.to.toDate(), // End of date range
+                lte: dateTimeInterval.to, // End of date range
               },
               canceled,
             },
@@ -157,8 +144,8 @@ export class MeetingService {
     dateTimeInterval: DateTimeInterval[],
     locationId: number
   ): Promise<MeetingModel[]> {
-    const fromValues = dateTimeInterval.map((a) => a.from.toDate())
-    const toValues = dateTimeInterval.map((a) => a.from.toDate())
+    const fromValues = dateTimeInterval.map((a) => a.from)
+    const toValues = dateTimeInterval.map((a) => a.from)
 
     const query = Prisma.sql`
         SELECT *, "MeetingSchedule".id as scheduleId, "MeetingSchedule"."createdAt" as scheduleCreatedAt, "MeetingSchedule"."updatedAt" as scheduleUpdatedAt
@@ -223,9 +210,28 @@ export class MeetingService {
 
     const validityPeriod = 365
     const numOfSchedules = Math.ceil(validityPeriod / repeatRate.asDays())
-    return Array.from({ length: numOfSchedules }, (_, num) => ({
-      from: dayjs.utc(interval.from).add(num * repeatRate.asDays(), 'days'),
-      to: dayjs.utc(interval.to).add(num * repeatRate.asDays(), 'days'),
+    return Array.from({ length: numOfSchedules + 1 }, (_, num) => ({
+      from: dayjs
+        .utc(interval.from)
+        .add(num * repeatRate.asDays(), 'days')
+        .toDate(),
+      to: dayjs
+        .utc(interval.to)
+        .add(num * repeatRate.asDays(), 'days')
+        .toDate(),
     }))
   }
 }
+
+// private readonly xprisma = this.prisma.$extends({
+//   result: {
+//     meetingSchedule: {
+//       date: {
+//         needs: { repeatRate: true, repeatRateUnit: true },
+//         compute(repeat) {
+//           return `${repeat.repeatRate} ${repeat.repeatRateUnit}`
+//         },
+//       },
+//     },
+//   },
+// })

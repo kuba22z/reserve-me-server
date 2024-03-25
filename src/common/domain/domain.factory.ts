@@ -57,7 +57,7 @@ export class DomainFactory {
   })
 
   static dateTimeInterval: () => DateTimeInterval = () => ({
-    from: dayjs(),
-    to: dayjs(),
+    from: new Date(),
+    to: new Date(),
   })
 }
