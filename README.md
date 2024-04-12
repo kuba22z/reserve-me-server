@@ -68,6 +68,10 @@ npx prisma migrate deploy
 ```bash
 prisma migrate resolve --rolled-back "20240316090552_add_end_date_after_start_date_constraint"
 ```
+#### Drop the database, create a new database, apply all migrations, generate the Prisma client
+```bash
+prisma migrate reset
+```
 
 
 

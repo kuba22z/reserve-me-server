@@ -2,7 +2,6 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { MeetingDto } from '../dto/meeting.dto'
 import { MeetingService } from '../../domain/service/meeting.service'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
-import * as dayjs from 'dayjs'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 
 @Resolver()
@@ -27,7 +26,7 @@ export class MeetingResolver {
     canceled?: boolean
   ): Promise<MeetingDto[]> {
     return await this.meetingService
-      .findAllByInterval({ from: dayjs(from), to: dayjs(to) }, canceled)
+      .findAllByInterval({ from, to }, canceled)
       .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
   }
 
