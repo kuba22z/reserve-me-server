@@ -17,6 +17,12 @@ export type MeetingScheduleModel = MeetingSchedule & { location?: Location }
 export type MeetingModel = Meeting & { schedules: MeetingScheduleModel[] } & {
   clientsOnMeetings?: ClientsOnMeetingsModel[]
 }
+export type MeetingRawQuery = Meeting &
+  Omit<MeetingSchedule, 'createdAt' | 'updatedAt' | 'id'> & {
+    scheduleCreatedAt: Date
+    scheduleUpdatedAt: Date
+    scheduleId: number
+  }
 type ValidateShape<T, Shape> = T extends Shape
   ? Exclude<keyof T, keyof Shape> extends never
     ? T
@@ -42,6 +48,37 @@ export class MeetingMapper {
         this.clientMapper.toDomain(clientOnMeetings.client)
       ),
     })
+  }
+
+  toMeetingModel(meetingRawQuery: MeetingRawQuery): MeetingModel {
+    const {
+      canceled,
+      cancellationReason,
+      startDate,
+      endDate,
+      locationId,
+      meetingId,
+      scheduleCreatedAt,
+      scheduleUpdatedAt,
+      scheduleId,
+      ...meeting
+    } = meetingRawQuery
+    return {
+      ...meeting,
+      schedules: [
+        {
+          id: scheduleId,
+          createdAt: scheduleCreatedAt,
+          updatedAt: scheduleUpdatedAt,
+          meetingId,
+          canceled,
+          cancellationReason,
+          startDate,
+          endDate,
+          locationId,
+        },
+      ],
+    }
   }
 
   public toDto<T>(domain: ValidateShape<T, MeetingDomain>): MeetingDto {

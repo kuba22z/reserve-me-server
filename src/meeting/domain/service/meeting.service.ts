@@ -1,26 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { type UpdateMeetingDto } from '../../api/dto/update-meeting.dto'
 import { PrismaService } from 'nestjs-prisma'
-import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
+import {
+  MeetingMapper,
+  type MeetingModel,
+  type MeetingRawQuery,
+} from '../../mapper/meeting.mapper'
 import { type DateTimeInterval } from '../model/datetime-interval.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
-import {
-  type Meeting,
-  type MeetingSchedule,
-  Prisma,
-  type PrismaClient,
-} from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import * as dayjs from 'dayjs'
 import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
-
-type MeetingRawQuery = Meeting &
-  Omit<MeetingSchedule, 'createdAt' | 'updatedAt' | 'id'> & {
-    scheduleCreatedAt: Date
-    scheduleUpdatedAt: Date
-    scheduleId: number
-  }
 
 @Injectable()
 export class MeetingService {
@@ -144,9 +136,8 @@ export class MeetingService {
     dateTimeInterval: DateTimeInterval[],
     locationId: number
   ): Promise<MeetingModel[]> {
-    const fromValues = dateTimeInterval.map((a) => a.from)
-    const toValues = dateTimeInterval.map((a) => a.from)
-
+    const fromValues = dateTimeInterval.map((interval) => interval.from)
+    const toValues = dateTimeInterval.map((interval) => interval.from)
     const query = Prisma.sql`
         SELECT *, "MeetingSchedule".id as scheduleId, "MeetingSchedule"."createdAt" as scheduleCreatedAt, "MeetingSchedule"."updatedAt" as scheduleUpdatedAt
         FROM "Meeting"
@@ -156,40 +147,8 @@ export class MeetingService {
           AND EXISTS (SELECT 1
                       FROM unnest(ARRAY [${Prisma.join(fromValues)}], ARRAY [${Prisma.join(toValues)}]) AS range(startDate, endDate)
                       WHERE (startDate, endDate) OVERLAPS ("MeetingSchedule"."startDate", "MeetingSchedule"."endDate"))`
-    console.log('await tx.$queryRaw(query)')
-    console.log(await prisma.$queryRaw(query))
     const results: MeetingRawQuery[] = await prisma.$queryRaw(query)
-
-    return results.map((result) => {
-      const {
-        canceled,
-        cancellationReason,
-        startDate,
-        endDate,
-        locationId,
-        meetingId,
-        scheduleCreatedAt,
-        scheduleUpdatedAt,
-        scheduleId,
-        ...meeting
-      } = result
-      return {
-        ...meeting,
-        schedules: [
-          {
-            id: scheduleId,
-            createdAt: scheduleCreatedAt,
-            updatedAt: scheduleUpdatedAt,
-            meetingId,
-            canceled,
-            cancellationReason,
-            startDate,
-            endDate,
-            locationId,
-          },
-        ],
-      }
-    })
+    return results.map((result) => this.mapper.toMeetingModel(result))
   }
 
   update(id: number, updateMeetingDto: UpdateMeetingDto) {

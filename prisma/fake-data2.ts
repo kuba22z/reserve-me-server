@@ -13,7 +13,7 @@ import {
   type ServicesProvidedOnMeetings,
 } from '@prisma/client'
 
-const id = 10
+let id: number
 
 export const generateEmployee = (): Employee => ({
   id,
@@ -119,7 +119,9 @@ export const generateServicesBookedOnMeetings = (
   updatedAt: new Date(),
 })
 
-export const generateFakeData = (): {
+export const generateFakeData = (
+  idParam: number
+): {
   employees: Employee[]
   employeeSchedules: EmployeeSchedule[]
   locations: Location[]
@@ -131,6 +133,7 @@ export const generateFakeData = (): {
   servicesProvidedOnMeetings: ServicesProvidedOnMeetings[]
   servicesBookedOnMeetings: ServicesBookedOnMeetings[]
 } => {
+  id = idParam
   const employees: Employee[] = [generateEmployee()]
   const locations: Location[] = [generateLocation()]
   const employeeSchedules: EmployeeSchedule[] = [

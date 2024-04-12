@@ -18,6 +18,13 @@
  //   "strictNullChecks": true,
    // "strict": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "plugins": [
+      {
+        "transform": "ts-auto-mock/transformer",
+        "cacheBetweenTests": false,
+        //"features": ["random"]
+      }
+    ]
   }
 }

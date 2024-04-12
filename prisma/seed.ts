@@ -4,7 +4,10 @@ import { type ITXClientDenyList } from '@prisma/client/runtime/library'
 
 const prisma = new PrismaClient()
 
-async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
+async function initializeDatabase(
+  tx: Omit<PrismaClient, ITXClientDenyList>,
+  id: number
+) {
   /*  await prisma.client.upsert({
     where: { id: 1 },
     create: fakeClient(),
@@ -13,7 +16,7 @@ async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
 
   // const addUsers = async () => await prisma.user.createMany({ data: users });
 
-  const fakeData = generateFakeData()
+  const fakeData = generateFakeData(id)
 
   await tx.employee.createMany({
     data: fakeData.employees,
@@ -55,14 +58,16 @@ async function initializeDatabase(tx: Omit<PrismaClient, ITXClientDenyList>) {
   })
   // const addUsers = async () => await prisma.user.createMany({ data: users });
 }
-const trans = async () => {
+export const seed = async (id: number) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   await prisma.$transaction(async (tx) => {
-    await initializeDatabase(tx)
+    await initializeDatabase(tx, id)
   })
+  return id
 }
+export const seedId = 1
 
-trans()
+seed(seedId)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   .then((_) => {
     console.log('Database seeded successfully!')

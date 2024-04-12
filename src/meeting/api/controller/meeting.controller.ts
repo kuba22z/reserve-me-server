@@ -11,8 +11,7 @@ import {
 import { MeetingService } from '../../domain/service/meeting.service'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
-import { Dayjs } from 'dayjs'
-import { ParseDayjsPipe } from './parseDayjs.pipe'
+import { ParseDatePipe } from './parse-date-pipe.service'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
 
 @Controller('meeting')
@@ -29,8 +28,8 @@ export class MeetingController {
 
   @Get()
   async findAllByInterval(
-    @Query('from', new ParseDayjsPipe()) from: Dayjs,
-    @Query('to', new ParseDayjsPipe()) to: Dayjs
+    @Query('from', new ParseDatePipe()) from: Date,
+    @Query('to', new ParseDatePipe()) to: Date
   ) {
     return await this.meetingService
       .findAllByInterval({
