@@ -1,3 +1,4 @@
+/*
 import { Factory } from 'fishery'
 import { faker } from '@faker-js/faker'
 import {
@@ -100,7 +101,6 @@ export const ServicesProvidedOnMeetingsFactory =
     clientId: 1,
     meetingId: 1,
   }))
-
 export const ServicesBookedOnMeetingsFactory =
   Factory.define<ServicesBookedOnMeetings>(() => ({
     serviceId: 1,
@@ -121,3 +121,4 @@ export default {
   ServicesProvidedOnMeetingsFactory,
   ServicesBookedOnMeetingsFactory,
 }
+*/

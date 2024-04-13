@@ -72,9 +72,32 @@ type MeetingScheduleDto {
 
 type Mutation {
   createMeeting(meeting: CreateMeetingDto!): MeetingDto!
+  updateMeeting(meeting: UpdateMeetingDto!): MeetingDto!
 }
 
 type Query {
   meetings: [MeetingDto!]!
   meetingsByInterval(canceled: Boolean, from: DateTime!, to: DateTime!): [MeetingDto!]!
+}
+
+input UpdateMeetingDto {
+  discount: Float
+  employeeId: Float
+  employeeIdCreated: Float
+  id: Float!
+  locationId: Float
+  priceExcepted: Float
+  priceFinal: Float
+  priceFull: Float
+  repeatRate: String
+  schedules: [UpdateMeetingScheduleDto!]
+}
+
+"""UpdateMeetingSchedule"""
+input UpdateMeetingScheduleDto {
+  canceled: Boolean
+  cancellationReason: String
+  endDate: DateTime
+  id: Float!
+  startDate: DateTime
 }

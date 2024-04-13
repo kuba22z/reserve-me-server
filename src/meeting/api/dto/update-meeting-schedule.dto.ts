@@ -1,10 +1,12 @@
-import { InputType, PartialType } from '@nestjs/graphql'
+import { InputType, OmitType, PartialType } from '@nestjs/graphql'
 import { CreateMeetingScheduleDto } from './create-meeting-schedule.dto'
 
-@InputType({ description: 'CreateMeetingSchedule' })
+@InputType({ description: 'UpdateMeetingSchedule' })
 export class UpdateMeetingScheduleDto extends PartialType(
-  CreateMeetingScheduleDto
+  OmitType(CreateMeetingScheduleDto, ['locationId'] as const)
 ) {
+  // MAYBE remove
+  public id: number
   public canceled?: boolean
   public cancellationReason?: string
 }
