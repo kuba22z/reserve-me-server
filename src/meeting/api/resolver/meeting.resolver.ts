@@ -3,6 +3,7 @@ import { MeetingDto } from '../dto/meeting.dto'
 import { MeetingService } from '../../domain/service/meeting.service'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
+import { UpdateMeetingDto } from '../dto/update-meeting.dto'
 
 @Resolver()
 export class MeetingResolver {
@@ -36,6 +37,15 @@ export class MeetingResolver {
   ): Promise<MeetingDto> {
     return await this.meetingService
       .create(createMeetingDto)
+      .then((meeting) => this.mapper.toDto(meeting))
+  }
+
+  @Mutation(() => MeetingDto)
+  async updateMeeting(
+    @Args('meeting') updateMeetingDto: UpdateMeetingDto
+  ): Promise<MeetingDto> {
+    return await this.meetingService
+      .update(updateMeetingDto)
       .then((meeting) => this.mapper.toDto(meeting))
   }
 }

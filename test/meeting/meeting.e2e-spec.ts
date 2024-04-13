@@ -4,6 +4,7 @@ import * as request from 'supertest'
 import { MeetingModule } from '../../src/meeting/meeting.module'
 import { seed } from '../../prisma/seed'
 import { rollbackSeed } from '../../prisma/rollbackSeed'
+import { removeAllFakeData } from '../../prisma/removeAll'
 
 const gql = '/graphql'
 
@@ -15,6 +16,7 @@ describe('MeetingResolver (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [MeetingModule],
     }).compile()
+    await removeAllFakeData()
     await seed(seedId)
     app = moduleFixture.createNestApplication()
     await app.init()
