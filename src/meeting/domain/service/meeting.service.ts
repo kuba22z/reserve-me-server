@@ -14,6 +14,7 @@ import * as dayjs from 'dayjs'
 import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
 import { MeetingScheduleMapper } from '../../mapper/meetingSchedule.mapper'
+import { type CounterDto } from '../../api/dto/counter.dto'
 
 @Injectable()
 export class MeetingService {
@@ -140,7 +141,7 @@ export class MeetingService {
     dateTimeInterval: DateTimeInterval[],
     locationId: number
   ): Promise<MeetingModel[]> {
-    const interval = dateTimeInterval.filter((i) => i.to || i.from)
+    const interval = dateTimeInterval.filter((i) => i.to && i.from)
     if (interval.length === 0) return []
 
     const fromValues = interval.map((interval) => interval.from)
@@ -259,8 +260,10 @@ export class MeetingService {
     })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} meeting`
+  async remove(ids: number[]): Promise<CounterDto> {
+    return await this.prisma.meeting.deleteMany({
+      where: { id: { in: ids } },
+    })
   }
 
   public computeAllSchedules(

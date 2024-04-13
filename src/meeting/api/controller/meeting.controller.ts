@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -49,8 +48,8 @@ export class MeetingController {
     //  return this.meetingService.update(+id, updateMeetingDto)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.meetingService.remove(+id)
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.meetingService.remove(+id)
+  // }
 }
