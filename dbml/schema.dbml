@@ -130,13 +130,13 @@ Table Meeting {
   updatedAt DateTime [not null]
 }
 
-Ref: MeetingSchedule.meetingId > Meeting.id
+Ref: MeetingSchedule.meetingId > Meeting.id [delete: Cascade]
 
 Ref: MeetingSchedule.locationId > Location.id
 
 Ref: ClientsOnMeetings.clientId > Client.id
 
-Ref: ClientsOnMeetings.meetingId > Meeting.id
+Ref: ClientsOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
 Ref: EmployeeSchedule.employeeId > Employee.id
 
@@ -144,9 +144,9 @@ Ref: EmployeeSchedule.locationId > Location.id
 
 Ref: ServicesProvidedOnMeetings.clientId > Service.id
 
-Ref: ServicesProvidedOnMeetings.meetingId > Meeting.id
+Ref: ServicesProvidedOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
-Ref: ServicesBookedOnMeetings.meetingId > Meeting.id
+Ref: ServicesBookedOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
 Ref: ServicesBookedOnMeetings.serivceId > Service.id
 

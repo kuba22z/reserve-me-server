@@ -1,9 +1,10 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { MeetingDto } from '../dto/meeting.dto'
 import { MeetingService } from '../../domain/service/meeting.service'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
+import { CounterDto } from '../dto/counter.dto'
 
 @Resolver()
 export class MeetingResolver {
@@ -47,5 +48,12 @@ export class MeetingResolver {
     return await this.meetingService
       .update(updateMeetingDto)
       .then((meeting) => this.mapper.toDto(meeting))
+  }
+
+  @Mutation(() => CounterDto)
+  async deleteMeetings(
+    @Args('ids', { type: () => [Int] }) ids: number[]
+  ): Promise<CounterDto> {
+    return await this.meetingService.remove(ids)
   }
 }

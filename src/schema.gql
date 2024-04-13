@@ -10,6 +10,11 @@ type ClientDto {
   phoneNumber: String!
 }
 
+"""Counter"""
+type CounterDto {
+  count: Float!
+}
+
 input CreateMeetingDto {
   discount: Float
   employeeId: Float
@@ -72,6 +77,7 @@ type MeetingScheduleDto {
 
 type Mutation {
   createMeeting(meeting: CreateMeetingDto!): MeetingDto!
+  deleteMeetings(ids: [Int!]!): CounterDto!
   updateMeeting(meeting: UpdateMeetingDto!): MeetingDto!
 }
 

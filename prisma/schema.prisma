@@ -29,7 +29,7 @@ datasource db {
 model MeetingSchedule {
   id                 Int      @id @default(autoincrement())
   meetingId          Int
-  meeting            Meeting  @relation(fields: [meetingId], references: [id])
+  meeting            Meeting  @relation(fields: [meetingId], references: [id],onDelete: Cascade)
   locationId         Int
   location           Location @relation(fields: [locationId], references: [id])
   startDate          DateTime
@@ -54,7 +54,7 @@ model ClientsOnMeetings {
   clientId  Int
   meetingId Int
   client    Client   @relation(fields: [clientId], references: [id])
-  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -109,7 +109,7 @@ model ServicesProvidedOnMeetings {
   clientId  Int
   meetingId Int
   serivce   Service @relation(fields: [clientId], references: [id])
-  meeting   Meeting @relation(fields: [meetingId], references: [id])
+  meeting   Meeting @relation(fields: [meetingId], references: [id],onDelete: Cascade)
 
   @@id([clientId, meetingId])
 }
@@ -117,7 +117,7 @@ model ServicesProvidedOnMeetings {
 model ServicesBookedOnMeetings {
   serivceId Int
   meetingId Int
-  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meeting   Meeting  @relation(fields: [meetingId], references: [id],onDelete: Cascade)
   serivce   Service  @relation(fields: [serivceId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
