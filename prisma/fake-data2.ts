@@ -113,7 +113,7 @@ export const generateServicesBookedOnMeetings = (
   serviceId: number,
   meetingId: number
 ): ServicesBookedOnMeetings => ({
-  serivceId: serviceId,
+  serviceId,
   meetingId,
   createdAt: new Date(),
   updatedAt: new Date(),
