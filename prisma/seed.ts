@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import generateFakeData from './fake-data2'
+import generateFakeData from './fake-data'
 import { type ITXClientDenyList } from '@prisma/client/runtime/library'
 
 const prisma = new PrismaClient()
@@ -17,7 +17,7 @@ async function initializeDatabase(
   // const addUsers = async () => await prisma.user.createMany({ data: users });
 
   const fakeData = generateFakeData(id)
-
+  console.log(fakeData.meetings[0].priceExcepted)
   await tx.employee.createMany({
     data: fakeData.employees,
   })
