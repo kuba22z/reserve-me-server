@@ -1,9 +1,14 @@
 import {
   type Client,
   type ClientsOnMeetings,
+  type Employee,
+  type EmployeeSchedule,
   type Location,
   type Meeting,
   type MeetingSchedule,
+  type Service,
+  type ServicesBookedOnMeetings,
+  type ServicesProvidedOnMeetings,
 } from '@prisma/client'
 import { MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
@@ -12,11 +17,25 @@ import { MeetingDto } from '../api/dto/meeting.dto'
 import { ClientMapper } from '../../client/mapper/client.mapper'
 import * as dayjs from 'dayjs'
 
-export type ClientsOnMeetingsModel = ClientsOnMeetings & { client: Client }
+export type ClientsOnMeetingsModel = ClientsOnMeetings & { client?: Client }
 export type MeetingScheduleModel = MeetingSchedule & { location?: Location }
-export type MeetingModel = Meeting & { schedules: MeetingScheduleModel[] } & {
+export type MeetingModel = Meeting & { schedules?: MeetingScheduleModel[] } & {
   clientsOnMeetings?: ClientsOnMeetingsModel[]
 }
+
+export type LocationModel = Location & { meetingSchedules?: MeetingSchedule[] }
+export type EmployeeModel = Employee & { schedule?: EmployeeScheduleModel[] }
+export type EmployeeScheduleModel = EmployeeSchedule & { location?: Location }
+export type ServiceModel = Service & {
+  servicesBookedOnMeetings?: ServicesBookedOnMeetingsModel[]
+} & { servicesProvidedOnMeetings?: ServicesProvidedOnMeetings[] }
+export type ServicesBookedOnMeetingsModel = ServicesBookedOnMeetings & {
+  meeting?: Meeting
+}
+export type ServicesProvidedOnMeetingsModel = ServicesProvidedOnMeetings & {
+  meeting?: Meeting
+}
+
 export type MeetingRawQuery = Meeting &
   Omit<MeetingSchedule, 'createdAt' | 'updatedAt' | 'id'> & {
     scheduleCreatedAt: Date
