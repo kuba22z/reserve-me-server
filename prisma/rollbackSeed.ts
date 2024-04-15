@@ -23,7 +23,7 @@ async function deleteFakeData(
     // Delete one servicesBookedOnMeetings
     await txPrisma.servicesBookedOnMeetings.delete({
       where: {
-        serivceId_meetingId: { serivceId: idToDelete, meetingId: idToDelete },
+        serviceId_meetingId: { serviceId: idToDelete, meetingId: idToDelete },
       },
     })
 
@@ -103,6 +103,7 @@ rollbackSeed(seedId)
   .catch((error) => {
     console.error(error)
   })
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   .finally(async () => {
     await prisma.$disconnect()
   })

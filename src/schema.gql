@@ -18,11 +18,11 @@ type CounterDto {
 input CreateMeetingDto {
   discount: Float
   employeeId: Float
-  employeeIdCreated: Float!
-  priceExcepted: Float
+  employeeIdCreated: Float
+  priceExcepted: Float!
   priceFinal: Float
   priceFull: Float
-  repeatRate: String!
+  repeatRate: String
   schedule: CreateMeetingScheduleDto!
 }
 
