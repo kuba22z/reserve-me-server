@@ -112,10 +112,10 @@ export class MeetingMapper {
     } = domain
     return new MeetingDto({
       ...reduced,
-      priceFinal: priceFinal.toNumber(),
+      priceFinal: priceFinal?.toNumber(),
       priceExcepted: priceExcepted.toNumber(),
       discount: discount.toNumber(),
-      priceFull: priceFull.toNumber(),
+      priceFull: priceFull?.toNumber(),
       repeatRate: domain.repeatRate?.toISOString(),
       schedules: domain.schedules.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
