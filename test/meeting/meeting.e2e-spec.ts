@@ -18,6 +18,7 @@ import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-
 import { type MeetingDto } from '../../src/meeting/api/dto/meeting.dto'
 import { type MeetingSchedule } from '@prisma/client'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
+import { MeetingService } from '../../src/meeting/domain/service/meeting.service'
 
 const gql = '/graphql'
 
@@ -117,7 +118,7 @@ describe('MeetingResolver (e2e)', () => {
       await shouldThrow(
         createMeeting(createMeetingDto2),
         409,
-        'Requested Meeting Schedule collides with other Schedules'
+        MeetingService.CREATE_MEETING_CONFLICT_MESSAGE
       )
     })
   })
@@ -126,8 +127,8 @@ describe('MeetingResolver (e2e)', () => {
     it('should update meeting', async () => {
       // given
       const meetingSchedule1 = createMock<CreateMeetingScheduleDto>({
-        startDate: new Date('2024-01-01T00:00:00+00:00'),
-        endDate: new Date('2024-01-01T01:00:00+00:00'),
+        startDate: new Date('2024-01-01T00:10:00+00:00'),
+        endDate: new Date('2024-01-01T00:20:00+00:00'),
         locationId: location1.id,
       })
       const createMeetingDto1 = createMock<CreateMeetingDto>({
@@ -137,6 +138,23 @@ describe('MeetingResolver (e2e)', () => {
         createMeeting(createMeetingDto1),
         createMeetingDto1
       )
+
+      const updateMeetingSchedule1 = createMock<UpdateMeetingScheduleDto>({
+        id: meeting1.schedules[0].id,
+        startDate: new Date('2024-01-01T00:00:00+00:00'),
+        endDate: new Date('2024-01-01T01:00:00+00:00'),
+      })
+      const updateMeetingDto1 = createMock<UpdateMeetingDto>({
+        id: meeting1.id,
+        priceExcepted: 10,
+        schedules: [updateMeetingSchedule1],
+      })
+      // updateMeetingSchedule1 collides with meetingSchedule1, but it's the same meeting -> should update schedule
+      await isMeetingUpdated(
+        updateMeeting(updateMeetingDto1),
+        updateMeetingDto1
+      )
+
       const meetingSchedule2 = createMock<CreateMeetingScheduleDto>({
         startDate: new Date('2024-01-01T02:00:00+00:00'),
         endDate: new Date('2024-01-01T03:00:00+00:00'),
@@ -150,33 +168,36 @@ describe('MeetingResolver (e2e)', () => {
         createMeetingDto2
       )
 
-      const updateMeetingSchedule = createMock<UpdateMeetingScheduleDto>({
+      const updateMeetingSchedule2 = createMock<UpdateMeetingScheduleDto>({
         id: meeting1.schedules[0].id,
         startDate: new Date('2024-01-01T01:00:00+00:00'),
         endDate: new Date('2024-01-01T02:00:00+00:00'),
       })
-      const updateMeetingDto = createMock<UpdateMeetingDto>({
+      const updateMeetingDto2 = createMock<UpdateMeetingDto>({
         id: meeting1.id,
         priceExcepted: 10,
-        schedules: [updateMeetingSchedule],
+        schedules: [updateMeetingSchedule2],
       })
-      // updateMeetingSchedule2 is exclusively between meetingSchedule1 and meetingSchedule2 -> should update
-      await isMeetingUpdated(updateMeeting(updateMeetingDto), updateMeetingDto)
+      // updateMeetingSchedule2 doesn't collides exclusively with meetingSchedule2 -> should update
+      await isMeetingUpdated(
+        updateMeeting(updateMeetingDto2),
+        updateMeetingDto2
+      )
 
-      const updateMeetingSchedule2 = createMock<UpdateMeetingScheduleDto>({
+      const updateMeetingSchedule3 = createMock<UpdateMeetingScheduleDto>({
         id: meeting1.schedules[0].id,
         startDate: new Date('2024-01-01T02:00:00+00:00'),
         endDate: new Date('2024-01-01T02:50:00+00:00'),
       })
-      const updateMeetingDto2 = createMock<UpdateMeetingDto>({
+      const updateMeetingDto3 = createMock<UpdateMeetingDto>({
         id: meeting1.id,
-        schedules: [updateMeetingSchedule2],
+        schedules: [updateMeetingSchedule3],
         locationId: location2.id,
       })
-      // updateMeetingSchedule2 collides with meetingSchedule2 but locationId is changed to 2 -> should update
+      // updateMeetingSchedule3 collides with meetingSchedule2 but locationId is changed to 2 -> should update
       await isMeetingUpdated(
-        updateMeeting(updateMeetingDto2),
-        updateMeetingDto2
+        updateMeeting(updateMeetingDto3),
+        updateMeetingDto3
       )
     })
 
@@ -194,10 +215,23 @@ describe('MeetingResolver (e2e)', () => {
         createMeetingDto1
       )
 
+      const meetingSchedule2 = createMock<CreateMeetingScheduleDto>({
+        startDate: new Date('2024-01-01T02:00:00+00:00'),
+        endDate: new Date('2024-01-01T03:00:00+00:00'),
+        locationId: location1.id,
+      })
+      const createMeetingDto2 = createMock<CreateMeetingDto>({
+        schedule: meetingSchedule2,
+      })
+      const meeting2 = await isMeetingCreated(
+        createMeeting(createMeetingDto2),
+        createMeetingDto2
+      )
+
       const updateMeetingSchedule = createMock<UpdateMeetingScheduleDto>({
         id: meeting1.schedules[0].id,
-        startDate: new Date('2024-01-01T00:59:00+00:00'),
-        endDate: new Date('2024-01-01T02:00:00+00:00'),
+        startDate: new Date('2024-01-01T01:00:00+00:00'),
+        endDate: new Date('2024-01-01T02:01:00+00:00'),
       })
       const updateMeetingDto = createMock<UpdateMeetingDto>({
         id: meeting1.id,
@@ -205,17 +239,12 @@ describe('MeetingResolver (e2e)', () => {
         schedules: [updateMeetingSchedule],
       })
       // updateMeetingSchedule collides with meetingSchedule1 -> should not update schedules
-      await updateMeeting(updateMeetingDto).expect((res) => {
-        // schedules doesnt change
-        expect(res.body.data.updateMeeting.schedules[0]).toEqual({
-          locationId: meetingSchedule1.locationId,
-          startDate: meetingSchedule1.startDate.toISOString(),
-          endDate: meetingSchedule1.endDate.toISOString(),
-        })
-        // priceExcepted does change
-        expect(res.body.data.updateMeeting.priceExcepted).toEqual(
-          updateMeetingDto.priceExcepted
-        )
+      await shouldThrow(
+        updateMeeting(updateMeetingDto),
+        409,
+        MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
+      ).then((errorDto) => {
+        expect((errorDto.data[0] as MeetingDto).id).toEqual(meeting2.id)
       })
 
       updateMeetingDto.locationId = 99
@@ -223,7 +252,7 @@ describe('MeetingResolver (e2e)', () => {
       await shouldThrow(
         updateMeeting(updateMeetingDto),
         404,
-        `The location doesnt exist`,
+        MeetingService.LOCATION_NOT_FOUND_MESSAGE,
         [{ locationId: updateMeetingDto.locationId }]
       )
     })
@@ -295,21 +324,23 @@ describe('MeetingResolver (e2e)', () => {
       .then((res) => res.body.data.updateMeeting)
   }
 
-  const shouldThrow = (
+  const shouldThrow = async (
     test: Test,
     statusCode: number,
     message: string,
-    data?: object
+    data?: object[]
   ) => {
-    return test.expect((res) => {
-      expect(res.body.errors.length).toEqual(1)
-      const errorDto = res.body.errors[0] as ErrorDto
-      expect(errorDto.statusCode).toEqual(statusCode)
-      expect(errorDto.message).toEqual(message)
-      if (data) {
-        expect(errorDto.data).toEqual(data)
-      }
-    })
+    return await test
+      .expect((res) => {
+        expect(res.body.errors.length).toEqual(1)
+        const errorDto = res.body.errors[0] as ErrorDto
+        expect(errorDto.statusCode).toEqual(statusCode)
+        expect(errorDto.message).toEqual(message)
+        if (data) {
+          expect(errorDto.data).toEqual(data)
+        }
+      })
+      .then((res) => res.body.errors[0] as ErrorDto)
   }
 
   const removeQuotesOnKeys = (string: string) => {
