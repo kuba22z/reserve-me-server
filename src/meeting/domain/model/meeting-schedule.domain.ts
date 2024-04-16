@@ -1,11 +1,10 @@
 import { type MeetingDomain } from './meeting.domain'
 import { type LocationDomain } from './location.domain'
-import { type Dayjs } from 'dayjs'
 
 export class MeetingScheduleDomain {
   public id: number
-  public startDate: Dayjs
-  public endDate: Dayjs
+  public startDate: Date
+  public endDate: Date
   public canceled: boolean
   public cancellationReason?: string
   public locationId: number

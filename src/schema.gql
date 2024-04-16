@@ -2,35 +2,25 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-"""Client"""
-type ClientDto {
-  firstName: String!
+"""Location"""
+type LocationDto {
   id: Float!
-  lastName: String!
-  phoneNumber: String!
+  name: String!
+  street: String!
+  houseNumber: Float!
+  city: String!
+  postalCode: String!
 }
 
-"""Counter"""
-type CounterDto {
-  count: Float!
-}
-
-input CreateMeetingDto {
-  discount: Float
-  employeeId: Float
-  employeeIdCreated: Float
-  priceExcepted: Float!
-  priceFinal: Float
-  priceFull: Float
-  repeatRate: String
-  schedule: CreateMeetingScheduleDto!
-}
-
-"""CreateMeetingSchedule"""
-input CreateMeetingScheduleDto {
-  endDate: DateTime!
-  locationId: Float!
+"""MeetingSchedule"""
+type MeetingScheduleDto {
+  id: Float!
   startDate: DateTime!
+  endDate: DateTime!
+  canceled: Boolean!
+  cancellationReason: String
+  locationId: Float!
+  location: LocationDto
 }
 
 """
@@ -38,72 +28,82 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""Location"""
-type LocationDto {
-  city: String!
-  houseNumber: Float!
+"""Client"""
+type ClientDto {
   id: Float!
-  name: String!
-  postalCode: String!
-  street: String!
+  phoneNumber: String!
+  firstName: String!
+  lastName: String!
 }
 
 """Meeting"""
 type MeetingDto {
-  clients: [ClientDto!]!
-  createdAt: DateTime!
-  discount: Float!
+  id: Float!
   employeeId: Float!
-  employeeIdCreated: Float!
-  id: Float!
-  priceExcepted: Float!
-  priceFinal: Float!
-  priceFull: Float!
   repeatRate: String
-  schedules: [MeetingScheduleDto!]!
+  priceFull: Float!
+  discount: Float!
+  priceFinal: Float!
+  employeeIdCreated: Float!
+  priceExcepted: Float!
+  createdAt: DateTime!
   updatedAt: DateTime!
+  clients: [ClientDto!]!
+  schedules: [MeetingScheduleDto!]!
 }
 
-"""MeetingSchedule"""
-type MeetingScheduleDto {
-  canceled: Boolean!
-  cancellationReason: String
-  endDate: DateTime!
-  id: Float!
-  location: LocationDto
-  locationId: Float!
-  startDate: DateTime!
-}
-
-type Mutation {
-  createMeeting(meeting: CreateMeetingDto!): MeetingDto!
-  deleteMeetings(ids: [Int!]!): CounterDto!
-  updateMeeting(meeting: UpdateMeetingDto!): MeetingDto!
+"""Counter"""
+type CounterDto {
+  count: Float!
 }
 
 type Query {
   meetings: [MeetingDto!]!
-  meetingsByInterval(canceled: Boolean, from: DateTime!, to: DateTime!): [MeetingDto!]!
+  meetingsByInterval(from: DateTime!, to: DateTime!, canceled: Boolean): [MeetingDto!]!
+}
+
+type Mutation {
+  createMeeting(meeting: CreateMeetingDto!): MeetingDto!
+  updateMeeting(meeting: UpdateMeetingDto!): MeetingDto!
+  deleteMeetings(ids: [Int!]!): CounterDto!
+}
+
+input CreateMeetingDto {
+  employeeId: Float
+  priceFull: Float
+  discount: Float
+  priceFinal: Float
+  employeeIdCreated: Float
+  priceExcepted: Float!
+  repeatRate: String
+  schedule: CreateMeetingScheduleDto!
+}
+
+"""CreateMeetingSchedule"""
+input CreateMeetingScheduleDto {
+  startDate: DateTime!
+  endDate: DateTime!
+  locationId: Float!
 }
 
 input UpdateMeetingDto {
-  discount: Float
   employeeId: Float
+  priceFull: Float
+  discount: Float
+  priceFinal: Float
   employeeIdCreated: Float
+  priceExcepted: Float
+  repeatRate: String
   id: Float!
   locationId: Float
-  priceExcepted: Float
-  priceFinal: Float
-  priceFull: Float
-  repeatRate: String
   schedules: [UpdateMeetingScheduleDto!]
 }
 
 """UpdateMeetingSchedule"""
 input UpdateMeetingScheduleDto {
-  canceled: Boolean
-  cancellationReason: String
+  startDate: DateTime
   endDate: DateTime
   id: Float!
-  startDate: DateTime
+  canceled: Boolean
+  cancellationReason: String
 }
