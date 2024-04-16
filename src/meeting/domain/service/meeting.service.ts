@@ -22,6 +22,14 @@ import { type CounterDto } from '../../api/dto/counter.dto'
 
 @Injectable()
 export class MeetingService {
+  public static CREATE_MEETING_CONFLICT_MESSAGE =
+    'Requested meeting schedule creation collides with other schedules'
+
+  public static UPDATE_MEETING_CONFLICT_MESSAGE =
+    'Requested meeting schedule update collides with other schedules'
+
+  public static LOCATION_NOT_FOUND_MESSAGE = `The location doesnt exist`
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly meetingMapper: MeetingMapper,
@@ -53,7 +61,7 @@ export class MeetingService {
           } else {
             throw new ConflictException(
               meetings.map((m) => this.meetingMapper.toDto(m)),
-              'Requested Meeting Schedule collides with other Schedules'
+              MeetingService.CREATE_MEETING_CONFLICT_MESSAGE
             )
             // throw new GraphQLError(
             //   'Requested Meeting Schedule collides with other Schedules',
@@ -156,14 +164,13 @@ export class MeetingService {
   ): Promise<MeetingModel[]> {
     const interval = dateTimeInterval.filter((i) => i.to && i.from)
     if (interval.length === 0) return []
-
     const fromValues = interval.map((interval) => interval.from.toISOString())
     const toValues = interval.map((interval) => interval.to.toISOString())
     const query = Prisma.sql`
-        SELECT *, "MeetingSchedule".id as "scheduleId", "MeetingSchedule"."createdAt" as "scheduleCreatedAt", "MeetingSchedule"."updatedAt" as "scheduleUpdatedAt"
+        SELECT *,"Meeting".id as "id", "MeetingSchedule".id as "scheduleId", "MeetingSchedule"."createdAt" as "scheduleCreatedAt", "MeetingSchedule"."updatedAt" as "scheduleUpdatedAt"
         FROM "Meeting"
                  left join "MeetingSchedule" on "Meeting".id = "MeetingSchedule"."meetingId"
-        WHERE canceled = false
+        WHERE canceled = false  
           AND "locationId" = ${locationId}
           AND EXISTS (SELECT 1
                       FROM unnest(ARRAY [${Prisma.join(fromValues)}::timestamp], ARRAY [${Prisma.join(toValues)}::timestamp]) AS range(startDate, endDate)
@@ -190,84 +197,91 @@ export class MeetingService {
   }
 
   async update(updateMeetingDto: UpdateMeetingDto): Promise<MeetingDomain> {
-    // return await this.prisma.$transaction(
-    // async (prisma) => {
-    if (
-      !updateMeetingDto.schedules ||
-      updateMeetingDto.schedules.length === 0
-    ) {
-      return await this.updateMeeting(updateMeetingDto, [], this.prisma)
-    }
-
-    const schedulesToChangeRequest = updateMeetingDto.schedules
-      .filter((s) => s.startDate && s.endDate)
-      .map((schedule) => {
-        return {
-          from: schedule.startDate,
-          to: schedule.endDate,
+    return await this.prisma.$transaction(
+      async (prisma) => {
+        if (
+          !updateMeetingDto.schedules ||
+          updateMeetingDto.schedules.length === 0
+        ) {
+          return await this.updateMeeting(updateMeetingDto, [], prisma)
         }
-      })
 
-    const actualMeetingSchedule = await this.prisma.meetingSchedule
-      .findMany({
-        where: { meetingId: updateMeetingDto.id },
-      })
-      .then((schedule) => schedule.map((s) => this.scheduleMapper.toDomain(s)))
+        const schedulesToChangeRequest = updateMeetingDto.schedules
+          .filter((s) => s.startDate && s.endDate)
+          .map((schedule) => {
+            return {
+              from: schedule.startDate,
+              to: schedule.endDate,
+            }
+          })
 
-    if (updateMeetingDto.locationId) {
-      await this.prisma.location
-        .findFirst({
-          where: { id: updateMeetingDto.locationId },
-          select: { id: true },
-        })
-        .then((location) => {
-          if (!location) {
-            throw new NotFoundException(
-              [{ locationId: updateMeetingDto.locationId }],
-              `The location doesnt exist`
-            )
-          }
-        })
-    }
+        const actualMeetingSchedule = await prisma.meetingSchedule
+          .findMany({
+            where: { meetingId: updateMeetingDto.id },
+          })
+          .then((schedule) =>
+            schedule.map((s) => this.scheduleMapper.toDomain(s))
+          )
 
-    const locationId =
-      // TODO make locationId not unique for each schedule in a meeting
-      // here is [0] used because currently each schedule of a meeting sholud have the same locationId
-      updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
-    const meetingsOverlapChangeRequest = await this.findNotCanceledByIntervals(
-      this.prisma,
-      schedulesToChangeRequest.length !== 0
-        ? schedulesToChangeRequest
-        : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
-      locationId
-    ).then((meetings) => meetings.map((m) => this.meetingMapper.toDomain(m)))
-    const schedulesOverlapChangeRequest = meetingsOverlapChangeRequest.flatMap(
-      (m) => m.schedules
-    )
-    const schedulesToChange = updateMeetingDto.schedules.filter(
-      (schedule) =>
-        !schedulesOverlapChangeRequest.find((s) => s.id === schedule.id)
-    )
-
-    const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
-      schedulesToChange.map((s) => {
-        return {
-          where: { id: s.id },
-          data: {
-            ...s,
-            locationId,
-          },
+        if (updateMeetingDto.locationId) {
+          await prisma.location
+            .findFirst({
+              where: { id: updateMeetingDto.locationId },
+              select: { id: true },
+            })
+            .then((location) => {
+              if (!location) {
+                throw new NotFoundException(
+                  [{ locationId: updateMeetingDto.locationId }],
+                  MeetingService.LOCATION_NOT_FOUND_MESSAGE
+                )
+              }
+            })
         }
-      })
 
-    return await this.updateMeeting(
-      updateMeetingDto,
-      schedulesUpdateManyInput,
-      this.prisma
+        const locationId =
+          // TODO make locationId not unique for each schedule in a meeting
+          // here is [0] used because currently each schedule of a meeting sholud have the same locationId
+          updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
+        const meetingsOverlapChangeRequest =
+          await this.findNotCanceledByIntervals(
+            prisma,
+            schedulesToChangeRequest.length !== 0
+              ? schedulesToChangeRequest
+              : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
+            locationId
+          ).then((meetings) =>
+            meetings
+              .map((m) =>
+                this.meetingMapper.toDto(this.meetingMapper.toDomain(m))
+              )
+              .filter((m) => m.id !== updateMeetingDto.id)
+          )
+        if (meetingsOverlapChangeRequest.length > 0) {
+          throw new ConflictException(
+            meetingsOverlapChangeRequest,
+            MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
+          )
+        }
+        const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
+          updateMeetingDto.schedules.map((s) => {
+            return {
+              where: { id: s.id },
+              data: {
+                ...s,
+                locationId,
+              },
+            }
+          })
+
+        return await this.updateMeeting(
+          updateMeetingDto,
+          schedulesUpdateManyInput,
+          prisma
+        )
+      },
+      { timeout: 10000 }
     )
-    // },
-    // { timeout: 10000 }
-    // )
   }
 
   async remove(ids: number[]): Promise<CounterDto> {
