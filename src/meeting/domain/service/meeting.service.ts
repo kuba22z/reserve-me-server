@@ -157,20 +157,16 @@ export class MeetingService {
     const interval = dateTimeInterval.filter((i) => i.to && i.from)
     if (interval.length === 0) return []
 
-    const fromValues = interval.map((interval) =>
-      dayjs(interval.from).add(-1, 'hours').toDate()
-    )
-    const toValues = interval.map((interval) =>
-      dayjs(interval.to).add(-1, 'hours').toDate()
-    )
+    const fromValues = interval.map((interval) => interval.from.toISOString())
+    const toValues = interval.map((interval) => interval.to.toISOString())
     const query = Prisma.sql`
-        SELECT *, "MeetingSchedule".id as scheduleId, "MeetingSchedule"."createdAt" as scheduleCreatedAt, "MeetingSchedule"."updatedAt" as scheduleUpdatedAt
+        SELECT *, "MeetingSchedule".id as "scheduleId", "MeetingSchedule"."createdAt" as "scheduleCreatedAt", "MeetingSchedule"."updatedAt" as "scheduleUpdatedAt"
         FROM "Meeting"
                  left join "MeetingSchedule" on "Meeting".id = "MeetingSchedule"."meetingId"
         WHERE canceled = false
           AND "locationId" = ${locationId}
           AND EXISTS (SELECT 1
-                      FROM unnest(ARRAY [${Prisma.join(fromValues)}], ARRAY [${Prisma.join(toValues)}]) AS range(startDate, endDate)
+                      FROM unnest(ARRAY [${Prisma.join(fromValues)}::timestamp], ARRAY [${Prisma.join(toValues)}::timestamp]) AS range(startDate, endDate)
                       WHERE (startDate, endDate) OVERLAPS ("MeetingSchedule"."startDate", "MeetingSchedule"."endDate"))`
     const results: MeetingRawQuery[] = await prisma.$queryRaw(query)
     return results.map((result) => this.meetingMapper.toMeetingModel(result))
@@ -194,86 +190,84 @@ export class MeetingService {
   }
 
   async update(updateMeetingDto: UpdateMeetingDto): Promise<MeetingDomain> {
-    return await this.prisma.$transaction(async (prisma) => {
-      if (
-        !updateMeetingDto.schedules ||
-        updateMeetingDto.schedules.length === 0
-      ) {
-        return await this.updateMeeting(updateMeetingDto, [], prisma)
-      }
+    // return await this.prisma.$transaction(
+    // async (prisma) => {
+    if (
+      !updateMeetingDto.schedules ||
+      updateMeetingDto.schedules.length === 0
+    ) {
+      return await this.updateMeeting(updateMeetingDto, [], this.prisma)
+    }
 
-      const schedulesToChangeRequest = updateMeetingDto.schedules
-        .filter((s) => s.startDate && s.endDate)
-        .map((schedule) => {
-          return {
-            from: schedule.startDate,
-            to: schedule.endDate,
+    const schedulesToChangeRequest = updateMeetingDto.schedules
+      .filter((s) => s.startDate && s.endDate)
+      .map((schedule) => {
+        return {
+          from: schedule.startDate,
+          to: schedule.endDate,
+        }
+      })
+
+    const actualMeetingSchedule = await this.prisma.meetingSchedule
+      .findMany({
+        where: { meetingId: updateMeetingDto.id },
+      })
+      .then((schedule) => schedule.map((s) => this.scheduleMapper.toDomain(s)))
+
+    if (updateMeetingDto.locationId) {
+      await this.prisma.location
+        .findFirst({
+          where: { id: updateMeetingDto.locationId },
+          select: { id: true },
+        })
+        .then((location) => {
+          if (!location) {
+            throw new NotFoundException(
+              [{ locationId: updateMeetingDto.locationId }],
+              `The location doesnt exist`
+            )
           }
         })
+    }
 
-      const actualMeetingSchedule = await prisma.meetingSchedule
-        .findMany({
-          where: { meetingId: updateMeetingDto.id },
-        })
-        .then((schedule) =>
-          schedule.map((s) => this.scheduleMapper.toDomain(s))
-        )
+    const locationId =
+      // TODO make locationId not unique for each schedule in a meeting
+      // here is [0] used because currently each schedule of a meeting sholud have the same locationId
+      updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
+    const meetingsOverlapChangeRequest = await this.findNotCanceledByIntervals(
+      this.prisma,
+      schedulesToChangeRequest.length !== 0
+        ? schedulesToChangeRequest
+        : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
+      locationId
+    ).then((meetings) => meetings.map((m) => this.meetingMapper.toDomain(m)))
+    const schedulesOverlapChangeRequest = meetingsOverlapChangeRequest.flatMap(
+      (m) => m.schedules
+    )
+    const schedulesToChange = updateMeetingDto.schedules.filter(
+      (schedule) =>
+        !schedulesOverlapChangeRequest.find((s) => s.id === schedule.id)
+    )
 
-      if (updateMeetingDto.locationId) {
-        await prisma.location
-          .findFirst({
-            where: { id: updateMeetingDto.locationId },
-            select: { id: true, name: true },
-          })
-          .then((location) => {
-            if (!location) {
-              throw new NotFoundException(
-                location,
-                `The location ${location.name} doesnt exist`
-              )
-            }
-          })
-      }
+    const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
+      schedulesToChange.map((s) => {
+        return {
+          where: { id: s.id },
+          data: {
+            ...s,
+            locationId,
+          },
+        }
+      })
 
-      const locationId =
-        // TODO make locationId not unique for each schedule in a meeting
-        // here is [0] used because currently each schedule of a meeting sholud have the same locationId
-        updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
-
-      const meetingsOverlapChangeRequest =
-        await this.findNotCanceledByIntervals(
-          prisma,
-          schedulesToChangeRequest.length !== 0
-            ? schedulesToChangeRequest
-            : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
-          locationId
-        ).then((meetings) =>
-          meetings.map((m) => this.meetingMapper.toDomain(m))
-        )
-      const schedulesOverlapChangeRequest =
-        meetingsOverlapChangeRequest.flatMap((m) => m.schedules)
-      const schedulesToChange = updateMeetingDto.schedules.filter(
-        (schedule) =>
-          !schedulesOverlapChangeRequest.find((s) => s.id === schedule.id)
-      )
-
-      const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
-        schedulesToChange.map((s) => {
-          return {
-            where: { id: s.id },
-            data: {
-              ...s,
-              locationId,
-            },
-          }
-        })
-
-      return await this.updateMeeting(
-        updateMeetingDto,
-        schedulesUpdateManyInput,
-        prisma
-      )
-    })
+    return await this.updateMeeting(
+      updateMeetingDto,
+      schedulesUpdateManyInput,
+      this.prisma
+    )
+    // },
+    // { timeout: 10000 }
+    // )
   }
 
   async remove(ids: number[]): Promise<CounterDto> {
