@@ -6,19 +6,18 @@ const prisma = new PrismaClient()
 
 async function deleteFakeData(txPrisma: Omit<PrismaClient, ITXClientDenyList>) {
   // Delete records in junction tables first
-  return await Promise.all([
-    txPrisma.servicesBookedOnMeetings.deleteMany({}),
-    txPrisma.servicesProvidedOnMeetings.deleteMany({}),
-    txPrisma.clientsOnMeetings.deleteMany({}),
-    // Delete records from main tables
-    txPrisma.meetingSchedule.deleteMany({}),
-    txPrisma.meeting.deleteMany({}),
-    txPrisma.service.deleteMany({}),
-    txPrisma.client.deleteMany({}),
-    txPrisma.employeeSchedule.deleteMany({}),
-    txPrisma.location.deleteMany({}),
-    txPrisma.employee.deleteMany({}),
-  ])
+
+  await txPrisma.servicesBookedOnMeetings.deleteMany({})
+  await txPrisma.servicesProvidedOnMeetings.deleteMany({})
+  await txPrisma.clientsOnMeetings.deleteMany({})
+  // Delete records from main tables
+  await txPrisma.meetingSchedule.deleteMany({})
+  await txPrisma.meeting.deleteMany({})
+  await txPrisma.service.deleteMany({})
+  await txPrisma.client.deleteMany({})
+  await txPrisma.employeeSchedule.deleteMany({})
+  await txPrisma.employee.deleteMany({})
+  await txPrisma.location.deleteMany({})
 }
 
 export const removeAllFakeData = async () => {

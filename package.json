@@ -17,8 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "ts-patch install -s"
+    "prepare": "ts-patch install -s",
+    "pretest:e2e": "nest build -p tsconfig.test.json && cp ./test/jest-e2e.json ./dist-test/test/",
+    "test:e2e": "jest --config ./dist-test/test/jest-e2e.json"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

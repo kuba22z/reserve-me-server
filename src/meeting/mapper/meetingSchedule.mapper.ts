@@ -3,7 +3,6 @@ import { LocationMapper } from './location.mapper'
 import type { MeetingScheduleModel } from './meeting.mapper'
 import { MeetingScheduleDomain } from '../domain/model/meeting-schedule.domain'
 import { MeetingScheduleDto } from '../api/dto/meeting-schedule.dto'
-import * as dayjs from 'dayjs'
 
 // type ValidateShape<T, Shape> = T extends Shape
 //   ? Exclude<keyof T, keyof Shape> extends never
@@ -20,8 +19,8 @@ export class MeetingScheduleMapper {
     const { ...reduced } = schedule
     return new MeetingScheduleDomain({
       ...reduced,
-      startDate: dayjs(schedule.startDate),
-      endDate: dayjs(schedule.endDate),
+      startDate: schedule.startDate,
+      endDate: schedule.endDate,
       location: this.locationMapper.toDomain(schedule.location),
     })
   }
@@ -30,8 +29,8 @@ export class MeetingScheduleMapper {
     const { location, startDate, endDate, ...reduced } = domain
     return new MeetingScheduleDto({
       ...reduced,
-      startDate: domain.startDate.toDate(),
-      endDate: domain.endDate.toDate(),
+      startDate: domain.startDate,
+      endDate: domain.endDate,
       location: this.locationMapper.toDto(domain.location),
     })
   }

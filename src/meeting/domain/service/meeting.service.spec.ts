@@ -118,12 +118,12 @@ describe('MeetingService', () => {
       // Add more test cases as needed...
     ])('isAllowed', (toCreateData, toCheckData, expected) => {
       const toCreate = DomainFactory.meetingScheduleDomain()
-      toCreate.startDate = dayjs(toCreateData.startDate)
-      toCreate.endDate = dayjs(toCreateData.endDate)
+      toCreate.startDate = dayjs(toCreateData.startDate).toDate()
+      toCreate.endDate = dayjs(toCreateData.endDate).toDate()
 
       const toCheck = DomainFactory.meetingScheduleDomain()
-      toCheck.startDate = dayjs(toCheckData.startDate)
-      toCheck.endDate = dayjs(toCheckData.endDate)
+      toCheck.startDate = dayjs(toCheckData.startDate).toDate()
+      toCheck.endDate = dayjs(toCheckData.endDate).toDate()
 
       //     expect(service.isAllowed(toCreate, toCheck)).toEqual(expected)
     })

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { type UpdateMeetingDto } from '../../api/dto/update-meeting.dto'
 import { PrismaService } from 'nestjs-prisma'
 import {
@@ -6,7 +10,7 @@ import {
   type MeetingModel,
   type MeetingRawQuery,
 } from '../../mapper/meeting.mapper'
-import { type DateTimeInterval } from '../model/datetime-interval.domain'
+import { DateTimeInterval } from '../model/datetime-interval.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
 import { Prisma, type PrismaClient } from '@prisma/client'
@@ -41,23 +45,44 @@ export class MeetingService {
         .then((meetings) => meetings.map((a) => this.meetingMapper.toDomain(a)))
         .then(async (meetings) => {
           if (meetings.length === 0) {
-            return await this.createMeetings(
+            return await this.createMeeting(
               prisma,
               allSchedules,
               createMeetingDto
             )
           } else {
-            throw new NotFoundException('Meeting Schedule already exists')
+            throw new ConflictException(
+              meetings.map((m) => this.meetingMapper.toDto(m)),
+              'Requested Meeting Schedule collides with other Schedules'
+            )
+            // throw new GraphQLError(
+            //   'Requested Meeting Schedule collides with other Schedules',
+            //   {
+            //     extensions: {
+            //       code: 409,
+            //       data: meetings.map((m) => this.meetingMapper.toDto(m)),
+            //     },
+            //   }
+            // )
           }
         })
     })
   }
 
-  private async createMeetings(
+  private async createMeeting(
     prisma: Omit<PrismaClient, ITXClientDenyList>,
     schedules: DateTimeInterval[],
     createMeetingDto: CreateMeetingDto
   ): Promise<MeetingDomain> {
+    const createSchedulesModel = schedules.map(
+      (schedule): Prisma.MeetingScheduleCreateManyMeetingInput => {
+        return {
+          startDate: schedule.from,
+          endDate: schedule.to,
+          locationId: createMeetingDto.schedule.locationId,
+        }
+      }
+    )
     const meeting: MeetingModel = await prisma.meeting.create({
       include: { schedules: true },
       data: {
@@ -67,22 +92,10 @@ export class MeetingService {
         priceFull: createMeetingDto.priceFull,
         discount: createMeetingDto.discount,
         repeatRate: createMeetingDto.repeatRate,
+        schedules: { createMany: { data: createSchedulesModel } },
       },
     })
-    const createSchedulesModel = schedules.map(
-      (schedule): Prisma.MeetingScheduleCreateManyInput => {
-        return {
-          meetingId: meeting.id,
-          startDate: schedule.from,
-          endDate: schedule.to,
-          locationId: createMeetingDto.schedule.locationId,
-        }
-      }
-    )
 
-    await prisma.meetingSchedule.createMany({
-      data: createSchedulesModel,
-    })
     return this.meetingMapper.toDomain(meeting)
   }
 
@@ -113,8 +126,11 @@ export class MeetingService {
       .findMany({
         include: {
           clientsOnMeetings: { include: { client: true } },
+          schedules: { include: { location: true } },
+        },
+        where: {
           schedules: {
-            where: {
+            every: {
               startDate: {
                 gte: dateTimeInterval.from, // Start of date range
               },
@@ -122,9 +138,6 @@ export class MeetingService {
                 lte: dateTimeInterval.to, // End of date range
               },
               canceled,
-            },
-            include: {
-              location: true,
             },
           },
         },
@@ -144,8 +157,12 @@ export class MeetingService {
     const interval = dateTimeInterval.filter((i) => i.to && i.from)
     if (interval.length === 0) return []
 
-    const fromValues = interval.map((interval) => interval.from)
-    const toValues = interval.map((interval) => interval.from)
+    const fromValues = interval.map((interval) =>
+      dayjs(interval.from).add(-1, 'hours').toDate()
+    )
+    const toValues = interval.map((interval) =>
+      dayjs(interval.to).add(-1, 'hours').toDate()
+    )
     const query = Prisma.sql`
         SELECT *, "MeetingSchedule".id as scheduleId, "MeetingSchedule"."createdAt" as scheduleCreatedAt, "MeetingSchedule"."updatedAt" as scheduleUpdatedAt
         FROM "Meeting"
@@ -161,6 +178,7 @@ export class MeetingService {
 
   async updateMeeting(
     updateMeetingDto: UpdateMeetingDto,
+    schedulesToUpdate: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[],
     prisma: Omit<PrismaClient, ITXClientDenyList>
   ): Promise<MeetingDomain> {
     const { schedules, id, locationId, ...updateMeetingDto2 } = updateMeetingDto
@@ -169,6 +187,7 @@ export class MeetingService {
       include: { schedules: true },
       data: {
         ...updateMeetingDto2,
+        schedules: { updateMany: schedulesToUpdate },
       },
     })
     return this.meetingMapper.toDomain(meeting)
@@ -180,7 +199,7 @@ export class MeetingService {
         !updateMeetingDto.schedules ||
         updateMeetingDto.schedules.length === 0
       ) {
-        return await this.updateMeeting(updateMeetingDto, prisma)
+        return await this.updateMeeting(updateMeetingDto, [], prisma)
       }
 
       const schedulesToChangeRequest = updateMeetingDto.schedules
@@ -200,31 +219,33 @@ export class MeetingService {
           schedule.map((s) => this.scheduleMapper.toDomain(s))
         )
 
-      let locationExists = false
       if (updateMeetingDto.locationId) {
-        locationExists = await prisma.location
+        await prisma.location
           .findFirst({
             where: { id: updateMeetingDto.locationId },
-            select: { id: true },
+            select: { id: true, name: true },
           })
-          .then((l) => !!l)
+          .then((location) => {
+            if (!location) {
+              throw new NotFoundException(
+                location,
+                `The location ${location.name} doesnt exist`
+              )
+            }
+          })
       }
 
       const locationId =
         // TODO make locationId not unique for each schedule in a meeting
         // here is [0] used because currently each schedule of a meeting sholud have the same locationId
-        locationExists
-          ? updateMeetingDto.locationId
-          : actualMeetingSchedule[0].locationId
+        updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
 
       const meetingsOverlapChangeRequest =
         await this.findNotCanceledByIntervals(
           prisma,
           schedulesToChangeRequest.length !== 0
             ? schedulesToChangeRequest
-            : actualMeetingSchedule.map((s) => {
-                return { from: s.startDate.toDate(), to: s.endDate.toDate() }
-              }),
+            : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
           locationId
         ).then((meetings) =>
           meetings.map((m) => this.meetingMapper.toDomain(m))
@@ -236,27 +257,22 @@ export class MeetingService {
           !schedulesOverlapChangeRequest.find((s) => s.id === schedule.id)
       )
 
-      const promises = schedulesToChange.map(
-        async (s) =>
-          await this.prisma.meetingSchedule.update({
+      const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
+        schedulesToChange.map((s) => {
+          return {
             where: { id: s.id },
             data: {
               ...s,
               locationId,
             },
-          })
+          }
+        })
+
+      return await this.updateMeeting(
+        updateMeetingDto,
+        schedulesUpdateManyInput,
+        prisma
       )
-      const meetingDomain = await this.updateMeeting(updateMeetingDto, prisma)
-      const schedules = await Promise.all(promises).then((schdueles) =>
-        schdueles.map((s) => this.scheduleMapper.toDomain(s))
-      )
-      meetingDomain.schedules = meetingDomain.schedules.map((oldSchedule) => {
-        const newSchedule = schedules.find(
-          (newSchedule) => newSchedule.id === oldSchedule.id
-        )
-        return newSchedule ?? oldSchedule
-      })
-      return meetingDomain
     })
   }
 
