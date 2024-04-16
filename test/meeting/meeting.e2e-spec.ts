@@ -17,6 +17,7 @@ import { type UpdateMeetingDto } from '../../src/meeting/api/dto/update-meeting.
 import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
 import { type MeetingDto } from '../../src/meeting/api/dto/meeting.dto'
 import { type MeetingSchedule } from '@prisma/client'
+import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 
 const gql = '/graphql'
 
@@ -53,7 +54,6 @@ describe('MeetingResolver (e2e)', () => {
 
   describe('meetingsByInterval', () => {
     it('should get one meeting', async () => {
-      // given
       const meetingSchedule1 = createMock<CreateMeetingScheduleDto>({
         startDate: new Date('2024-01-01T00:00:00+00:00'),
         endDate: new Date('2024-01-01T01:00:00+00:00'),
@@ -92,7 +92,6 @@ describe('MeetingResolver (e2e)', () => {
 
   describe('createMeeting', () => {
     it('should not create meeting', async () => {
-      // given
       const meetingSchedule1 = createMock<CreateMeetingScheduleDto>({
         startDate: new Date('2024-01-01T00:00:00+00:00'),
         endDate: new Date('2024-01-01T01:00:00+00:00'),
@@ -115,15 +114,11 @@ describe('MeetingResolver (e2e)', () => {
         createMeetingDto1
       )
       // meetingSchedule1 collides with meetingSchedule2 -> should throw ConflictException 409
-      await createMeeting(createMeetingDto2)
-        //  .expect(409)
-        .then((res) => {
-          expect(res.body.errors.length).toEqual(1)
-          expect(res.body.errors[0].code).toEqual(409)
-          expect(res.body.errors[0].message).toEqual(
-            'Requested Meeting Schedule collides with other Schedules'
-          )
-        })
+      await shouldThrow(
+        createMeeting(createMeetingDto2),
+        409,
+        'Requested Meeting Schedule collides with other Schedules'
+      )
     })
   })
 
@@ -184,6 +179,54 @@ describe('MeetingResolver (e2e)', () => {
         updateMeetingDto2
       )
     })
+
+    it('should not update meeting', async () => {
+      const meetingSchedule1 = createMock<CreateMeetingScheduleDto>({
+        startDate: new Date('2024-01-01T00:00:00+00:00'),
+        endDate: new Date('2024-01-01T01:00:00+00:00'),
+        locationId: location1.id,
+      })
+      const createMeetingDto1 = createMock<CreateMeetingDto>({
+        schedule: meetingSchedule1,
+      })
+      const meeting1 = await isMeetingCreated(
+        createMeeting(createMeetingDto1),
+        createMeetingDto1
+      )
+
+      const updateMeetingSchedule = createMock<UpdateMeetingScheduleDto>({
+        id: meeting1.schedules[0].id,
+        startDate: new Date('2024-01-01T00:59:00+00:00'),
+        endDate: new Date('2024-01-01T02:00:00+00:00'),
+      })
+      const updateMeetingDto = createMock<UpdateMeetingDto>({
+        id: meeting1.id,
+        priceExcepted: 10,
+        schedules: [updateMeetingSchedule],
+      })
+      // updateMeetingSchedule collides with meetingSchedule1 -> should not update schedules
+      await updateMeeting(updateMeetingDto).expect((res) => {
+        // schedules doesnt change
+        expect(res.body.data.updateMeeting.schedules[0]).toEqual({
+          locationId: meetingSchedule1.locationId,
+          startDate: meetingSchedule1.startDate.toISOString(),
+          endDate: meetingSchedule1.endDate.toISOString(),
+        })
+        // priceExcepted does change
+        expect(res.body.data.updateMeeting.priceExcepted).toEqual(
+          updateMeetingDto.priceExcepted
+        )
+      })
+
+      updateMeetingDto.locationId = 99
+      // updateMeetingDto has not existing locationId -> should throw Not Found 404
+      await shouldThrow(
+        updateMeeting(updateMeetingDto),
+        404,
+        `The location doesnt exist`,
+        [{ locationId: updateMeetingDto.locationId }]
+      )
+    })
   })
 
   const getMeetingsByInterval = (
@@ -206,7 +249,6 @@ describe('MeetingResolver (e2e)', () => {
 
   const updateMeeting = (meeting: UpdateMeetingDto) => {
     const updateMeeting = `mutation {updateMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {priceExcepted,id,schedules {startDate,endDate,locationId}}}`
-    console.log(updateMeeting)
     return request(app.getHttpServer()).post(gql).send({
       query: updateMeeting,
     })
@@ -251,6 +293,23 @@ describe('MeetingResolver (e2e)', () => {
         )
       })
       .then((res) => res.body.data.updateMeeting)
+  }
+
+  const shouldThrow = (
+    test: Test,
+    statusCode: number,
+    message: string,
+    data?: object
+  ) => {
+    return test.expect((res) => {
+      expect(res.body.errors.length).toEqual(1)
+      const errorDto = res.body.errors[0] as ErrorDto
+      expect(errorDto.statusCode).toEqual(statusCode)
+      expect(errorDto.message).toEqual(message)
+      if (data) {
+        expect(errorDto.data).toEqual(data)
+      }
+    })
   }
 
   const removeQuotesOnKeys = (string: string) => {

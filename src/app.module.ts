@@ -7,6 +7,7 @@ import { ClientModule } from './client/client.module'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo'
 import { type GraphQLFormattedError } from 'graphql/error'
+import { type ErrorDto } from './common/api/dto/error.dto'
 
 @Module({
   imports: [
@@ -18,19 +19,20 @@ import { type GraphQLFormattedError } from 'graphql/error'
       autoSchemaFile: true,
       sortSchema: true,
       playground: true,
-      formatError: (formattedError: GraphQLFormattedError) => {
+      formatError: (
+        formattedError: GraphQLFormattedError
+      ): GraphQLFormattedError | ErrorDto => {
         const originalError = formattedError.extensions?.originalError as {
           statusCode: number
           error: string
-          message: string | object | any
+          message: object[]
         }
-
         if (!originalError) {
           return formattedError
         }
         return {
           message: originalError.error,
-          code: originalError.statusCode,
+          statusCode: originalError.statusCode,
           data: originalError.message,
         }
       },
