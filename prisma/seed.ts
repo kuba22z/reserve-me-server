@@ -65,7 +65,7 @@ export const seed = async (id: number) => {
   })
   return id
 }
-export const seedId = 1
+export const seedId = 2
 
 seed(seedId)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

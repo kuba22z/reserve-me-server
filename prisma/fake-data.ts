@@ -58,6 +58,7 @@ export const generateMeetingSchedule = (
   meetingId: number
 ): MeetingScheduleModel =>
   createMock<MeetingScheduleModel>({
+    id,
     startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
     endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
     canceled: false,
