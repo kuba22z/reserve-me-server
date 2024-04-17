@@ -171,7 +171,7 @@ describe('MeetingService', () => {
       })
       // when
       const actualDates = service
-        .computeAllSchedules(
+        .computePeriodicSchedules(
           {
             from: new Date(firstSchedule.from),
             to: new Date(firstSchedule.to),

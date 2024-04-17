@@ -15,14 +15,15 @@
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
- //   "strictNullChecks": true,
-   // "strict": true,
+    //"strictNullChecks": true,
+    //"strict": true,
+    //"alwaysStrict": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "plugins": [
       {
         "transform": "ts-auto-mock/transformer",
-        "cacheBetweenTests": false,
+        "cacheBetweenTests": false
         //"features": ["random"]
       }
     ]

@@ -42,7 +42,7 @@ model MeetingSchedule {
 
 model Client {
   id                Int                 @id @default(autoincrement())
-  phoneNumber       String
+  phoneNumber       String              @unique
   firstName         String?
   lastName          String?
   clientsOnMeetings ClientsOnMeetings[]

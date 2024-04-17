@@ -15,6 +15,9 @@ async function bootstrap() {
   // its full utility by setting it up as a global-scoped pipe so that it is
   // applied to every route handler across the entire application.
   app.useGlobalPipes(new ValidationPipe())
+  // define useContainer in main.ts file
+  // useContainer(app.select(AppModule), { fallbackOnErrors: true })
+
   // app.useGlobalFilters(new PrismaClientExceptionFilter())
 
   // extend dayjs with plugin globally
