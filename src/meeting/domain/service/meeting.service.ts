@@ -37,7 +37,7 @@ export class MeetingService {
   ) {}
 
   async create(createMeetingDto: CreateMeetingDto): Promise<MeetingDomain> {
-    const allSchedules = this.computeAllSchedules(
+    const periodicSchedules = this.computePeriodicSchedules(
       {
         from: createMeetingDto.schedule.startDate,
         to: createMeetingDto.schedule.endDate,
@@ -47,7 +47,7 @@ export class MeetingService {
     return await this.prisma.$transaction(async (prisma) => {
       return await this.findNotCanceledByIntervals(
         prisma,
-        allSchedules,
+        periodicSchedules,
         createMeetingDto.schedule.locationId
       )
         .then((meetings) => meetings.map((a) => this.meetingMapper.toDomain(a)))
@@ -55,7 +55,7 @@ export class MeetingService {
           if (meetings.length === 0) {
             return await this.createMeeting(
               prisma,
-              allSchedules,
+              periodicSchedules,
               createMeetingDto
             )
           } else {
@@ -63,15 +63,6 @@ export class MeetingService {
               meetings.map((m) => this.meetingMapper.toDto(m)),
               MeetingService.CREATE_MEETING_CONFLICT_MESSAGE
             )
-            // throw new GraphQLError(
-            //   'Requested Meeting Schedule collides with other Schedules',
-            //   {
-            //     extensions: {
-            //       code: 409,
-            //       data: meetings.map((m) => this.meetingMapper.toDto(m)),
-            //     },
-            //   }
-            // )
           }
         })
     })
@@ -199,6 +190,22 @@ export class MeetingService {
   async update(updateMeetingDto: UpdateMeetingDto): Promise<MeetingDomain> {
     return await this.prisma.$transaction(
       async (prisma) => {
+        if (updateMeetingDto.locationId) {
+          await prisma.location
+            .findFirst({
+              where: { id: updateMeetingDto.locationId },
+              select: { id: true },
+            })
+            .then((location) => {
+              if (!location) {
+                throw new NotFoundException(
+                  [{ locationId: updateMeetingDto.locationId }],
+                  MeetingService.LOCATION_NOT_FOUND_MESSAGE
+                )
+              }
+            })
+        }
+
         if (
           !updateMeetingDto.schedules ||
           updateMeetingDto.schedules.length === 0
@@ -222,22 +229,6 @@ export class MeetingService {
           .then((schedule) =>
             schedule.map((s) => this.scheduleMapper.toDomain(s))
           )
-
-        if (updateMeetingDto.locationId) {
-          await prisma.location
-            .findFirst({
-              where: { id: updateMeetingDto.locationId },
-              select: { id: true },
-            })
-            .then((location) => {
-              if (!location) {
-                throw new NotFoundException(
-                  [{ locationId: updateMeetingDto.locationId }],
-                  MeetingService.LOCATION_NOT_FOUND_MESSAGE
-                )
-              }
-            })
-        }
 
         const locationId =
           // TODO make locationId not unique for each schedule in a meeting
@@ -310,7 +301,7 @@ export class MeetingService {
     })
   }
 
-  public computeAllSchedules(
+  public computePeriodicSchedules(
     interval: DateTimeInterval,
     repeatRate: Duration
   ): DateTimeInterval[] {

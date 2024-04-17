@@ -22,4 +22,17 @@ export class ClientService {
     })
     return clientModel
   }
+
+  async findById(dateTimeInterval: DateTimeInterval) {
+    const clientModel: ClientModel[] = await this.prisma.client.findMany({
+      include: {
+        clientsOnMeetings: {
+          include: {
+            meeting: true,
+          },
+        },
+      },
+    })
+    return clientModel
+  }
 }
