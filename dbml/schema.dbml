@@ -23,7 +23,7 @@ Table MeetingSchedule {
 
 Table Client {
   id Int [pk, increment]
-  phoneNumber String [not null]
+  phoneNumber String [unique, not null]
   firstName String
   lastName String
   clientsOnMeetings ClientsOnMeetings [not null]
@@ -69,7 +69,7 @@ Table EmployeeSchedule {
 
 Table Location {
   id Int [pk, increment]
-  name String [not null]
+  name String [unique, not null]
   street String [not null]
   houseNumber Int [not null]
   city String [not null]

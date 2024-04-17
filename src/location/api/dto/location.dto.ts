@@ -1,6 +1,6 @@
 import { ObjectType } from '@nestjs/graphql'
 
-@ObjectType({ description: 'Location' })
+@ObjectType({ description: 'LocationDto' })
 export class LocationDto {
   id: number
   name: string

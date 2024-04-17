@@ -1,4 +1,4 @@
-import { type LocationDto } from './location.dto'
+import { type LocationDto } from '../../../location/api/dto/location.dto'
 import { ObjectType } from '@nestjs/graphql'
 
 @ObjectType({ description: 'MeetingSchedule' })

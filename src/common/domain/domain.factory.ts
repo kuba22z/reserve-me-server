@@ -1,5 +1,5 @@
 import { type ClientDomain } from '../../client/domain/model/client.domain'
-import { type LocationDomain } from '../../meeting/domain/model/location.domain'
+import { type LocationDomain } from '../../location/domain/model/location.domain'
 import { type MeetingScheduleDomain } from '../../meeting/domain/model/meeting-schedule.domain'
 import { Prisma } from '@prisma/client'
 import { type MeetingDomain } from '../../meeting/domain/model/meeting.domain'

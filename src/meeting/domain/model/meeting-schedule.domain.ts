@@ -1,5 +1,5 @@
 import { type MeetingDomain } from './meeting.domain'
-import { type LocationDomain } from './location.domain'
+import { type LocationDomain } from '../../../location/domain/model/location.domain'
 
 export class MeetingScheduleDomain {
   public id: number
