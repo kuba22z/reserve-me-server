@@ -11,8 +11,8 @@ import {
   type ServicesProvidedOnMeetings,
 } from '@prisma/client'
 import { MeetingDomain } from '../domain/model/meeting.domain'
-import { Injectable } from '@nestjs/common'
-import { MeetingScheduleMapper } from './meetingSchedule.mapper'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
 import { ClientMapper } from '../../client/mapper/client.mapper'
 import * as dayjs from 'dayjs'
@@ -52,6 +52,8 @@ type ValidateShape<T, Shape> = T extends Shape
 export class MeetingMapper {
   constructor(
     private readonly meetingScheduleMapper: MeetingScheduleMapper,
+    // forwardRef prevent a Circular dependency
+    @Inject(forwardRef(() => ClientMapper))
     private readonly clientMapper: ClientMapper
   ) {}
 

@@ -1,4 +1,4 @@
-import { type LocationDto } from '../../meeting/api/dto/location.dto'
+import { type LocationDto } from '../../location/api/dto/location.dto'
 import { type MeetingScheduleDto } from '../../meeting/api/dto/meeting-schedule.dto'
 import { type MeetingDto } from '../../meeting/api/dto/meeting.dto'
 import * as dayjs from 'dayjs'

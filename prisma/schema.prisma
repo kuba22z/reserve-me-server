@@ -86,7 +86,7 @@ model EmployeeSchedule {
 
 model Location {
   id                Int                @id @default(autoincrement())
-  name              String
+  name              String             @unique
   street            String
   houseNumber       Int                @db.SmallInt
   city              String

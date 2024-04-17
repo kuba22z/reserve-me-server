@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { LocationMapper } from './location.mapper'
+import { LocationMapper } from '../../location/mapper/location.mapper'
 import type { MeetingScheduleModel } from './meeting.mapper'
 import { MeetingScheduleDomain } from '../domain/model/meeting-schedule.domain'
 import { MeetingScheduleDto } from '../api/dto/meeting-schedule.dto'

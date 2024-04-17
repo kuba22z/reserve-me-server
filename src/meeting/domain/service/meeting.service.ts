@@ -17,7 +17,7 @@ import { Prisma, type PrismaClient } from '@prisma/client'
 import * as dayjs from 'dayjs'
 import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
-import { MeetingScheduleMapper } from '../../mapper/meetingSchedule.mapper'
+import { MeetingScheduleMapper } from '../../mapper/meeting-schedule.mapper'
 import { type CounterDto } from '../../api/dto/counter.dto'
 
 @Injectable()
@@ -192,7 +192,7 @@ export class MeetingService {
       async (prisma) => {
         if (updateMeetingDto.locationId) {
           await prisma.location
-            .findFirst({
+            .findUnique({
               where: { id: updateMeetingDto.locationId },
               select: { id: true },
             })
