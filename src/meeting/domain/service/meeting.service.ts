@@ -243,20 +243,25 @@ export class MeetingService {
           // TODO make locationId not unique for each schedule in a meeting
           // here is [0] used because currently each schedule of a meeting sholud have the same locationId
           updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
-        const meetingsOverlapChangeRequest =
-          await this.findNotCanceledByIntervals(
-            prisma,
-            schedulesToChangeRequest.length !== 0
-              ? schedulesToChangeRequest
-              : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
-            locationId
-          ).then((meetings) =>
-            meetings
-              .map((m) =>
-                this.meetingMapper.toDto(this.meetingMapper.toDomain(m))
-              )
-              .filter((m) => m.id !== updateMeetingDto.id)
+        const meetingsOverlap = await this.findNotCanceledByIntervals(
+          prisma,
+          schedulesToChangeRequest.length !== 0
+            ? schedulesToChangeRequest
+            : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
+          locationId
+        ).then((meetings) =>
+          meetings.map((m) =>
+            this.meetingMapper.toDto(this.meetingMapper.toDomain(m))
           )
+        )
+        // TODO fix bug: when the meeting is periodic and I change one interval so that it collides with
+        //  other interval which belongs to the meeting -> this case will be not considered and this collison
+        //  will be not detected
+        //  currently its fixed by catching Exception -> constraint detects this failure
+        const meetingsOverlapChangeRequest = meetingsOverlap.filter(
+          (m) => m.id !== updateMeetingDto.id
+        )
+
         if (meetingsOverlapChangeRequest.length > 0) {
           throw new ConflictException(
             meetingsOverlapChangeRequest,
@@ -274,11 +279,26 @@ export class MeetingService {
             }
           })
 
-        return await this.updateMeeting(
-          updateMeetingDto,
-          schedulesUpdateManyInput,
-          prisma
-        )
+        try {
+          return await this.updateMeeting(
+            updateMeetingDto,
+            schedulesUpdateManyInput,
+            prisma
+          )
+        } catch (error) {
+          if (
+            error instanceof Prisma.PrismaClientUnknownRequestError &&
+            error.message.includes(
+              'exclude_overlapping_meeting_schedules_for_each_location'
+            )
+          ) {
+            throw new ConflictException(
+              meetingsOverlap,
+              MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
+            )
+          }
+          throw error
+        }
       },
       { timeout: 10000 }
     )
