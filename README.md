@@ -102,6 +102,15 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## AWS
+
+
+Adding a New AWS CLI Profile / Add an iam user to your local environment
+ - this is required to save api credentials to your local environment
+```bash
+aws configure ––profile <iam user name>
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

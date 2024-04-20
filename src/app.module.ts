@@ -9,6 +9,7 @@ import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo'
 import { type GraphQLFormattedError } from 'graphql/error'
 import { type ErrorDto } from './common/api/dto/error.dto'
 import { LocationModule } from './location/location.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LocationModule } from './location/location.module'
     MeetingModule,
     ClientModule,
     LocationModule,
+    AuthModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
