@@ -20,6 +20,7 @@ export class AuthService {
     const clientSecretBasic =
       'Basic ' +
       btoa(`${CognitoAuthConfig.clientId}:${CognitoAuthConfig.clientSecret}`)
+    // see https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html
     return await this.httpService.axiosRef
       .post(
         `${cognitoDomain}/oauth2/token`,

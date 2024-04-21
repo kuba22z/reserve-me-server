@@ -2,10 +2,10 @@ import { Args, Int, Query, Resolver } from '@nestjs/graphql'
 import { ClientService } from '../../domain/serivce/client.service'
 import { ClientMapper } from '../../mapper/client.mapper'
 import { ClientDto } from '../dto/client.dto'
-import { GqlCognitoUser } from '@nestjs-cognito/graphql'
+import { AuthorizationGuard, GqlCognitoUser } from '@nestjs-cognito/graphql'
 import { CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
+import { UserDto } from '../dto/user.dto'
 import { UseGuards } from '@nestjs/common'
-import { AuthorizationGuard } from '@nestjs-cognito/auth'
 
 @Resolver()
 // @GqlAuthorization(['admin'])
@@ -24,11 +24,13 @@ export class ClientResolver {
       .then((client) => this.mapper.toDto(client))
   }
 
-  @Query(() => String)
+  @Query(() => [UserDto])
   @UseGuards(AuthorizationGuard(['admin']))
-  findAll(@GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload) {
+  async clientsByGroup(@GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload) {
     console.log('cognitoJwtPayload')
     console.log(cognitoJwtPayload)
-    return { message: 'This action returns all the data' }
+    return await this.clientService
+      .findAllByGroup('admin')
+      .then((users) => users.map((u) => this.mapper.toDto2(u)))
   }
 }
