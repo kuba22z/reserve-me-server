@@ -18,15 +18,15 @@ export class CognitoAuthConfig {
     }
   }
 
-  public static readonly userPoolId: string = process.env.COGNITO_USER_POOL_ID
-  public static readonly clientId: string = process.env.COGNITO_CLIENT_ID
+  public static readonly userPoolId: string = process.env.COGNITO_USER_POOL_ID!
+  public static readonly clientId: string = process.env.COGNITO_CLIENT_ID!
   public static readonly clientSecret: string =
-    process.env.COGNITO_CLIENT_SECRET
+    process.env.COGNITO_CLIENT_SECRET!
 
   public static readonly tokenUse: 'id' | 'access' | null = this.parseTokenUse(
-    process.env.COGNITO_TOKEN_USE
+    process.env.COGNITO_TOKEN_USE!
   )
 
-  public static readonly domain: string = process.env.COGNITO_DOMAIN
-  public static readonly profile: string = process.env.COGNITO_PROFILE
+  public static readonly domain: string = process.env.COGNITO_DOMAIN!
+  public static readonly profile: string = process.env.COGNITO_PROFILE!
 }

@@ -56,12 +56,12 @@ export class MeetingMapper {
     //  private readonly clientMapper: UserMapper
   ) {}
 
-  public toDomain<T>(meeting: ValidateShape<T, MeetingModel>): MeetingDomain {
+  public toDomain<T>(meeting: MeetingModel): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
     return new MeetingDomain({
       ...reduced,
-      repeatRate: repeatRate === null ? null : dayjs.duration(repeatRate),
-      schedules: schedules.map((schedule) =>
+      repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
+      schedules: schedules!.map((schedule) =>
         this.meetingScheduleMapper.toDomain(schedule)
       ),
       userNames: meeting.usersOnMeetings?.map((u) => u.userName),
@@ -107,6 +107,7 @@ export class MeetingMapper {
       discount,
       priceFull,
       repeatRate,
+      userNames,
       ...reduced
     } = domain
     return new MeetingDto({
@@ -119,6 +120,7 @@ export class MeetingMapper {
       schedules: domain.schedules.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
       ),
+      userNames: userNames!,
     })
   }
 }

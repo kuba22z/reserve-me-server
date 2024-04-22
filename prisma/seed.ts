@@ -13,7 +13,6 @@ async function initializeDatabase(
   await tx.location.createMany({
     data: fakeData.locations,
   })
-
   await tx.meeting.createMany({
     data: fakeData.meetings,
   })

@@ -12,13 +12,13 @@ import * as utcPlugin from 'dayjs/plugin/utc'
 import * as dayjs from 'dayjs'
 import type Test from 'supertest/lib/test'
 import { Test as NestJsTest, type TestingModule } from '@nestjs/testing'
-import { DateTimeInterval } from '../../src/meeting/domain/model/datetime-interval.domain'
+import { type DateTimeInterval } from '../../src/meeting/domain/model/datetime-interval.domain'
 import { type UpdateMeetingDto } from '../../src/meeting/api/dto/update-meeting.dto'
-import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
 import { type MeetingDto } from '../../src/meeting/api/dto/meeting.dto'
 import { type MeetingSchedule } from '@prisma/client'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 import { MeetingService } from '../../src/meeting/domain/service/meeting.service'
+import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
 
 const gql = '/graphql'
 
@@ -69,6 +69,7 @@ describe('MeetingResolver (e2e)', () => {
       const createMeetingDto1 = createMock<CreateMeetingDto>({
         schedule: meetingSchedule1,
       })
+
       const createMeetingDto2 = createMock<CreateMeetingDto>({
         schedule: meetingSchedule2,
         priceExcepted: 12,
@@ -82,7 +83,13 @@ describe('MeetingResolver (e2e)', () => {
         createMeetingDto2
       )
       // meetingSchedule2 is outside of meetingSchedule1 -> only meeting1 should be returned
-      await getMeetingsByInterval(new DateTimeInterval(meetingSchedule1), false)
+      await getMeetingsByInterval(
+        {
+          from: meetingSchedule1.startDate,
+          to: meetingSchedule1.endDate,
+        },
+        false
+      )
         .expect(200)
         .expect((res) => {
           expect(res.body.data.meetingsByInterval.length).toEqual(1)
@@ -140,7 +147,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule1 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules[0].id,
+        id: meeting1.schedules![0].id,
         startDate: new Date('2024-01-01T00:00:00+00:00'),
         endDate: new Date('2024-01-01T01:00:00+00:00'),
       })
@@ -169,7 +176,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule2 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules[0].id,
+        id: meeting1.schedules![0].id,
         startDate: new Date('2024-01-01T01:00:00+00:00'),
         endDate: new Date('2024-01-01T02:00:00+00:00'),
       })
@@ -185,7 +192,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule3 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules[0].id,
+        id: meeting1.schedules![0].id,
         startDate: new Date('2024-01-01T02:00:00+00:00'),
         endDate: new Date('2024-01-01T02:50:00+00:00'),
       })
@@ -229,7 +236,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules[0].id,
+        id: meeting1.schedules![0].id,
         startDate: new Date('2024-01-01T01:00:00+00:00'),
         endDate: new Date('2024-01-01T02:01:00+00:00'),
       })
@@ -309,12 +316,16 @@ describe('MeetingResolver (e2e)', () => {
     meeting: Test,
     updateMeetingDto: UpdateMeetingDto
   ): Promise<MeetingDto> => {
+    // @ts-expect-error
+    const startDate = updateMeetingDto.schedules![0].startDate.toISOString()
+    // @ts-expect-error
+    const endDate = updateMeetingDto.schedules![0].endDate.toISOString()
     return await meeting
       .expect(200)
       .expect((res) => {
         expect(res.body.data.updateMeeting.schedules[0]).toEqual({
-          startDate: updateMeetingDto.schedules[0].startDate.toISOString(),
-          endDate: updateMeetingDto.schedules[0].endDate.toISOString(),
+          startDate,
+          endDate,
           locationId: updateMeetingDto.locationId ?? location1.id,
         })
         expect(res.body.data.updateMeeting.priceExcepted).toEqual(

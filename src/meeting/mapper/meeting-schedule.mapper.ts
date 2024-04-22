@@ -21,7 +21,7 @@ export class MeetingScheduleMapper {
       ...reduced,
       startDate: schedule.startDate,
       endDate: schedule.endDate,
-      location: this.locationMapper.toDomain(schedule.location),
+      location: this.locationMapper.toDomain(schedule.location!),
     })
   }
 
@@ -31,7 +31,7 @@ export class MeetingScheduleMapper {
       ...reduced,
       startDate: domain.startDate,
       endDate: domain.endDate,
-      location: this.locationMapper.toDto(domain.location),
+      location: this.locationMapper.toDto(domain.location!),
     })
   }
 }

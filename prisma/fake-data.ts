@@ -26,7 +26,7 @@ export const generateEmployeeSchedule = (
     startDate: new Date(2018, 1, 5, 20, 30, 0, 0),
     endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
     canceled: false,
-    repeatRate: null,
+    repeatRate: undefined,
   })
 
 export const generateLocation = (): LocationModel =>
@@ -37,7 +37,7 @@ export const generateLocation = (): LocationModel =>
 export const generateMeeting = (): MeetingModel =>
   createMock<MeetingModel>({
     id,
-    repeatRate: null,
+    repeatRate: undefined,
     priceExcepted: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
     priceFinal: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
     priceFull: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),

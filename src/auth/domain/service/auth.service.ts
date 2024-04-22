@@ -28,7 +28,7 @@ export class AuthService {
           grant_type: 'authorization_code',
           client_id: CognitoAuthConfig.clientId,
           code: authorizationCode,
-          redirect_uri: process.env.RESERVE_ME_CLIENT_DOMAIN,
+          redirect_uri: process.env.RESERVE_ME_CLIENT_DOMAIN!,
         }),
         {
           headers: {

@@ -35,7 +35,7 @@ model MeetingSchedule {
   startDate          DateTime
   endDate            DateTime
   canceled           Boolean  @default(false)
-  cancellationReason String?
+  cancellationReason String   @default("")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -73,7 +73,7 @@ model EmployeeSchedule {
   startDate          DateTime
   endDate            DateTime
   canceled           Boolean             @default(false)
-  cancellationReason String?
+  cancellationReason String              @default("")
   repeatRate         String?
   employee           EmployeesOnMeetings @relation(fields: employeeId, references: [id])
   location           Location            @relation(fields: [locationId], references: [id])
@@ -128,7 +128,7 @@ model Meeting {
   priceFull                  Decimal?                     @db.Decimal(8, 2)
   discount                   Decimal                      @default(0) @db.Decimal(3, 2)
   priceFinal                 Decimal?                     @db.Decimal(8, 2)
-  employeeIdCreated          Int?
+  createdByExternalRefId     String
   repeatRate                 String?
   usersOnMeetings            UsersOnMeetings[]
   employeesOnMeetings        EmployeesOnMeetings[]

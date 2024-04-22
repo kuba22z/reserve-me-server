@@ -16,7 +16,7 @@ Table MeetingSchedule {
   startDate DateTime [not null]
   endDate DateTime [not null]
   canceled Boolean [not null, default: false]
-  cancellationReason String
+  cancellationReason String [not null, default: '']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 }
@@ -58,7 +58,7 @@ Table EmployeeSchedule {
   startDate DateTime [not null]
   endDate DateTime [not null]
   canceled Boolean [not null, default: false]
-  cancellationReason String
+  cancellationReason String [not null, default: '']
   repeatRate String
   employee EmployeesOnMeetings [not null]
   location Location [not null]
@@ -117,7 +117,7 @@ Table Meeting {
   priceFull Decimal
   discount Decimal [not null, default: 0]
   priceFinal Decimal
-  employeeIdCreated Int
+  createdByExternalRefId String [not null]
   repeatRate String
   usersOnMeetings UsersOnMeetings [not null]
   employeesOnMeetings EmployeesOnMeetings [not null]
