@@ -1,8 +1,6 @@
 import {
-  type Client,
-  type ClientsOnMeetings,
-  type Employee,
   type EmployeeSchedule,
+  type EmployeesOnMeetings,
   type Location,
   type Meeting,
   type MeetingSchedule,
@@ -11,21 +9,22 @@ import {
   type ServicesProvidedOnMeetings,
 } from '@prisma/client'
 import { MeetingDomain } from '../domain/model/meeting.domain'
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
-import { ClientMapper } from '../../client/mapper/client.mapper'
+import { type UsersOnMeetingsModel } from '../../user/mapper/user.mapper'
 import * as dayjs from 'dayjs'
 
-export type ClientsOnMeetingsModel = ClientsOnMeetings & { client?: Client }
 export type MeetingScheduleModel = MeetingSchedule & { location?: Location }
 export type MeetingModel = Meeting & { schedules?: MeetingScheduleModel[] } & {
-  clientsOnMeetings?: ClientsOnMeetingsModel[]
+  usersOnMeetings?: UsersOnMeetingsModel[]
 }
 
 export type LocationModel = Location & { meetingSchedules?: MeetingSchedule[] }
-export type EmployeeModel = Employee & { schedule?: EmployeeScheduleModel[] }
 export type EmployeeScheduleModel = EmployeeSchedule & { location?: Location }
+export type EmployeesOnMeetingsModel = EmployeesOnMeetings & {
+  schedule?: EmployeeScheduleModel[]
+} & { meeting?: MeetingModel }
 export type ServiceModel = Service & {
   servicesBookedOnMeetings?: ServicesBookedOnMeetingsModel[]
 } & { servicesProvidedOnMeetings?: ServicesProvidedOnMeetings[] }
@@ -51,23 +50,21 @@ type ValidateShape<T, Shape> = T extends Shape
 @Injectable()
 export class MeetingMapper {
   constructor(
-    private readonly meetingScheduleMapper: MeetingScheduleMapper,
+    private readonly meetingScheduleMapper: MeetingScheduleMapper
     // forwardRef prevent a Circular dependency
-    @Inject(forwardRef(() => ClientMapper))
-    private readonly clientMapper: ClientMapper
+    //  @Inject(forwardRef(() => UserMapper))
+    //  private readonly clientMapper: UserMapper
   ) {}
 
   public toDomain<T>(meeting: ValidateShape<T, MeetingModel>): MeetingDomain {
-    const { clientsOnMeetings, repeatRate, schedules, ...reduced } = meeting
+    const { repeatRate, schedules, ...reduced } = meeting
     return new MeetingDomain({
       ...reduced,
       repeatRate: repeatRate === null ? null : dayjs.duration(repeatRate),
       schedules: schedules.map((schedule) =>
         this.meetingScheduleMapper.toDomain(schedule)
       ),
-      clients: meeting.clientsOnMeetings?.map((clientOnMeetings) =>
-        this.clientMapper.toDomain(clientOnMeetings.client)
-      ),
+      userNames: meeting.usersOnMeetings?.map((u) => u.userName),
     })
   }
 
@@ -122,7 +119,6 @@ export class MeetingMapper {
       schedules: domain.schedules.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
       ),
-      clients: domain.clients?.map((client) => this.clientMapper.toDto(client)),
     })
   }
 }

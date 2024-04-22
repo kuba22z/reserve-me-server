@@ -16,7 +16,7 @@ async function deleteFakeData(
     // Delete one servicesProvidedOnMeetings
     await txPrisma.servicesProvidedOnMeetings.delete({
       where: {
-        clientId_meetingId: { clientId: idToDelete, meetingId: idToDelete },
+        serviceId_meetingId: { serviceId: idToDelete, meetingId: idToDelete },
       },
     })
 
@@ -28,9 +28,12 @@ async function deleteFakeData(
     })
 
     // Delete one clientsOnMeetings
-    await txPrisma.clientsOnMeetings.delete({
+    await txPrisma.usersOnMeetings.delete({
       where: {
-        clientId_meetingId: { clientId: idToDelete, meetingId: idToDelete },
+        userExternalRefId_meetingId: {
+          userExternalRefId: idToDelete.toString(),
+          meetingId: idToDelete,
+        },
       },
     })
 
@@ -49,7 +52,7 @@ async function deleteFakeData(
     })
 
     // Delete one employee
-    await txPrisma.employee.delete({
+    await txPrisma.employeesOnMeetings.delete({
       where: {
         id: idToDelete,
       },
@@ -64,13 +67,6 @@ async function deleteFakeData(
 
     // Delete one service
     await txPrisma.service.delete({
-      where: {
-        id: idToDelete,
-      },
-    })
-
-    // Delete one client
-    await txPrisma.client.delete({
       where: {
         id: idToDelete,
       },

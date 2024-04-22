@@ -5,7 +5,6 @@ import { PrismaModule } from 'nestjs-prisma'
 import { MeetingMapper } from './mapper/meeting.mapper'
 import { LocationMapper } from '../location/mapper/location.mapper'
 import { MeetingScheduleMapper } from './mapper/meeting-schedule.mapper'
-import { ClientMapper } from '../client/mapper/client.mapper'
 import { ParseDatePipe } from './api/controller/parse-date-pipe.service'
 import { MeetingResolver } from './api/resolver/meeting.resolver'
 
@@ -16,7 +15,6 @@ import { MeetingResolver } from './api/resolver/meeting.resolver'
     MeetingMapper,
     LocationMapper,
     MeetingScheduleMapper,
-    ClientMapper,
     ParseDatePipe,
     MeetingResolver,
   ],

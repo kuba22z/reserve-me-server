@@ -21,35 +21,34 @@ Table MeetingSchedule {
   updatedAt DateTime [not null]
 }
 
-Table Client {
-  id Int [pk, increment]
-  phoneNumber String [unique, not null]
-  firstName String
-  lastName String
-  clientsOnMeetings ClientsOnMeetings [not null]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-}
-
-Table ClientsOnMeetings {
-  clientId Int [not null]
+Table UsersOnMeetings {
+  userExternalRefId String [not null]
   meetingId Int [not null]
-  client Client [not null]
+  userName String [not null]
   meeting Meeting [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 
   indexes {
-    (clientId, meetingId) [pk]
+    (userExternalRefId, meetingId) [pk]
+    (userName, meetingId) [unique]
   }
 }
 
-Table Employee {
+Table EmployeesOnMeetings {
   id Int [pk, increment]
-  firstName String [not null]
-  lastName String [not null]
+  userExternalRefId String [not null]
+  meetingId Int [not null]
+  userName String [not null]
   schedule EmployeeSchedule [not null]
   meeting Meeting [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userExternalRefId, meetingId) [unique]
+    (userName, meetingId) [unique]
+  }
 }
 
 Table EmployeeSchedule {
@@ -61,7 +60,7 @@ Table EmployeeSchedule {
   canceled Boolean [not null, default: false]
   cancellationReason String
   repeatRate String
-  employee Employee [not null]
+  employee EmployeesOnMeetings [not null]
   location Location [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
@@ -89,13 +88,13 @@ Table Service {
 }
 
 Table ServicesProvidedOnMeetings {
-  clientId Int [not null]
+  serviceId Int [not null]
   meetingId Int [not null]
   service Service [not null]
   meeting Meeting [not null]
 
   indexes {
-    (clientId, meetingId) [pk]
+    (serviceId, meetingId) [pk]
   }
 }
 
@@ -114,15 +113,14 @@ Table ServicesBookedOnMeetings {
 
 Table Meeting {
   id Int [pk, increment]
-  employeeId Int
   priceExcepted Decimal [not null]
   priceFull Decimal
   discount Decimal [not null, default: 0]
   priceFinal Decimal
   employeeIdCreated Int
   repeatRate String
-  clientsOnMeetings ClientsOnMeetings [not null]
-  employee Employee
+  usersOnMeetings UsersOnMeetings [not null]
+  employeesOnMeetings EmployeesOnMeetings [not null]
   schedules MeetingSchedule [not null]
   servicesBookedOnMeetings ServicesBookedOnMeetings [not null]
   servicesProvidedOnMeetings ServicesProvidedOnMeetings [not null]
@@ -134,20 +132,18 @@ Ref: MeetingSchedule.meetingId > Meeting.id [delete: Cascade]
 
 Ref: MeetingSchedule.locationId > Location.id
 
-Ref: ClientsOnMeetings.clientId > Client.id
+Ref: UsersOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
-Ref: ClientsOnMeetings.meetingId > Meeting.id [delete: Cascade]
+Ref: EmployeesOnMeetings.meetingId > Meeting.id
 
-Ref: EmployeeSchedule.employeeId > Employee.id
+Ref: EmployeeSchedule.employeeId > EmployeesOnMeetings.id
 
 Ref: EmployeeSchedule.locationId > Location.id
 
-Ref: ServicesProvidedOnMeetings.clientId > Service.id
+Ref: ServicesProvidedOnMeetings.serviceId > Service.id
 
 Ref: ServicesProvidedOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
 Ref: ServicesBookedOnMeetings.meetingId > Meeting.id [delete: Cascade]
 
 Ref: ServicesBookedOnMeetings.serviceId > Service.id
-
-Ref: Meeting.employeeId > Employee.id

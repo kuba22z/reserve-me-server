@@ -1,6 +1,6 @@
 import {
-  type EmployeeModel,
   type EmployeeScheduleModel,
+  type EmployeesOnMeetingsModel,
   type LocationModel,
   type MeetingModel,
   type MeetingScheduleModel,
@@ -9,19 +9,11 @@ import {
   type ServicesProvidedOnMeetingsModel,
 } from '../src/meeting/mapper/meeting.mapper'
 import { createMock } from 'ts-auto-mock'
-import {
-  type ClientModel,
-  type ClientsOnMeetingsModel,
-} from '../src/client/mapper/client.mapper'
+import { type UsersOnMeetingsModel } from '../src/user/mapper/user.mapper'
 import { Prisma } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 
 let id: number
-
-export const generateEmployee = (): EmployeeModel =>
-  createMock<EmployeeModel>({
-    id,
-  })
 
 export const generateEmployeeSchedule = (
   employeeId: number,
@@ -42,10 +34,9 @@ export const generateLocation = (): LocationModel =>
     id,
   })
 
-export const generateMeeting = (employeeId: number): MeetingModel =>
+export const generateMeeting = (): MeetingModel =>
   createMock<MeetingModel>({
     id,
-    employeeId,
     repeatRate: null,
     priceExcepted: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
     priceFinal: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
@@ -66,17 +57,12 @@ export const generateMeetingSchedule = (
     meetingId,
   })
 
-export const generateClient = (): ClientModel =>
-  createMock<ClientModel>({
-    id,
-  })
-
 export const generateClientsOnMeetings = (
-  clientId: number,
+  userExternalRefId: string,
   meetingId: number
-): ClientsOnMeetingsModel =>
-  createMock<ClientsOnMeetingsModel>({
-    clientId,
+): UsersOnMeetingsModel =>
+  createMock<UsersOnMeetingsModel>({
+    userExternalRefId,
     meetingId,
   })
 
@@ -87,11 +73,11 @@ export const generateService = (): ServiceModel =>
   })
 
 export const generateServicesProvidedOnMeetings = (
-  clientId: number,
+  serviceId: number,
   meetingId: number
 ): ServicesProvidedOnMeetingsModel =>
   createMock<ServicesProvidedOnMeetingsModel>({
-    clientId,
+    serviceId,
     meetingId,
   })
 
@@ -104,38 +90,50 @@ export const generateServicesBookedOnMeetings = (
     meetingId,
   })
 
+export const generateEmployeesOnMeetings = (
+  userExternalRefId: string,
+  meetingId: number
+): EmployeesOnMeetingsModel =>
+  createMock<EmployeesOnMeetingsModel>({
+    id,
+    userExternalRefId,
+    meetingId,
+  })
+
 export const generateFakeData = (
   idParam: number
 ): {
-  employees: EmployeeModel[]
+  employees: EmployeesOnMeetingsModel[]
   employeeSchedules: EmployeeScheduleModel[]
   locations: LocationModel[]
   meetings: MeetingModel[]
   meetingSchedules: MeetingScheduleModel[]
-  clients: ClientModel[]
-  clientsOnMeetings: ClientsOnMeetingsModel[]
+  usersOnMeetings: UsersOnMeetingsModel[]
   services: ServiceModel[]
   servicesProvidedOnMeetings: ServicesProvidedOnMeetingsModel[]
   servicesBookedOnMeetings: ServicesBookedOnMeetingsModel[]
 } => {
   id = idParam
-  const employees: EmployeeModel[] = [generateEmployee()]
   const locations: LocationModel[] = [generateLocation()]
+
+  const meetings: MeetingModel[] = [generateMeeting()]
+  const meetingSchedules: MeetingScheduleModel[] = [
+    generateMeetingSchedule(locations[0].id, meetings[0].id),
+  ]
+  const employees: EmployeesOnMeetingsModel[] = [
+    generateEmployeesOnMeetings(id.toString(), meetings[0].id),
+  ]
+
   const employeeSchedules: EmployeeScheduleModel[] = [
     generateEmployeeSchedule(employees[0].id, locations[0].id),
   ]
 
-  const meetings: MeetingModel[] = [generateMeeting(employees[0].id)]
-  const meetingSchedules: MeetingScheduleModel[] = [
-    generateMeetingSchedule(locations[0].id, meetings[0].id),
-  ]
-  const clients: ClientModel[] = [generateClient()]
-  const clientsOnMeetings: ClientsOnMeetingsModel[] = [
-    generateClientsOnMeetings(clients[0].id, meetings[0].id),
+  const clientsOnMeetings: UsersOnMeetingsModel[] = [
+    generateClientsOnMeetings(id.toString(), meetings[0].id),
   ]
   const services: ServiceModel[] = [generateService()]
   const servicesProvidedOnMeetings: ServicesProvidedOnMeetingsModel[] = [
-    generateServicesProvidedOnMeetings(clients[0].id, meetings[0].id),
+    generateServicesProvidedOnMeetings(services[0].id, meetings[0].id),
   ]
   const servicesBookedOnMeetings: ServicesBookedOnMeetingsModel[] = [
     generateServicesBookedOnMeetings(services[0].id, meetings[0].id),
@@ -147,8 +145,7 @@ export const generateFakeData = (
     locations,
     meetings,
     meetingSchedules,
-    clients,
-    clientsOnMeetings,
+    usersOnMeetings: clientsOnMeetings,
     services,
     servicesProvidedOnMeetings,
     servicesBookedOnMeetings,
