@@ -2,7 +2,10 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import type { UsersOnMeetings } from '@prisma/client'
 import { type UserDomain } from '../domain/model/user.domain'
 import { type UserDto } from '../api/dto/user.dto'
-import { MeetingMapper, type MeetingModel } from '../../meeting/mapper/meeting.mapper'
+import {
+  MeetingMapper,
+  type MeetingModel,
+} from '../../meeting/mapper/meeting.mapper'
 import { type CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { type UserType } from '@aws-sdk/client-cognito-identity-provider'
 
