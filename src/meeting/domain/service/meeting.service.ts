@@ -1,15 +1,7 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common'
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { type UpdateMeetingDto } from '../../api/dto/update-meeting.dto'
 import { PrismaService } from 'nestjs-prisma'
-import {
-  MeetingMapper,
-  type MeetingModel,
-  type MeetingRawQuery,
-} from '../../mapper/meeting.mapper'
+import { MeetingMapper, type MeetingModel, type MeetingRawQuery } from '../../mapper/meeting.mapper'
 import { DateTimeInterval } from '../model/datetime-interval.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type CreateMeetingDto } from '../../api/dto/create-meeting.dto'
@@ -50,7 +42,7 @@ export class MeetingService {
         periodicSchedules,
         createMeetingDto.schedule.locationId
       )
-        .then((meetings) => meetings.map((a) => this.meetingMapper.toDomain(a)))
+        .then((meetings) => meetings.map((m) => this.meetingMapper.toDomain(m)))
         .then(async (meetings) => {
           if (meetings.length === 0) {
             return await this.createMeeting(
@@ -83,7 +75,7 @@ export class MeetingService {
       }
     )
     const meeting: MeetingModel = await prisma.meeting.create({
-      include: { schedules: true },
+      include: { schedules: true, usersOnMeetings: true },
       data: {
         employeeIdCreated: createMeetingDto.employeeIdCreated,
         priceExcepted: createMeetingDto.priceExcepted,
@@ -102,7 +94,7 @@ export class MeetingService {
     return await this.prisma.meeting
       .findMany({
         include: {
-          clientsOnMeetings: { include: { client: true } },
+          usersOnMeetings: true,
           schedules: {
             include: {
               location: true,
@@ -124,7 +116,7 @@ export class MeetingService {
     return await this.prisma.meeting
       .findMany({
         include: {
-          clientsOnMeetings: { include: { client: true } },
+          usersOnMeetings: true,
           schedules: { include: { location: true } },
         },
         where: {
@@ -176,9 +168,9 @@ export class MeetingService {
     prisma: Omit<PrismaClient, ITXClientDenyList>
   ): Promise<MeetingDomain> {
     const { schedules, id, locationId, ...updateMeetingDto2 } = updateMeetingDto
-    const meeting = await prisma.meeting.update({
+    const meeting: MeetingModel = await prisma.meeting.update({
       where: { id: updateMeetingDto.id },
-      include: { schedules: true },
+      include: { schedules: true, usersOnMeetings: true },
       data: {
         ...updateMeetingDto2,
         schedules: { updateMany: schedulesToUpdate },

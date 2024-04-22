@@ -19,7 +19,7 @@
 //   //       PrismaService,
 //   //       MeetingMapper,
 //   //       MeetingScheduleMapper,
-//   //       ClientMapper,
+//   //       UserMapper,
 //   //       LocationMapper,
 //   //     ],
 //   //   }).compile()

@@ -4,10 +4,12 @@ import { type MockFunctionMetadata, ModuleMocker } from 'jest-mock'
 import * as dayjs from 'dayjs'
 import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
-import { DtoFactory } from '../../../common/api/dto.factory'
-import { DomainFactory } from '../../../common/domain/domain.factory'
 import * as duration from 'dayjs/plugin/duration'
 import * as utcPlugin from 'dayjs/plugin/utc'
+import { createMock } from 'ts-auto-mock'
+import { type MeetingDomain } from '../model/meeting.domain'
+import { type MeetingDto } from '../../api/dto/meeting.dto'
+import { type MeetingScheduleDomain } from '../model/meeting-schedule.domain'
 
 const moduleMocker = new ModuleMocker(global)
 
@@ -64,10 +66,10 @@ describe('MeetingService', () => {
 
     meetingMapper.toDomain = jest
       .fn()
-      .mockReturnValueOnce([DomainFactory.meetingDomain()])
+      .mockReturnValueOnce([createMock<MeetingDomain>()])
     meetingMapper.toDto = jest
       .fn()
-      .mockReturnValueOnce([DtoFactory.meetingDto()])
+      .mockReturnValueOnce([createMock<MeetingDto>()])
 
     expect(
       service.findAllByInterval({ from: new Date(), to: new Date() })
@@ -117,11 +119,11 @@ describe('MeetingService', () => {
       ],
       // Add more test cases as needed...
     ])('isAllowed', (toCreateData, toCheckData, expected) => {
-      const toCreate = DomainFactory.meetingScheduleDomain()
+      const toCreate = createMock<MeetingScheduleDomain>()
       toCreate.startDate = dayjs(toCreateData.startDate).toDate()
       toCreate.endDate = dayjs(toCreateData.endDate).toDate()
 
-      const toCheck = DomainFactory.meetingScheduleDomain()
+      const toCheck = createMock<MeetingScheduleDomain>()
       toCheck.startDate = dayjs(toCheckData.startDate).toDate()
       toCheck.endDate = dayjs(toCheckData.endDate).toDate()
 

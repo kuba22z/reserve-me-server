@@ -8,26 +8,10 @@ async function initializeDatabase(
   tx: Omit<PrismaClient, ITXClientDenyList>,
   id: number
 ) {
-  /*  await prisma.client.upsert({
-    where: { id: 1 },
-    create: fakeClient(),
-    update: {},
-  }) */
-
-  // const addUsers = async () => await prisma.user.createMany({ data: users });
-
   const fakeData = generateFakeData(id)
-  console.log(fakeData.meetings[0].priceExcepted)
-  await tx.employee.createMany({
-    data: fakeData.employees,
-  })
 
   await tx.location.createMany({
     data: fakeData.locations,
-  })
-
-  await tx.employeeSchedule.createMany({
-    data: fakeData.employeeSchedules,
   })
 
   await tx.meeting.createMany({
@@ -36,13 +20,15 @@ async function initializeDatabase(
   await tx.meetingSchedule.createMany({
     data: fakeData.meetingSchedules,
   })
-
-  await tx.client.createMany({
-    data: fakeData.clients,
+  await tx.employeesOnMeetings.createMany({
+    data: fakeData.employees,
+  })
+  await tx.employeeSchedule.createMany({
+    data: fakeData.employeeSchedules,
   })
 
-  await tx.clientsOnMeetings.createMany({
-    data: fakeData.clientsOnMeetings,
+  await tx.usersOnMeetings.createMany({
+    data: fakeData.usersOnMeetings,
   })
 
   await tx.service.createMany({

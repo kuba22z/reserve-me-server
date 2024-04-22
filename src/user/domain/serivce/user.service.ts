@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from 'nestjs-prisma'
-import { ClientMapper, type ClientModel } from '../../mapper/client.mapper'
-import type { DateTimeInterval } from '../../../meeting/domain/model/datetime-interval.domain'
-import { type ClientDomain } from '../model/client.domain'
+import { UserMapper } from '../../mapper/user.mapper'
 import {
   CognitoIdentityProviderClient,
   ListUsersCommand,
@@ -12,41 +9,35 @@ import { CognitoAuthConfig } from '../../../auth/cognito-auth.config'
 import { fromIni } from '@aws-sdk/credential-providers'
 
 @Injectable()
-export class ClientService {
+export class UserService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly clientMapper: ClientMapper
+    //  private readonly prisma: PrismaService,
+    private readonly userMapper: UserMapper
   ) {}
 
-  async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
-    const clientModel: ClientModel[] = await this.prisma.client.findMany({
-      include: {
-        clientsOnMeetings: {
-          include: {
-            meeting: true,
-          },
-        },
-      },
-    })
-    return clientModel
-  }
+  // async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
+  //   const clientModel: UserModel[] = await this.prisma.usersOnMeetings.findMany(
+  //     {
+  //       include: {
+  //         meeting: true,
+  //       },
+  //     }
+  //   )
+  //   return clientModel
+  // }
 
-  async findById(id: number): Promise<ClientDomain> {
-    return await this.prisma.client
-      .findUnique({
-        where: { id },
-        include: {
-          clientsOnMeetings: {
-            include: {
-              meeting: {
-                include: { schedules: { include: { location: true } } },
-              },
-            },
-          },
-        },
-      })
-      .then((client) => this.clientMapper.toDomain(client))
-  }
+  // async findById(id: string): Promise<UserDomain> {
+  //   return await this.prisma.usersOnMeetings
+  //     .findMany({
+  //       where: { userExternalRefId: id },
+  //       include: {
+  //         meeting: {
+  //           include: { schedules: { include: { location: true } } },
+  //         },
+  //       },
+  //     })
+  //     .then((client) => this.userMapper.toDomain(client))
+  // }
 
   async findAll() {
     const cognitoClient = new CognitoIdentityProviderClient({
@@ -78,7 +69,7 @@ export class ClientService {
       GroupName: groupName,
     })
     return await cognitoClient.send(command).then((res) => {
-      return res.Users.map((u) => this.clientMapper.toDomain2(u))
+      return res.Users.map((u) => this.userMapper.toDomain(u))
     })
   }
 }

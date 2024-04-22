@@ -1,5 +1,5 @@
 import { ObjectType } from '@nestjs/graphql'
-import type { MeetingDto } from '../../../meeting/api/dto/meeting.dto'
+import { type MeetingDto } from '../../../meeting/api/dto/meeting.dto'
 
 @ObjectType({ description: 'UserDto' })
 export class UserDto {

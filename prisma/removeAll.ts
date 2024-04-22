@@ -9,14 +9,14 @@ async function deleteFakeData(txPrisma: Omit<PrismaClient, ITXClientDenyList>) {
 
   await txPrisma.servicesBookedOnMeetings.deleteMany({})
   await txPrisma.servicesProvidedOnMeetings.deleteMany({})
-  await txPrisma.clientsOnMeetings.deleteMany({})
+  await txPrisma.usersOnMeetings.deleteMany({})
+  await txPrisma.employeeSchedule.deleteMany({})
+  await txPrisma.employeesOnMeetings.deleteMany({})
   // Delete records from main tables
   await txPrisma.meetingSchedule.deleteMany({})
   await txPrisma.meeting.deleteMany({})
   await txPrisma.service.deleteMany({})
-  await txPrisma.client.deleteMany({})
-  await txPrisma.employeeSchedule.deleteMany({})
-  await txPrisma.employee.deleteMany({})
+
   await txPrisma.location.deleteMany({})
 }
 
