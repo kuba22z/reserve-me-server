@@ -31,13 +31,20 @@ export class UserMapper {
   }
 
   public toDomain(userType: UserType): UserDomain {
+    const { Username, Attributes } = userType
     // @ts-expect-error
-    const { Username, Attributes, ...notUsed } = userType
+    const phoneNumber = Attributes!.find(
+      (a) => a.Name === 'phone_number'
+    ).Value!
+    // @ts-expect-error
+    const name = Attributes!.find((a) => a.Name === 'name').Value!
+    // @ts-expect-error
+    const id = Attributes!.find((a) => a.Name === 'sub').Value!
     return {
-      userName: Username,
-      phoneNumber: Attributes.find((a) => a.Name === 'phone_number').Value,
-      name: Attributes.find((a) => a.Name === 'name').Value,
-      id: Attributes.find((a) => a.Name === 'sub').Value,
+      userName: Username!,
+      phoneNumber,
+      name,
+      id,
     }
   }
 

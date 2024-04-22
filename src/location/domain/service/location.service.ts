@@ -56,7 +56,7 @@ export class LocationService {
       .then((location) => {
         if (!location) {
           throw new NotFoundException(
-            [{ locationId: location.id }],
+            [{ locationId }],
             LocationService.LOCATION_NOT_FOUND_MESSAGE
           )
         }

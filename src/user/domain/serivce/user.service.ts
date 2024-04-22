@@ -69,7 +69,7 @@ export class UserService {
       GroupName: groupName,
     })
     return await cognitoClient.send(command).then((res) => {
-      return res.Users.map((u) => this.userMapper.toDomain(u))
+      return res.Users!.map((u) => this.userMapper.toDomain(u))
     })
   }
 }

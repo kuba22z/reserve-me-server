@@ -5,7 +5,6 @@ import { CreateMeetingScheduleDto } from './create-meeting-schedule.dto'
 export class UpdateMeetingScheduleDto extends PartialType(
   OmitType(CreateMeetingScheduleDto, ['locationId'] as const)
 ) {
-  // MAYBE remove
   public id: number
   public canceled?: boolean
   public cancellationReason?: string

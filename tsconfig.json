@@ -16,8 +16,9 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     //"strictNullChecks": true,
-    //"strict": true,
-    //"alwaysStrict": true,
+    "strict": true,
+    "alwaysStrict": true,
+    "strictPropertyInitialization": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "plugins": [

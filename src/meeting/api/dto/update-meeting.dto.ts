@@ -4,7 +4,7 @@ import { type UpdateMeetingScheduleDto } from './update-meeting-schedule.dto'
 
 @InputType()
 export class UpdateMeetingDto extends PartialType(
-  OmitType(CreateMeetingDto, ['schedule'] as const)
+  OmitType(CreateMeetingDto, ['schedule', 'createdByExternalRefId'] as const)
 ) {
   public id: number
   public locationId?: number
