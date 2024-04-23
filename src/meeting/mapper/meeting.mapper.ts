@@ -7,6 +7,7 @@ import {
   type Service,
   type ServicesBookedOnMeetings,
   type ServicesProvidedOnMeetings,
+  type UsersOnMeetings,
 } from '@prisma/client'
 import { MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
@@ -14,6 +15,7 @@ import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
 import { type UsersOnMeetingsModel } from '../../user/mapper/user.mapper'
 import * as dayjs from 'dayjs'
+import * as assert from 'assert'
 
 export type MeetingScheduleModel = MeetingSchedule & { location?: Location }
 export type MeetingModel = Meeting & { schedules?: MeetingScheduleModel[] } & {
@@ -40,6 +42,9 @@ export type MeetingRawQuery = Meeting &
     scheduleCreatedAt: Date
     scheduleUpdatedAt: Date
     scheduleId: number
+  } & Omit<UsersOnMeetings, 'createdAt' | 'updatedAt'> & {
+    usersOnMeetingsCreatedAt: Date
+    usersOnMeetingsUpdatedAt: Date
   }
 type ValidateShape<T, Shape> = T extends Shape
   ? Exclude<keyof T, keyof Shape> extends never
@@ -58,10 +63,11 @@ export class MeetingMapper {
 
   public toDomain(meeting: MeetingModel): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
+    assert(schedules)
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
-      schedules: schedules?.map((schedule) =>
+      schedules: schedules.map((schedule) =>
         this.meetingScheduleMapper.toDomain(schedule)
       ),
       userNames: meeting.usersOnMeetings?.map((u) => u.userName),
@@ -79,6 +85,10 @@ export class MeetingMapper {
       scheduleCreatedAt,
       scheduleUpdatedAt,
       scheduleId,
+      userExternalRefId,
+      userName,
+      usersOnMeetingsCreatedAt,
+      usersOnMeetingsUpdatedAt,
       ...meeting
     } = meetingRawQuery
     return {
@@ -96,6 +106,15 @@ export class MeetingMapper {
           locationId,
         },
       ],
+      usersOnMeetings: [
+        {
+          userExternalRefId,
+          userName,
+          meetingId,
+          updatedAt: usersOnMeetingsUpdatedAt,
+          createdAt: usersOnMeetingsCreatedAt,
+        },
+      ],
     }
   }
 
@@ -109,6 +128,7 @@ export class MeetingMapper {
       userNames,
       ...reduced
     } = domain
+    assert(userNames)
     return new MeetingDto({
       ...reduced,
       priceFinal: priceFinal?.toNumber(),
@@ -116,11 +136,10 @@ export class MeetingMapper {
       discount: discount.toNumber(),
       priceFull: priceFull?.toNumber(),
       repeatRate: domain.repeatRate?.toISOString(),
-      schedules: domain.schedules?.map((schedule) =>
+      schedules: domain.schedules.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
       ),
-      // TODO remove ! and add assertion for userNames -> ass join for usersOnMeetings in findNotCanceledByIntervals
-      userNames: userNames!,
+      userNames,
     })
   }
 }
