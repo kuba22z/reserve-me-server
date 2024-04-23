@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider'
 import { CognitoAuthConfig } from '../../../auth/cognito-auth.config'
 import { fromIni } from '@aws-sdk/credential-providers'
+import { type CognitoGroup } from '../../api/dto/cognito/cognito-groups'
 
 @Injectable()
 export class UserService {
@@ -51,11 +52,11 @@ export class UserService {
       Limit: 50,
     })
     return await cognitoClient.send(command).then((res) => {
-      return res
+      return res.Users!.map((u) => this.userMapper.toDomain(u))
     })
   }
 
-  async findAllByGroup(groupName: string) {
+  async findByGroup(group: CognitoGroup) {
     const cognitoClient = new CognitoIdentityProviderClient({
       // see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
       credentials: fromIni({
@@ -66,7 +67,7 @@ export class UserService {
     const command = new ListUsersInGroupCommand({
       UserPoolId: CognitoAuthConfig.userPoolId,
       Limit: 50,
-      GroupName: groupName,
+      GroupName: group.toString(),
     })
     return await cognitoClient.send(command).then((res) => {
       return res.Users!.map((u) => this.userMapper.toDomain(u))

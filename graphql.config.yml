@@ -1,6 +1,4 @@
 projects:
   reserve-me-server:
-    schema: src/schema.graphql
-    extensions:
-      endpoints:
-        dev: http:/ya/localhost:3000/graphql
+    documents: 'src/**/*.{tsx,gql,graphql}'
+    schema: "http://localhost:3000/graphql"
