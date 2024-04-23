@@ -35,6 +35,7 @@ export class UserResolver {
     CognitoGroup.employee,
   ])
   async user(@GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload) {
+    console.log(cognitoJwtPayload)
     return this.mapper.toDto(this.mapper.jwtPayloadToDomain(cognitoJwtPayload))
   }
 
@@ -50,10 +51,8 @@ export class UserResolver {
   }
 
   @Query(() => [UserDto])
-  //  @UseGuards(AuthorizationGuard([CognitoGroup.admin]))
+  // @UseGuards(AuthorizationGuard([CognitoGroup.admin]))
   async users(@GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload) {
-    console.log('cognitoJwtPayload')
-    console.log(cognitoJwtPayload)
     return await this.userService
       .findAll()
       .then((users) => users.map((u) => this.mapper.toDto(u)))
