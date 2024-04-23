@@ -5,16 +5,18 @@ import {
   ListUsersCommand,
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
-import { CognitoAuthConfig } from '../../../auth/cognito-auth.config'
 import { type CognitoGroup } from '../../api/dto/cognito/cognito-groups'
 import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
 import * as assert from 'assert'
+import { ConfigService } from '@nestjs/config'
+import type { EnvironmentVariables } from '../../../config-validation'
 
 @Injectable()
 export class UserService {
   constructor(
     //  private readonly prisma: PrismaService,
     private readonly userMapper: UserMapper,
+    private readonly configService: ConfigService<EnvironmentVariables, true>,
     @InjectCognitoIdentityProviderClient()
     private readonly cognitoClient: CognitoIdentityProviderClient
   ) {}
@@ -45,7 +47,7 @@ export class UserService {
 
   async findAll() {
     const command = new ListUsersCommand({
-      UserPoolId: CognitoAuthConfig.userPoolId,
+      UserPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       Limit: 50,
     })
     return await this.cognitoClient.send(command).then((res) => {
@@ -57,7 +59,7 @@ export class UserService {
   async findByGroup(group: CognitoGroup) {
     // see https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsersInGroup.html
     const command = new ListUsersInGroupCommand({
-      UserPoolId: CognitoAuthConfig.userPoolId,
+      UserPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       Limit: 50,
       GroupName: group.toString(),
     })

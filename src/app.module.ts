@@ -11,6 +11,8 @@ import { type ErrorDto } from './common/api/dto/error.dto'
 import { LocationModule } from './location/location.module'
 import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
+import { configurations } from './config'
+import { validateConfig } from './config-validation'
 
 @Module({
   imports: [
@@ -19,7 +21,12 @@ import { ConfigModule } from '@nestjs/config'
     UserModule,
     LocationModule,
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [...configurations],
+      validate: validateConfig,
+      expandVariables: true,
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,

@@ -5,12 +5,14 @@ import { UseGuards } from '@nestjs/common'
 import { AuthorizationGuard, GqlCognitoUser } from '@nestjs-cognito/graphql'
 import { CognitoGroup } from '../../../user/api/dto/cognito/cognito-groups'
 import { CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
+import { Public } from 'src/common/api/public'
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Query(() => TokenDto)
+  @Public()
   async accessToken(
     @Args('authorizationCode', { type: () => String }) authorizationCode: string
   ) {

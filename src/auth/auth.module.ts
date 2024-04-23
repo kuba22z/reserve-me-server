@@ -3,25 +3,27 @@ import { AuthController } from './api/auth.controller'
 import { HttpModule } from '@nestjs/axios'
 import { AuthService } from './domain/service/auth.service'
 import { CognitoAuthModule } from '@nestjs-cognito/auth'
-import { CognitoAuthConfig } from './cognito-auth.config'
 import { AuthResolver } from './api/resolver/auth.resolver'
 import { AuthMapper } from './mapper/auth.mapper'
 import { fromIni } from '@aws-sdk/credential-providers'
+import { ConfigService } from '@nestjs/config'
+import { type EnvironmentVariables } from '../config-validation'
+
+const configService = new ConfigService<EnvironmentVariables, true>()
 
 @Module({
   imports: [
     HttpModule,
     CognitoAuthModule.register({
       jwtVerifier: {
-        userPoolId: CognitoAuthConfig.userPoolId,
-        clientId: CognitoAuthConfig.clientId,
-        tokenUse: CognitoAuthConfig.tokenUse,
+        userPoolId: configService.get('COGNITO_USER_POOL_ID'),
+        clientId: configService.get('COGNITO_CLIENT_ID'),
+        tokenUse: configService.get('COGNITO_TOKEN_USE'),
       },
       identityProvider: {
-        region: 'eu-central-1',
         // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
         credentials: fromIni({
-          profile: CognitoAuthConfig.profile,
+          profile: configService.get('COGNITO_PROFILE'),
         }),
       },
     }),
