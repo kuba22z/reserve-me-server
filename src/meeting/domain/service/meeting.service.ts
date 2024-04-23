@@ -166,6 +166,7 @@ export class MeetingService {
                       FROM unnest(ARRAY [${Prisma.join(fromValues)}::timestamp], ARRAY [${Prisma.join(toValues)}::timestamp]) AS range(startDate, endDate)
                       WHERE (startDate, endDate) OVERLAPS ("MeetingSchedule"."startDate", "MeetingSchedule"."endDate"))`
     const results: MeetingRawQuery[] = await prisma.$queryRaw(query)
+    console.log(results)
     return results.map((result) => this.meetingMapper.toMeetingModel(result))
   }
 
@@ -214,8 +215,10 @@ export class MeetingService {
       .filter((s) => s.startDate && s.endDate)
       .map((schedule) => {
         return {
-          from: schedule.startDate as Date,
-          to: schedule.endDate as Date,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          from: schedule.startDate!,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          to: schedule.endDate!,
         }
       })
 
