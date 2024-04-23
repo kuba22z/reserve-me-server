@@ -1,27 +1,31 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
-import { CognitoAuthConfig } from '../../cognito-auth.config'
 import { type TokenDto } from '../../api/dto/token.dto'
 import { AuthMapper } from '../../mapper/auth.mapper'
 import { type CognitoTokenResponseDto } from '../../api/dto/cognito/cognito-token-response.dto'
 import { CognitoTokenRequestDto } from '../../api/dto/cognito/cognito-token-request.dto'
-import { ConfigService } from '@nestjs/config'
 import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
 import {
   CognitoIdentityProviderClient,
   GlobalSignOutCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
+import { type AxiosError } from 'axios'
+import { type EnvironmentVariables } from '../../../config-validation'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly httpService: HttpService,
     private readonly authMapper: AuthMapper,
+    private readonly configService: ConfigService<EnvironmentVariables, true>,
     // see https://docs.nestjs.com/techniques/configuration
-    private readonly configService: ConfigService<
-      { RESERVE_ME_CLIENT_DOMAIN: string },
-      true
-    >,
+    // TODO: its doesnt work, fix it
+    /*
+    @Inject(ConfigKey.Cognito)
+    private readonly cognitoConfig: ConfigType<typeof CognitoConfig>,
+    @Inject(ConfigKey.Client)
+    private readonly clientConfig: ConfigType<typeof ClientConfig>, */
     @InjectCognitoIdentityProviderClient()
     private readonly cognitoClient: CognitoIdentityProviderClient
   ) {}
@@ -29,19 +33,20 @@ export class AuthService {
   async requestCognitoAccessToken(
     authorizationCode: string
   ): Promise<TokenDto> {
-    const cognitoDomain = CognitoAuthConfig.domain
     const clientSecretBasic =
       'Basic ' +
-      btoa(`${CognitoAuthConfig.clientId}:${CognitoAuthConfig.clientSecret}`)
+      btoa(
+        `${this.configService.get('COGNITO_CLIENT_ID')}:${this.configService.get('COGNITO_CLIENT_SECRET')}`
+      )
     // see https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html
     return await this.httpService.axiosRef
       .post(
-        `${cognitoDomain}/oauth2/token`,
+        `${this.configService.get('COGNITO_DOMAIN')}/oauth2/token`,
         new CognitoTokenRequestDto({
           grant_type: 'authorization_code',
-          client_id: CognitoAuthConfig.clientId,
+          client_id: this.configService.get('COGNITO_CLIENT_ID'),
           code: authorizationCode,
-          redirect_uri: this.configService.get('RESERVE_ME_CLIENT_DOMAIN'),
+          redirect_uri: this.configService.get('CLIENT_DOMAIN'),
         }),
         {
           headers: {
@@ -53,8 +58,7 @@ export class AuthService {
       .then((res) => {
         return this.authMapper.toDto(res.data as CognitoTokenResponseDto)
       })
-      .catch((error) => {
-        console.log(error.data.error)
+      .catch((error: AxiosError) => {
         throw new UnauthorizedException()
       })
   }
