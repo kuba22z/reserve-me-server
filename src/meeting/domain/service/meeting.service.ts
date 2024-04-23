@@ -157,9 +157,12 @@ export class MeetingService {
                "Meeting".id                  as "id",
                "MeetingSchedule".id          as "scheduleId",
                "MeetingSchedule"."createdAt" as "scheduleCreatedAt",
-               "MeetingSchedule"."updatedAt" as "scheduleUpdatedAt"
+               "MeetingSchedule"."updatedAt" as "scheduleUpdatedAt",
+               "UsersOnMeetings"."createdAt" as "usersOnMeetingsCreatedAt",
+               "UsersOnMeetings"."updatedAt" as "usersOnMeetingsUpdatedAt"
         FROM "Meeting"
                  left join "MeetingSchedule" on "Meeting".id = "MeetingSchedule"."meetingId"
+                 left join "UsersOnMeetings" on "Meeting".id = "UsersOnMeetings"."meetingId"
         WHERE canceled = false
           AND "locationId" = ${locationId}
           AND EXISTS (SELECT 1
