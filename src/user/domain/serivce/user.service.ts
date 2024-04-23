@@ -6,14 +6,17 @@ import {
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
 import { CognitoAuthConfig } from '../../../auth/cognito-auth.config'
-import { fromIni } from '@aws-sdk/credential-providers'
 import { type CognitoGroup } from '../../api/dto/cognito/cognito-groups'
+import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
+import * as assert from 'assert'
 
 @Injectable()
 export class UserService {
   constructor(
     //  private readonly prisma: PrismaService,
-    private readonly userMapper: UserMapper
+    private readonly userMapper: UserMapper,
+    @InjectCognitoIdentityProviderClient()
+    private readonly cognitoClient: CognitoIdentityProviderClient
   ) {}
 
   // async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
@@ -41,36 +44,26 @@ export class UserService {
   // }
 
   async findAll() {
-    const cognitoClient = new CognitoIdentityProviderClient({
-      // see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
-      credentials: fromIni({
-        profile: CognitoAuthConfig.profile,
-      }),
-    })
     const command = new ListUsersCommand({
       UserPoolId: CognitoAuthConfig.userPoolId,
       Limit: 50,
     })
-    return await cognitoClient.send(command).then((res) => {
-      return res.Users!.map((u) => this.userMapper.toDomain(u))
+    return await this.cognitoClient.send(command).then((res) => {
+      assert(res.Users)
+      return res.Users.map((u) => this.userMapper.toDomain(u))
     })
   }
 
   async findByGroup(group: CognitoGroup) {
-    const cognitoClient = new CognitoIdentityProviderClient({
-      // see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
-      credentials: fromIni({
-        profile: CognitoAuthConfig.profile,
-      }),
-    })
     // see https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsersInGroup.html
     const command = new ListUsersInGroupCommand({
       UserPoolId: CognitoAuthConfig.userPoolId,
       Limit: 50,
       GroupName: group.toString(),
     })
-    return await cognitoClient.send(command).then((res) => {
-      return res.Users!.map((u) => this.userMapper.toDomain(u))
+    return await this.cognitoClient.send(command).then((res) => {
+      assert(res.Users)
+      return res.Users.map((u) => this.userMapper.toDomain(u))
     })
   }
 }

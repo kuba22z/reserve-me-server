@@ -19,7 +19,7 @@ import { ConfigModule } from '@nestjs/config'
     UserModule,
     LocationModule,
     AuthModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,

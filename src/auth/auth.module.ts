@@ -6,6 +6,7 @@ import { CognitoAuthModule } from '@nestjs-cognito/auth'
 import { CognitoAuthConfig } from './cognito-auth.config'
 import { AuthResolver } from './api/resolver/auth.resolver'
 import { AuthMapper } from './mapper/auth.mapper'
+import { fromIni } from '@aws-sdk/credential-providers'
 
 @Module({
   imports: [
@@ -15,6 +16,13 @@ import { AuthMapper } from './mapper/auth.mapper'
         userPoolId: CognitoAuthConfig.userPoolId,
         clientId: CognitoAuthConfig.clientId,
         tokenUse: CognitoAuthConfig.tokenUse,
+      },
+      identityProvider: {
+        region: 'eu-central-1',
+        // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
+        credentials: fromIni({
+          profile: CognitoAuthConfig.profile,
+        }),
       },
     }),
   ],
