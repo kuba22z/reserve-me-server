@@ -4,7 +4,7 @@ import type { Duration } from 'dayjs/plugin/duration'
 
 export class MeetingDomain {
   public id: number
-  public schedules: MeetingScheduleDomain[]
+  public schedules?: MeetingScheduleDomain[]
   public repeatRate: Duration
   public priceFull: Prisma.Decimal | null
   public discount: Prisma.Decimal

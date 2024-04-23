@@ -13,6 +13,7 @@ export class MeetingDto {
   public createdAt: Date
   public updatedAt: Date
   public userNames: string[]
+  // TODO make schedules non optional
   public schedules?: MeetingScheduleDto[]
   // public employee?: Employee
   //  public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[]

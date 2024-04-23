@@ -56,12 +56,12 @@ export class MeetingMapper {
     //  private readonly clientMapper: UserMapper
   ) {}
 
-  public toDomain<T>(meeting: MeetingModel): MeetingDomain {
+  public toDomain(meeting: MeetingModel): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
-      schedules: schedules!.map((schedule) =>
+      schedules: schedules?.map((schedule) =>
         this.meetingScheduleMapper.toDomain(schedule)
       ),
       userNames: meeting.usersOnMeetings?.map((u) => u.userName),
@@ -101,7 +101,6 @@ export class MeetingMapper {
 
   public toDto<T>(domain: ValidateShape<T, MeetingDomain>): MeetingDto {
     const {
-      schedules,
       priceFinal,
       priceExcepted,
       discount,
@@ -117,9 +116,10 @@ export class MeetingMapper {
       discount: discount.toNumber(),
       priceFull: priceFull?.toNumber(),
       repeatRate: domain.repeatRate?.toISOString(),
-      schedules: domain.schedules.map((schedule) =>
+      schedules: domain.schedules?.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
       ),
+      // TODO remove ! and add assertion for userNames -> ass join for usersOnMeetings in findNotCanceledByIntervals
       userNames: userNames!,
     })
   }
