@@ -8,6 +8,7 @@ import {
 } from '../../meeting/mapper/meeting.mapper'
 import { type CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { type UserType } from '@aws-sdk/client-cognito-identity-provider'
+import { type CognitoGroup } from '../api/dto/cognito/cognito-groups'
 
 export type UsersOnMeetingsModel = UsersOnMeetings & {
   meeting?: MeetingModel
@@ -50,10 +51,11 @@ export class UserMapper {
 
   public jwtPayloadToDomain(cognitoJwtPayload: CognitoJwtPayload): UserDomain {
     return {
-      userName: 'test',
-      phoneNumber: '213231',
-      name: 'test',
       id: cognitoJwtPayload.sub,
+      userName: cognitoJwtPayload['cognito:username'] as string,
+      name: cognitoJwtPayload.name as string,
+      phoneNumber: cognitoJwtPayload.phone_number as string,
+      groups: cognitoJwtPayload['cognito:groups'] as CognitoGroup[],
     }
   }
 }

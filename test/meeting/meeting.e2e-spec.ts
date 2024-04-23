@@ -19,8 +19,10 @@ import { type MeetingSchedule } from '@prisma/client'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 import { MeetingService } from '../../src/meeting/domain/service/meeting.service'
 import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
+import gql from 'graphql-tag'
+import { print } from 'graphql/language'
 
-const gql = '/graphql'
+const gqlPath = '/graphql'
 
 describe('MeetingResolver (e2e)', () => {
   let app: INestApplication
@@ -270,7 +272,7 @@ describe('MeetingResolver (e2e)', () => {
     canceled: boolean
   ) => {
     return request(app.getHttpServer())
-      .post(gql)
+      .post(gqlPath)
       .send({
         query: `{meetingsByInterval(from:"${interval.from.toISOString()}",to:"${interval.to.toISOString()}",canceled:${canceled}){priceExcepted,id,schedules {id,startDate,endDate,locationId}}}`,
       })
@@ -278,16 +280,30 @@ describe('MeetingResolver (e2e)', () => {
 
   const createMeeting = (meeting: CreateMeetingDto) => {
     const createMeeting = `mutation {createMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {priceExcepted,id,schedules {id,startDate,endDate,locationId}}}`
-    return request(app.getHttpServer()).post(gql).send({
+    return request(app.getHttpServer()).post(gqlPath).send({
       query: createMeeting,
     })
   }
 
   const updateMeeting = (meeting: UpdateMeetingDto) => {
-    const updateMeeting = `mutation {updateMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {priceExcepted,id,schedules {startDate,endDate,locationId}}}`
-    return request(app.getHttpServer()).post(gql).send({
-      query: updateMeeting,
-    })
+    const updateMeeting = gql`
+      mutation {
+        updateMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {
+          priceExcepted
+          id
+          schedules {
+            startDate
+            endDate
+            locationId
+          }
+        }
+      }
+    `
+    return request(app.getHttpServer())
+      .post(gqlPath)
+      .send({
+        query: print(updateMeeting),
+      })
   }
 
   const isMeetingCreated = async (

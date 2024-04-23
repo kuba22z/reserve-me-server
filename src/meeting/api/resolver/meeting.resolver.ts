@@ -7,6 +7,7 @@ import { UpdateMeetingDto } from '../dto/update-meeting.dto'
 import { CounterDto } from '../dto/counter.dto'
 
 @Resolver()
+// @GqlAuthorization(['admin', 'client', 'employee'])
 export class MeetingResolver {
   constructor(
     private readonly meetingService: MeetingService,
