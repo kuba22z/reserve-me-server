@@ -4,10 +4,12 @@ import { registerAs } from '@nestjs/config'
 import * as process from 'process'
 import { type CognitoTokenUse } from './config-validation'
 
+// https://medium.com/@neerajsonii/managing-configs-in-nestjs-d0705436ee95
 export enum ConfigKey {
   App = 'app',
   Db = 'db',
   Cognito = 'cognito',
+  CognitoTestUser = 'cognitoTestUser',
   Client = 'client',
 }
 
@@ -40,8 +42,24 @@ export const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({
   profile: process.env.COGNITO_PROFILE!,
 }))
 
+export const CognitoTestUserConfig = registerAs(
+  ConfigKey.CognitoTestUser,
+  () => ({
+    userName: process.env.TEST_EMPLOYEE_USER_NAME!,
+    name: process.env.TEST_EMPLOYEE_NAME!,
+    password: process.env.TEST_EMPLOYEE_PASSWORD!,
+    phoneNumber: process.env.TEST_EMPLOYEE_PHONE_NUMBER!,
+  })
+)
+
 export const ClientConfig = registerAs(ConfigKey.Client, () => ({
   domain: process.env.CLIENT_DOMAIN!,
 }))
 
-export const configurations = [AppConfig, DbConfig, CognitoConfig, ClientConfig]
+export const configurations = [
+  AppConfig,
+  DbConfig,
+  CognitoConfig,
+  ClientConfig,
+  CognitoTestUserConfig,
+]

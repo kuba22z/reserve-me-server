@@ -9,6 +9,7 @@ import {
 import { type CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { type UserType } from '@aws-sdk/client-cognito-identity-provider'
 import { type CognitoGroup } from '../api/dto/cognito/cognito-groups'
+import * as assert from 'assert'
 
 export type UsersOnMeetingsModel = UsersOnMeetings & {
   meeting?: MeetingModel
@@ -23,7 +24,6 @@ export class UserMapper {
   ) {}
 
   public toDto(domain: UserDomain): UserDto {
-    console.log(domain)
     const { id, meetings, ...withoutId } = domain
     return {
       ...withoutId,
@@ -31,21 +31,25 @@ export class UserMapper {
     }
   }
 
-  public toDomain(userType: UserType): UserDomain {
+  public toDomain(userType: UserType, groups?: CognitoGroup[]): UserDomain {
+    assert(userType.Username)
+    assert(userType.Attributes)
     const { Username, Attributes } = userType
-    // @ts-expect-error
-    const phoneNumber = Attributes!.find(
-      (a) => a.Name === 'phone_number'
-    ).Value!
-    // @ts-expect-error
-    const name = Attributes!.find((a) => a.Name === 'name').Value!
-    // @ts-expect-error
-    const id = Attributes!.find((a) => a.Name === 'sub').Value!
+    const phoneNumber = Attributes.find((a) => a.Name === 'phone_number')
+    assert(phoneNumber)
+    assert(phoneNumber.Value)
+    const name = Attributes.find((a) => a.Name === 'name')
+    assert(name)
+    assert(name.Value)
+    const id = Attributes.find((a) => a.Name === 'sub')
+    assert(id)
+    assert(id.Value)
     return {
-      userName: Username!,
-      phoneNumber,
-      name,
-      id,
+      userName: Username,
+      phoneNumber: phoneNumber.Value,
+      name: name.Value,
+      id: id.Value,
+      groups,
     }
   }
 

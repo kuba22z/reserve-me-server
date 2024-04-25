@@ -8,10 +8,14 @@ import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
 import {
   CognitoIdentityProviderClient,
   GlobalSignOutCommand,
+  InitiateAuthCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
 import { type AxiosError } from 'axios'
 import { type EnvironmentVariables } from '../../../config-validation'
 import { ConfigService } from '@nestjs/config'
+import * as crypto from 'crypto'
+import { type SignInRequestDto } from '../../api/dto/signin-request.dto'
+import * as assert from 'assert'
 
 @Injectable()
 export class AuthService {
@@ -59,12 +63,45 @@ export class AuthService {
         return this.authMapper.toDto(res.data as CognitoTokenResponseDto)
       })
       .catch((error: AxiosError) => {
-        throw new UnauthorizedException()
+        throw new UnauthorizedException([], 'Unauthorized')
       })
   }
 
-  async requestCognitoSignOut(accessToken: string): Promise<void> {
+  async requestCognitoSignOut(accessToken: string): Promise<number> {
     const command = new GlobalSignOutCommand({ AccessToken: accessToken })
-    await this.cognitoClient.send(command)
+    return await this.cognitoClient.send(command).then((res) => {
+      return res.$metadata.httpStatusCode ?? 500
+    })
+  }
+
+  async requestCognitoSignIn(credentials: SignInRequestDto) {
+    const command = new InitiateAuthCommand({
+      AuthFlow: 'USER_PASSWORD_AUTH',
+      AuthParameters: {
+        USERNAME: credentials.username,
+        PASSWORD: credentials.password,
+        SECRET_HASH: this.generateSecretHash(
+          this.configService.get('COGNITO_CLIENT_SECRET'),
+          credentials.username,
+          this.configService.get('COGNITO_CLIENT_ID')
+        ),
+      },
+      ClientId: this.configService.get('COGNITO_CLIENT_ID'),
+    })
+    return await this.cognitoClient.send(command).then((s) => {
+      assert(s.AuthenticationResult)
+      return this.authMapper.authenticationResultToDto(s.AuthenticationResult)
+    })
+  }
+
+  generateSecretHash(
+    clientSecretKey: string,
+    username: string,
+    clientId: string
+  ): string {
+    const hmac = crypto.createHmac('sha256', clientSecretKey)
+    const data = username + clientId
+    const hash = hmac.update(data).digest('base64')
+    return hash
   }
 }
