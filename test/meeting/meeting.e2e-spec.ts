@@ -21,6 +21,7 @@ import { MeetingService } from '../../src/meeting/domain/service/meeting.service
 import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
 import gql from 'graphql-tag'
 import { print } from 'graphql/language'
+import * as assert from 'assert'
 
 const gqlPath = '/graphql'
 
@@ -287,17 +288,17 @@ describe('MeetingResolver (e2e)', () => {
 
   const updateMeeting = (meeting: UpdateMeetingDto) => {
     const updateMeeting = gql`
-      mutation {
-        updateMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {
-          priceExcepted
-          id
-          schedules {
-            startDate
-            endDate
-            locationId
-          }
+        mutation {
+            updateMeeting(meeting: ${removeQuotesOnKeys(JSON.stringify(meeting))}) {
+                priceExcepted
+                id
+                schedules {
+                    startDate
+                    endDate
+                    locationId
+                }
+            }
         }
-      }
     `
     return request(app.getHttpServer())
       .post(gqlPath)
@@ -332,10 +333,15 @@ describe('MeetingResolver (e2e)', () => {
     meeting: Test,
     updateMeetingDto: UpdateMeetingDto
   ): Promise<MeetingDto> => {
+    assert(updateMeetingDto.schedules)
+    assert(updateMeetingDto.schedules[0])
+    assert(updateMeetingDto)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const startDate = updateMeetingDto.schedules![0].startDate.toISOString()
+    const startDate = updateMeetingDto.schedules[0].startDate.toISOString()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const endDate = updateMeetingDto.schedules![0].endDate.toISOString()
+    const endDate = updateMeetingDto.schedules[0].endDate.toISOString()
     return await meeting
       .expect(200)
       .expect((res) => {

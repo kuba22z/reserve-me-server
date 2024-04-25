@@ -81,6 +81,22 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   COGNITO_PROFILE: string
+
+  @IsString()
+  @IsNotEmpty()
+  TEST_EMPLOYEE_USER_NAME: string
+
+  @IsString()
+  @IsNotEmpty()
+  TEST_EMPLOYEE_NAME: string
+
+  @IsString()
+  @IsNotEmpty()
+  TEST_EMPLOYEE_PHONE_NUMBER: string
+
+  @IsString()
+  @IsNotEmpty()
+  TEST_EMPLOYEE_PASSWORD: string
 }
 
 export function validateConfig(configuration: Record<string, unknown>) {

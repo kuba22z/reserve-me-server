@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { UserMapper } from '../../mapper/user.mapper'
 import {
   CognitoIdentityProviderClient,
+  GetUserCommand,
   ListUsersCommand,
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
@@ -67,5 +68,25 @@ export class UserService {
       assert(res.Users)
       return res.Users.map((u) => this.userMapper.toDomain(u))
     })
+  }
+
+  async findUser(accessToken: string, groups: CognitoGroup[]) {
+    const command = new GetUserCommand({
+      AccessToken: accessToken,
+    })
+    return await this.cognitoClient
+      .send(command)
+      .then((res) => {
+        return this.userMapper.toDomain(
+          {
+            Username: res.Username,
+            Attributes: res.UserAttributes,
+          },
+          groups
+        )
+      })
+      .catch((error) => {
+        throw new UnauthorizedException([], 'Unauthorized')
+      })
   }
 }
