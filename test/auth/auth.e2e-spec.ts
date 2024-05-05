@@ -9,7 +9,7 @@ import {
 import * as request from 'supertest'
 import gql from 'graphql-tag'
 import { type UserDto } from '../../src/user/api/dto/user.dto'
-import { CognitoGroup } from '../../src/user/api/dto/cognito/cognito-groups'
+import { CognitoGroupDto } from '../../src/auth/api/dto/cognito-groups.dto'
 import { print } from 'graphql/language'
 import { Test as NestJsTest } from '@nestjs/testing'
 import type Test from 'supertest/lib/test'
@@ -94,8 +94,8 @@ describe('Auth Module : e2e', () => {
           )
           expect(user.name).toEqual(config.get('TEST_EMPLOYEE_NAME'))
           expect(user.groups?.sort()).toEqual([
-            CognitoGroup.client,
-            CognitoGroup.employee,
+            CognitoGroupDto.client,
+            CognitoGroupDto.employee,
           ])
         })
         .then((res) => res.body.data.user as UserDto)

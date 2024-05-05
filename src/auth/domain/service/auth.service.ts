@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config'
 import * as crypto from 'crypto'
 import { type SignInRequestDto } from '../../api/dto/signin-request.dto'
 import * as assert from 'assert'
+import { type TokenRequestDto } from '../../api/dto/token-request.dto'
 
 @Injectable()
 export class AuthService {
@@ -35,7 +36,7 @@ export class AuthService {
   ) {}
 
   async requestCognitoAccessToken(
-    authorizationCode: string
+    tokenRequest: TokenRequestDto
   ): Promise<TokenDto> {
     const clientSecretBasic =
       'Basic ' +
@@ -47,10 +48,12 @@ export class AuthService {
       .post(
         `${this.configService.get('COGNITO_DOMAIN')}/oauth2/token`,
         new CognitoTokenRequestDto({
-          grant_type: 'authorization_code',
+          grant_type: tokenRequest.grantType,
           client_id: this.configService.get('COGNITO_CLIENT_ID'),
-          code: authorizationCode,
-          redirect_uri: this.configService.get('CLIENT_DOMAIN'),
+          code: tokenRequest.authorizationCode,
+          refresh_token: tokenRequest.refreshToken,
+          redirect_uri:
+            this.configService.get('CLIENT_DOMAIN') + '/api/auth/token',
         }),
         {
           headers: {
@@ -62,6 +65,7 @@ export class AuthService {
       .then((res) => {
         return this.authMapper.toDto(res.data as CognitoTokenResponseDto)
       })
+      // eslint-disable-next-line n/handle-callback-err
       .catch((error: AxiosError) => {
         throw new UnauthorizedException([], 'Unauthorized')
       })
