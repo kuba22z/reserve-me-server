@@ -2,27 +2,32 @@ import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { AuthService } from '../../domain/service/auth.service'
 import { TokenDto } from '../dto/token.dto'
 import { GqlAuthorization, GqlCognitoUser } from '@nestjs-cognito/graphql'
-import { CognitoGroup } from '../../../user/api/dto/cognito/cognito-groups'
+import { CognitoGroupDto } from '../dto/cognito-groups.dto'
 import { CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
-import { Public } from 'src/common/api/public'
+import { TokenRequestDto } from '../dto/token-request.dto'
+import { ConfigService } from '@nestjs/config'
+import type { EnvironmentVariables } from '../../../config-validation'
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService<EnvironmentVariables, true>
+  ) {}
 
   @Query(() => TokenDto)
-  @Public()
   async accessToken(
-    @Args('authorizationCode', { type: () => String }) authorizationCode: string
+    @Args('tokenRequest', { type: () => TokenRequestDto })
+    tokenRequest: TokenRequestDto
   ) {
-    return await this.authService.requestCognitoAccessToken(authorizationCode)
+    return await this.authService.requestCognitoAccessToken(tokenRequest)
   }
 
   @Query(() => Number)
   @GqlAuthorization([
-    CognitoGroup.admin,
-    CognitoGroup.client,
-    CognitoGroup.employee,
+    CognitoGroupDto.admin,
+    CognitoGroupDto.client,
+    CognitoGroupDto.employee,
   ])
   async logout(
     @GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload,
@@ -31,5 +36,13 @@ export class AuthResolver {
     return await this.authService.requestCognitoSignOut(
       context.req.headers.authorization.slice(7)
     )
+  }
+
+  loginParameters = `response_type=code&client_id=${this.configService.get('COGNITO_CLIENT_ID')}&redirect_uri=${this.configService.get('CLIENT_DOMAIN')}/api/auth/token&scope=aws.cognito.signin.user.admin+openid+phone+profile`
+  loginUrl = `${this.configService.get('COGNITO_DOMAIN')}/oauth2/authorize?${this.loginParameters}`
+
+  @Query((returns) => String)
+  async login() {
+    return this.loginUrl
   }
 }

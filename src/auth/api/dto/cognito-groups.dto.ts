@@ -1,11 +1,11 @@
 import { registerEnumType } from '@nestjs/graphql'
 
-export enum CognitoGroup {
+export enum CognitoGroupDto {
   admin = 'admin',
   client = 'client',
   employee = 'employee',
 }
 
-registerEnumType(CognitoGroup, {
-  name: 'CognitoGroups',
+registerEnumType(CognitoGroupDto, {
+  name: 'CognitoGroupDto',
 })

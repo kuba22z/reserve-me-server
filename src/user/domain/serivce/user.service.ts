@@ -6,7 +6,7 @@ import {
   ListUsersCommand,
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
-import { type CognitoGroup } from '../../api/dto/cognito/cognito-groups'
+import { type CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
 import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
 import * as assert from 'assert'
 import { ConfigService } from '@nestjs/config'
@@ -57,7 +57,7 @@ export class UserService {
     })
   }
 
-  async findByGroup(group: CognitoGroup) {
+  async findByGroup(group: CognitoGroupDto) {
     // see https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsersInGroup.html
     const command = new ListUsersInGroupCommand({
       UserPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
@@ -70,7 +70,7 @@ export class UserService {
     })
   }
 
-  async findUser(accessToken: string, groups: CognitoGroup[]) {
+  async findUser(accessToken: string, groups: CognitoGroupDto[]) {
     const command = new GetUserCommand({
       AccessToken: accessToken,
     })
