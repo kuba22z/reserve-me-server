@@ -4,9 +4,9 @@ import { type TokenDto } from '../../api/dto/token.dto'
 import { AuthMapper } from '../../mapper/auth.mapper'
 import { type CognitoTokenResponseDto } from '../../api/dto/cognito/cognito-token-response.dto'
 import { CognitoTokenRequestDto } from '../../api/dto/cognito/cognito-token-request.dto'
-import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
+import { InjectCognitoIdentityProvider } from '@nestjs-cognito/core'
 import {
-  CognitoIdentityProviderClient,
+  CognitoIdentityProvider,
   GlobalSignOutCommand,
   InitiateAuthCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
@@ -31,8 +31,8 @@ export class AuthService {
     private readonly cognitoConfig: ConfigType<typeof CognitoConfig>,
     @Inject(ConfigKey.Client)
     private readonly clientConfig: ConfigType<typeof ClientConfig>, */
-    @InjectCognitoIdentityProviderClient()
-    private readonly cognitoClient: CognitoIdentityProviderClient
+    @InjectCognitoIdentityProvider()
+    private readonly cognitoClient: CognitoIdentityProvider
   ) {}
 
   async requestCognitoAccessToken(
@@ -71,11 +71,24 @@ export class AuthService {
       })
   }
 
+  // https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_GlobalSignOut.html
   async requestCognitoSignOut(accessToken: string): Promise<number> {
     const command = new GlobalSignOutCommand({ AccessToken: accessToken })
     return await this.cognitoClient.send(command).then((res) => {
       return res.$metadata.httpStatusCode ?? 500
     })
+  }
+
+  async requestCognitoSignOut2(): Promise<number> {
+    return await this.httpService.axiosRef
+      .get(
+        `${this.configService.get('COGNITO_DOMAIN')}/logout?scope=openid+profile+phone&response_type=code&client_id=${this.configService.get('COGNITO_CLIENT_ID')}&logout_uri=${this.configService.get('CLIENT_DOMAIN')}`
+      )
+      .then((res) => 1)
+      // eslint-disable-next-line n/handle-callback-err
+      .catch((error: AxiosError) => {
+        throw new UnauthorizedException([], 'Unauthorized')
+      })
   }
 
   async requestCognitoSignIn(credentials: SignInRequestDto) {
@@ -105,7 +118,6 @@ export class AuthService {
   ): string {
     const hmac = crypto.createHmac('sha256', clientSecretKey)
     const data = username + clientId
-    const hash = hmac.update(data).digest('base64')
-    return hash
+    return hmac.update(data).digest('base64')
   }
 }

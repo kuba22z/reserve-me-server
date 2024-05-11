@@ -1,16 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { UserMapper } from '../../mapper/user.mapper'
 import {
-  CognitoIdentityProviderClient,
+  CognitoIdentityProvider,
   GetUserCommand,
   ListUsersCommand,
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
 import { type CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
-import { InjectCognitoIdentityProviderClient } from '@nestjs-cognito/core'
+import { InjectCognitoIdentityProvider } from '@nestjs-cognito/core'
 import * as assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../../config-validation'
+import { HttpService } from '@nestjs/axios'
 
 @Injectable()
 export class UserService {
@@ -18,8 +19,9 @@ export class UserService {
     //  private readonly prisma: PrismaService,
     private readonly userMapper: UserMapper,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
-    @InjectCognitoIdentityProviderClient()
-    private readonly cognitoClient: CognitoIdentityProviderClient
+    @InjectCognitoIdentityProvider()
+    private readonly cognitoClient: CognitoIdentityProvider,
+    private readonly httpService: HttpService
   ) {}
 
   // async findMeetingsByInterval(dateTimeInterval: DateTimeInterval) {
@@ -70,7 +72,7 @@ export class UserService {
     })
   }
 
-  async findUser(accessToken: string, groups: CognitoGroupDto[]) {
+  async findUser(accessToken: string, groups?: CognitoGroupDto[]) {
     const command = new GetUserCommand({
       AccessToken: accessToken,
     })
@@ -85,8 +87,19 @@ export class UserService {
           groups
         )
       })
-      .catch((error) => {
-        throw new UnauthorizedException([], 'Unauthorized')
+      .catch((e) => {
+        throw new UnauthorizedException(undefined, 'Authentication failed.')
       })
+  }
+
+  async requestUserInfo(accessToken: string) {
+    return await this.httpService.axiosRef
+      .get(`${this.configService.get('COGNITO_DOMAIN')}/oauth2/userInfo`, {
+        headers: {
+          'Content-Type': 'application/x-amz-json-1.1',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((a) => a.data)
   }
 }

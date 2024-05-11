@@ -44,8 +44,8 @@ import { validateConfig } from './config-validation'
           return formattedError
         }
         return {
-          message: originalError.error,
           statusCode: originalError.statusCode,
+          message: originalError.error,
           data: originalError.message,
         }
       },

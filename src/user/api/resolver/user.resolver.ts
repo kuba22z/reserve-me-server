@@ -2,10 +2,15 @@ import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { UserService } from '../../domain/serivce/user.service'
 import { UserMapper } from '../../mapper/user.mapper'
 import { UserDto } from '../dto/user.dto'
-import { AuthorizationGuard, GqlCognitoUser } from '@nestjs-cognito/graphql'
+import {
+  AuthorizationGuard,
+  GqlAuthorization,
+  GqlCognitoUser,
+} from '@nestjs-cognito/graphql'
 import { CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { UseGuards } from '@nestjs/common'
 import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
+import { AuthGuard } from '../../../auth/api/auth-guard.service'
 
 @Resolver()
 // @GqlAuthorization(['admin'])
@@ -25,13 +30,12 @@ export class UserResolver {
   } */
 
   @Query(() => UserDto)
-  @UseGuards(
-    AuthorizationGuard([
-      CognitoGroupDto.admin,
-      CognitoGroupDto.client,
-      CognitoGroupDto.employee,
-    ])
-  )
+  @GqlAuthorization([
+    CognitoGroupDto.admin,
+    CognitoGroupDto.client,
+    CognitoGroupDto.employee,
+  ])
+  @UseGuards(AuthGuard)
   async user(
     @GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload,
     @Context() context: { req: { headers: Record<string, string> } }
@@ -54,9 +58,7 @@ export class UserResolver {
   }
 
   @Query(() => [UserDto])
-  @UseGuards(
-    AuthorizationGuard([CognitoGroupDto.admin, CognitoGroupDto.employee])
-  )
+  @GqlAuthorization([CognitoGroupDto.admin, CognitoGroupDto.employee])
   async users(@GqlCognitoUser() cognitoJwtPayload: CognitoJwtPayload) {
     return await this.userService
       .findAll()
