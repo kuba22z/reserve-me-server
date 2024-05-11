@@ -7,6 +7,7 @@ import { PrismaModule } from 'nestjs-prisma'
 import { MeetingMapper } from '../meeting/mapper/meeting.mapper'
 import { MeetingScheduleMapper } from '../meeting/mapper/meeting-schedule.mapper'
 import { LocationMapper } from '../location/mapper/location.mapper'
+import { HttpModule } from '@nestjs/axios'
 
 @Module({
   providers: [
@@ -17,7 +18,7 @@ import { LocationMapper } from '../location/mapper/location.mapper'
     MeetingScheduleMapper,
     LocationMapper,
   ],
-  imports: [PrismaModule],
+  imports: [PrismaModule, HttpModule],
   controllers: [UserController],
 })
 export class UserModule {}
