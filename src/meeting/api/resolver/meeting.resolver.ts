@@ -5,9 +5,11 @@ import { MeetingMapper } from '../../mapper/meeting.mapper'
 import { CreateMeetingDto } from '../dto/create-meeting.dto'
 import { UpdateMeetingDto } from '../dto/update-meeting.dto'
 import { CounterDto } from '../dto/counter.dto'
+import { Auth } from '../../../auth/api/auth.decorator'
+import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
 
 @Resolver()
-// @GqlAuthorization(['admin', 'client', 'employee'])
+@Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
 export class MeetingResolver {
   constructor(
     private readonly meetingService: MeetingService,

@@ -7,6 +7,9 @@ import { LocationMapper } from '../location/mapper/location.mapper'
 import { MeetingScheduleMapper } from './mapper/meeting-schedule.mapper'
 import { ParseDatePipe } from './api/controller/parse-date-pipe.service'
 import { MeetingResolver } from './api/resolver/meeting.resolver'
+import { UserService } from '../user/domain/serivce/user.service'
+import { UserMapper } from '../user/mapper/user.mapper'
+import { HttpModule } from '@nestjs/axios'
 
 @Module({
   controllers: [MeetingController],
@@ -17,7 +20,9 @@ import { MeetingResolver } from './api/resolver/meeting.resolver'
     MeetingScheduleMapper,
     ParseDatePipe,
     MeetingResolver,
+    UserService,
+    UserMapper,
   ],
-  imports: [PrismaModule],
+  imports: [PrismaModule, HttpModule],
 })
 export class MeetingModule {}

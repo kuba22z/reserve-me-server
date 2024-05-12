@@ -11,9 +11,13 @@ import {
   CognitoJwtVerifier,
   InjectCognitoJwtVerifier,
 } from '@nestjs-cognito/core'
-import { type CognitoGroupDto } from './dto/cognito-groups.dto'
-import { IS_PUBLIC_KEY } from './public.decorator'
+import { CognitoGroupDto } from './dto/cognito-groups.dto'
+import { IS_PUBLIC_KEY } from './public-endpoint.decorator'
 import { Reflector } from '@nestjs/core'
+import { ConfigService } from '@nestjs/config'
+import type { EnvironmentVariables } from '../../config-validation'
+import { UserDomain } from '../../user/domain/model/user.domain'
+import * as process from 'process'
 
 export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
   @Injectable()
@@ -22,19 +26,28 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
       public readonly userService: UserService,
       @InjectCognitoJwtVerifier()
       public readonly jwtVerifier: CognitoJwtVerifier,
-      public readonly reflector: Reflector
+      public readonly reflector: Reflector,
+      public readonly configService: ConfigService<EnvironmentVariables, true>
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+      const ctx = GqlExecutionContext.create(context)
       const isPublic = this.reflector.getAllAndOverride<boolean>(
         IS_PUBLIC_KEY,
         [context.getHandler(), context.getClass()]
       )
-      if (isPublic) {
+      const authNotEnabled = process.env.AUTH_ENABLED === 'false'
+      if (isPublic || authNotEnabled) {
+        ctx.getContext().user = new UserDomain({
+          id: '1',
+          phoneNumber: '123',
+          name: 'user',
+          userName: 'admin',
+          groups: [CognitoGroupDto.admin],
+        })
         return true
       }
 
-      const ctx = GqlExecutionContext.create(context)
       const request = ctx.getContext().req
       const headers = request.headers
 
