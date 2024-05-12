@@ -24,7 +24,7 @@ const configService = new ConfigService<EnvironmentVariables, true>()
         userPoolId: configService.get('COGNITO_USER_POOL_ID'),
         clientId: configService.get('COGNITO_CLIENT_ID'),
         tokenUse: configService.get('COGNITO_TOKEN_USE'),
-        scope: ['openid'],
+        //   scope: ['openid'],
       },
       identityProvider: {
         region: 'eu-central-1',

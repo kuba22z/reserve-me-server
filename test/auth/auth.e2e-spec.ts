@@ -63,7 +63,12 @@ describe('Auth Module : e2e', () => {
         'Authentication failed.'
       )
       await authService.requestCognitoSignOut(tokenDto.accessToken)
-      await shouldThrow(requestUser(authToken), 401, 'Unauthorized')
+      await shouldThrow(
+        requestUser(authToken),
+        401,
+        undefined,
+        'Authentication failed.'
+      )
     })
     const requestUser = (authToken: string) => {
       const userQuery = gql`
