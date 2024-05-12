@@ -1,20 +1,7 @@
-// export const Authenticated: MethodDecorator = () => {
-//   const userServiceInjector = Inject(UserService)
-//
-//   return function decorator(
-//     target: any,
-//     _propertyKey: string,
-//     descriptor: PropertyDescriptor
-//   ): void {
-//     userServiceInjector(target, 'userService')
-//     const method = descriptor.value
-//
-//     descriptor.value = async function wrapper(...args: any[]) {
-//       if ('userService' in this) {
-//         const userService = this.userService as UserService
-//         userService.findUser()
-//       }
-//       return method.apply(this, args)
-//     }
-//   }
-// }
+import { applyDecorators, UseGuards } from '@nestjs/common'
+import { type CognitoGroupDto } from './dto/cognito-groups.dto'
+import { AuthGuard } from './auth.guard'
+
+export function Auth(roles?: CognitoGroupDto[]) {
+  return applyDecorators(UseGuards(AuthGuard(roles)))
+}
