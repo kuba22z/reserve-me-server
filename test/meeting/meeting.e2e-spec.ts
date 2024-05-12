@@ -22,6 +22,8 @@ import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-
 import gql from 'graphql-tag'
 import { print } from 'graphql/language'
 import * as assert from 'assert'
+import { ConfigService } from '@nestjs/config'
+import type { EnvironmentVariables } from '../../src/config-validation'
 
 const gqlPath = '/graphql'
 
@@ -30,6 +32,7 @@ describe('MeetingResolver (e2e)', () => {
   let location1: LocationModel
   let location2: LocationModel
   const prisma = new PrismaService()
+  let config: ConfigService<EnvironmentVariables, true>
 
   beforeAll(async () => {
     // extend dayjs with plugin globally
@@ -45,6 +48,11 @@ describe('MeetingResolver (e2e)', () => {
     location1 = createMock<LocationModel>({ id: 1, name: 'location1' })
     location2 = createMock<LocationModel>({ id: 2, name: 'location2' })
     await prisma.location.createMany({ data: [location1, location2] })
+    config =
+      moduleFixture.get<ConfigService<EnvironmentVariables, true>>(
+        ConfigService
+      )
+    config.set('AUTH_ENABLED', false)
     app = moduleFixture.createNestApplication()
     await app.init()
   })
