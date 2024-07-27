@@ -59,12 +59,12 @@ export class UserService {
     })
   }
 
-  async findByGroup(group: CognitoGroupDto) {
+  async findByGroup(group?: CognitoGroupDto) {
     // see https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsersInGroup.html
     const command = new ListUsersInGroupCommand({
       UserPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       Limit: 50,
-      GroupName: group.toString(),
+      GroupName: group != null ? group.toString() : '*',
     })
     return await this.cognitoClient.send(command).then((res) => {
       assert(res.Users)
@@ -72,7 +72,7 @@ export class UserService {
     })
   }
 
-  async findUser(accessToken: string, groups?: CognitoGroupDto[]) {
+  async findUser(accessToken: string, groups: CognitoGroupDto[]) {
     const command = new GetUserCommand({
       AccessToken: accessToken,
     })

@@ -67,7 +67,7 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
             userGroups.some((g) => allowedGroups.includes(g))
           ) {
             return await this.userService
-              .findUser(token, userGroups)
+              .findUser(token, userGroups ?? [])
               .then((user) => {
                 ctx.getContext().user = user
                 return true

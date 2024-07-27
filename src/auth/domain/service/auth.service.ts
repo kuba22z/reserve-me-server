@@ -74,9 +74,15 @@ export class AuthService {
   // https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_GlobalSignOut.html
   async requestCognitoSignOut(accessToken: string): Promise<number> {
     const command = new GlobalSignOutCommand({ AccessToken: accessToken })
-    return await this.cognitoClient.send(command).then((res) => {
-      return res.$metadata.httpStatusCode ?? 500
-    })
+    return await this.cognitoClient
+      .send(command)
+      .then((res) => {
+        return res.$metadata.httpStatusCode ?? 500
+      })
+      .catch((e) => {
+        console.error(e)
+        throw e
+      })
   }
 
   async requestCognitoSignOut2(): Promise<number> {

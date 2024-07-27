@@ -84,7 +84,10 @@ export class MeetingService {
     )
     const { schedule, ...createMeetingDtoWithoutSchedule } = createMeetingDto
     const meeting: MeetingModel = await prisma.meeting.create({
-      include: { schedules: true, usersOnMeetings: true },
+      include: {
+        schedules: { include: { location: true } },
+        usersOnMeetings: true,
+      },
       data: {
         ...createMeetingDtoWithoutSchedule,
         schedules: { createMany: { data: createSchedulesModel } },
