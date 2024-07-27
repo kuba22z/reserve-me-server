@@ -1,10 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql'
-import { type MeetingDto } from '../../../meeting/api/dto/meeting.dto'
 import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
+import type { MeetingDto } from '../../../meeting/api/dto/meeting.dto'
 
-@ObjectType({ description: 'UserDto' })
-export class UserDto {
-  public id: string
+@ObjectType({ description: 'CreateUserDto' })
+export class CreateUserDto {
   public phoneNumber: string
   public name: string
   public userName: string
@@ -12,7 +11,7 @@ export class UserDto {
   public groups?: CognitoGroupDto[]
 
   public meetings?: MeetingDto[]
-  constructor(data: UserDto) {
+  constructor(data: CreateUserDto) {
     Object.assign(this, data)
   }
 }

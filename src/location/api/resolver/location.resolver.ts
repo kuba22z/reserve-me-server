@@ -4,11 +4,9 @@ import { LocationService } from '../../domain/service/location.service'
 import { LocationDto } from '../dto/location.dto'
 import { CreateLocationDto } from '../dto/create-location.dto'
 import { UpdateLocationDto } from '../dto/update-location.dto'
-import { Auth } from '../../../auth/api/auth.decorator'
-import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
 
 @Resolver()
-@Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
+// @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
 export class LocationResolver {
   constructor(
     private readonly locationService: LocationService,
@@ -26,7 +24,7 @@ export class LocationResolver {
 
   @Mutation(() => LocationDto)
   async createLocation(
-    @Args('meeting') createLocationDto: CreateLocationDto
+    @Args('location') createLocationDto: CreateLocationDto
   ): Promise<LocationDto> {
     return await this.locationService
       .create(createLocationDto)

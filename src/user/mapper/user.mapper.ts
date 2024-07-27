@@ -24,9 +24,9 @@ export class UserMapper {
   ) {}
 
   public toDto(domain: UserDomain): UserDto {
-    const { id, meetings, ...withoutId } = domain
+    const { meetings, ...user } = domain
     return {
-      ...withoutId,
+      ...user,
       meetings: meetings?.map((m) => this.meetingMapper.toDto(m)),
     }
   }

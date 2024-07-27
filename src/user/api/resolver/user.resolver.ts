@@ -35,7 +35,8 @@ export class UserResolver {
 
   @Query(() => [UserDto])
   async usersByGroup(
-    @Args('group', { type: () => CognitoGroupDto }) group: CognitoGroupDto
+    @Args('group', { type: () => CognitoGroupDto, nullable: true })
+    group?: CognitoGroupDto
   ) {
     return await this.userService
       .findByGroup(group)
