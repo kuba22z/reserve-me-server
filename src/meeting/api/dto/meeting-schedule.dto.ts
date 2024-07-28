@@ -9,7 +9,7 @@ export class MeetingScheduleDto {
   public canceled: boolean
   public cancellationReason?: string
   public locationId: number
-  public location?: LocationDto
+  public location: LocationDto
   // public meeting?: MeetingDto | null
 
   constructor(data: MeetingScheduleDto) {
