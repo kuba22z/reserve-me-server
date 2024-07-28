@@ -19,6 +19,8 @@ import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
 import { MeetingScheduleMapper } from '../../mapper/meeting-schedule.mapper'
 import { type CounterDto } from '../../api/dto/counter.dto'
+import { UserService } from '../../../user/domain/serivce/user.service'
+import * as assert from 'assert'
 
 @Injectable()
 export class MeetingService {
@@ -33,7 +35,8 @@ export class MeetingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly meetingMapper: MeetingMapper,
-    private readonly scheduleMapper: MeetingScheduleMapper
+    private readonly scheduleMapper: MeetingScheduleMapper,
+    private readonly userService: UserService
   ) {}
 
   async create(createMeetingDto: CreateMeetingDto): Promise<MeetingDomain> {
@@ -82,19 +85,38 @@ export class MeetingService {
         }
       }
     )
-    const { schedule, ...createMeetingDtoWithoutSchedule } = createMeetingDto
+    const { schedule, userNames, ...createOnlyMeeting } = createMeetingDto
     const meeting: MeetingModel = await prisma.meeting.create({
       include: {
         schedules: { include: { location: true } },
         usersOnMeetings: true,
       },
       data: {
-        ...createMeetingDtoWithoutSchedule,
+        ...createOnlyMeeting,
         schedules: { createMany: { data: createSchedulesModel } },
+        usersOnMeetings: {
+          createMany: {
+            data: await this.findUsersOnMeetings(userNames),
+          },
+        },
       },
     })
-
     return this.meetingMapper.toDomain(meeting)
+  }
+
+  private async findUsersOnMeetings(
+    userNames: string[]
+  ): Promise<Prisma.UsersOnMeetingsCreateManyMeetingInput[]> {
+    return await this.userService.findAll().then((users) => {
+      return userNames.map((userName) => {
+        const user = users.find((user) => user.userName === userName)
+        assert(user)
+        return {
+          userExternalRefId: user.id,
+          userName: user.userName,
+        }
+      })
+    })
   }
 
   async findAll(): Promise<MeetingDomain[]> {
