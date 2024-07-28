@@ -9,7 +9,7 @@ export class CreateMeetingDto {
   public priceFinal?: number | null
   public priceExcepted: number
   public repeatRate?: string
-  // public clients: ClientDto[]
+  public userNames: string[]
   public schedule: CreateMeetingScheduleDto
   // public employee?: Employee
   //  public serivcesBookedOnMeetings?: ServicesBookedOnMeetings[]
