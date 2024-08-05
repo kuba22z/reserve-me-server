@@ -1,4 +1,4 @@
-import { Args, Query, Resolver } from '@nestjs/graphql'
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { UserService } from '../../domain/serivce/user.service'
 import { UserMapper } from '../../mapper/user.mapper'
 import { UserDto } from '../dto/user.dto'
@@ -6,6 +6,7 @@ import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
 import { type UserDomain } from '../../domain/model/user.domain'
 import { User } from '../../../auth/api/user.decorator'
 import { Auth } from '../../../auth/api/auth.decorator'
+import { CreateUserDto } from '../dto/create-user.dto'
 
 @Resolver()
 @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
@@ -14,15 +15,6 @@ export class UserResolver {
     private readonly userService: UserService,
     private readonly mapper: UserMapper
   ) {}
-
-  /*  @Query(() => UserDto)
-  async clientById(
-    @Args('id', { type: () => Int }) id: string
-  ): Promise<UserDto> {
-    return await this.clientService
-      .findById(id)
-      .then((client) => this.mapper.toDto(client))
-  } */
 
   @Query(() => UserDto)
   async user(
@@ -48,5 +40,12 @@ export class UserResolver {
     return await this.userService
       .findAll()
       .then((users) => users.map((u) => this.mapper.toDto(u)))
+  }
+
+  @Mutation(() => UserDto)
+  async createUser(@Args('user') user: CreateUserDto) {
+    return await this.userService
+      .create(user)
+      .then((userDomain) => this.mapper.toDto(userDomain))
   }
 }
