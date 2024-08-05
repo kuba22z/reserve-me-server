@@ -18,6 +18,7 @@ import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../config-validation'
 import { UserDomain } from '../../user/domain/model/user.domain'
 import * as process from 'process'
+import * as assert from 'assert'
 
 export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
   @Injectable()
@@ -62,6 +63,7 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
         if (token) {
           const payload = await this.verifyToken(token)
           const userGroups = payload['cognito:groups'] as CognitoGroupDto[]
+          assert(userGroups)
           if (
             !allowedGroups ||
             userGroups.some((g) => allowedGroups.includes(g))
