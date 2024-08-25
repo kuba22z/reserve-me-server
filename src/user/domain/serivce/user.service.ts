@@ -14,7 +14,6 @@ import * as assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../../config-validation'
 import { HttpService } from '@nestjs/axios'
-import { type UserDomain } from '../model/user.domain'
 import { type CreateUserDto } from '../../api/dto/create-user.dto'
 
 @Injectable()
@@ -28,7 +27,7 @@ export class UserService {
     private readonly httpService: HttpService
   ) {}
 
-  async create(user: CreateUserDto): Promise<UserDomain> {
+  async create(user: CreateUserDto) {
     // see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cognito-identity-provider/command/AdminCreateUserCommand/
     const createUserCommand = new AdminCreateUserCommand({
       UserPoolId: this.configService.get('COGNITO_USER_POOL_ID'), // required
@@ -93,7 +92,7 @@ export class UserService {
     return await this.cognitoClient
       .send(command)
       .then((res) => {
-        return this.userMapper.toDomain(
+        return this.userMapper.toDomainWithGroup(
           {
             Username: res.Username,
             Attributes: res.UserAttributes,
