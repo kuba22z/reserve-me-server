@@ -4,7 +4,11 @@ import { type TokenDto } from '../../api/dto/token.dto'
 import { AuthMapper } from '../../mapper/auth.mapper'
 import { type CognitoTokenResponseDto } from '../../api/dto/cognito/cognito-token-response.dto'
 import { CognitoTokenRequestDto } from '../../api/dto/cognito/cognito-token-request.dto'
-import { InjectCognitoIdentityProvider } from '@nestjs-cognito/core'
+import {
+  CognitoJwtVerifier,
+  InjectCognitoIdentityProvider,
+  InjectCognitoJwtVerifier,
+} from '@nestjs-cognito/core'
 import {
   CognitoIdentityProvider,
   GlobalSignOutCommand,
@@ -17,6 +21,7 @@ import * as crypto from 'crypto'
 import { type SignInRequestDto } from '../../api/dto/signin-request.dto'
 import * as assert from 'assert'
 import { type TokenRequestDto } from '../../api/dto/token-request.dto'
+import { type CognitoGroupDto } from '../../api/dto/cognito-groups.dto'
 
 @Injectable()
 export class AuthService {
@@ -31,6 +36,8 @@ export class AuthService {
     private readonly cognitoConfig: ConfigType<typeof CognitoConfig>,
     @Inject(ConfigKey.Client)
     private readonly clientConfig: ConfigType<typeof ClientConfig>, */
+    @InjectCognitoJwtVerifier()
+    public readonly jwtVerifier: CognitoJwtVerifier,
     @InjectCognitoIdentityProvider()
     private readonly cognitoClient: CognitoIdentityProvider
   ) {}
@@ -62,8 +69,13 @@ export class AuthService {
           },
         }
       )
-      .then((res) => {
-        return this.authMapper.toDto(res.data as CognitoTokenResponseDto)
+      .then(async (res) => {
+        const tokenDto = res.data as CognitoTokenResponseDto
+
+        const payload = await this.verifyToken(tokenDto.access_token)
+        const userGroups = payload['cognito:groups'] as CognitoGroupDto[]
+        assert(userGroups)
+        return this.authMapper.toDto(tokenDto, userGroups)
       })
       // eslint-disable-next-line n/handle-callback-err
       .catch((error: AxiosError) => {
@@ -115,6 +127,14 @@ export class AuthService {
       assert(s.AuthenticationResult)
       return this.authMapper.authenticationResultToDto(s.AuthenticationResult)
     })
+  }
+
+  async verifyToken(token: string) {
+    try {
+      return await this.jwtVerifier.verify(token)
+    } catch (e) {
+      throw new UnauthorizedException(undefined, 'Authentication failed.')
+    }
   }
 
   generateSecretHash(

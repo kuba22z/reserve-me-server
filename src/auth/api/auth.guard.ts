@@ -16,7 +16,7 @@ import { IS_PUBLIC_KEY } from './public-endpoint.decorator'
 import { Reflector } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../config-validation'
-import { UserDomain } from '../../user/domain/model/user.domain'
+import { UserDomainWithGroup } from '../../user/domain/model/userDomainWithGroup'
 import * as process from 'process'
 import * as assert from 'assert'
 
@@ -39,7 +39,7 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
       )
       const authNotEnabled = process.env.AUTH_ENABLED === 'false'
       if (isPublic || authNotEnabled) {
-        ctx.getContext().user = new UserDomain({
+        ctx.getContext().user = new UserDomainWithGroup({
           id: '1',
           phoneNumber: '123',
           name: 'user',

@@ -37,5 +37,6 @@ module.exports = {
     '@typescript-eslint/parameter-properties': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'warn',
     '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+    '@typescript-eslint/no-namespace': 'off',
   },
 }

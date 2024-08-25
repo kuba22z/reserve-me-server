@@ -7,6 +7,10 @@ import { UpdateMeetingDto } from '../dto/update-meeting.dto'
 import { CounterDto } from '../dto/counter.dto'
 import { Auth } from '../../../auth/api/auth.decorator'
 import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
+import { User } from '../../../auth/api/user.decorator'
+import { UserDomainWithGroup } from '../../../user/domain/model/userDomainWithGroup'
+import { RolePermission } from '../../../auth/api/role-permissions'
+import { ForbiddenException } from '@nestjs/common'
 
 @Resolver()
 @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
@@ -37,8 +41,25 @@ export class MeetingResolver {
 
   @Mutation(() => MeetingDto)
   async createMeeting(
+    @User() user: UserDomainWithGroup,
     @Args('meeting') createMeetingDto: CreateMeetingDto
   ): Promise<MeetingDto> {
+    const accessLevel = RolePermission.getPermissions(user.groups)
+
+    if (!accessLevel.createOther) {
+      if (
+        !(
+          createMeetingDto.userNames.length === 1 &&
+          createMeetingDto.userNames[0] === user.userName
+        )
+      ) {
+        throw new ForbiddenException(
+          undefined,
+          'A client cant create meetings for other users'
+        )
+      }
+    }
+
     return await this.meetingService
       .create(createMeetingDto)
       .then((meeting) => this.mapper.toDto(meeting))

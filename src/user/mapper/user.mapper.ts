@@ -1,7 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import type { UsersOnMeetings } from '@prisma/client'
-import { type UserDomain } from '../domain/model/user.domain'
-import { type UserDto } from '../api/dto/user.dto'
+import {
+  type UserDomain,
+  type UserDomainWithGroup,
+} from '../domain/model/userDomainWithGroup'
+import { type UserWithGroupDto } from '../api/dto/user-with-group.dto'
 import {
   MeetingMapper,
   type MeetingModel,
@@ -10,6 +13,7 @@ import { type CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { type UserType } from '@aws-sdk/client-cognito-identity-provider'
 import { type CognitoGroupDto } from '../../auth/api/dto/cognito-groups.dto'
 import * as assert from 'assert'
+import { type UserDto } from '../api/dto/user.dto'
 
 export type UsersOnMeetingsModel = UsersOnMeetings & {
   meeting?: MeetingModel
@@ -23,6 +27,14 @@ export class UserMapper {
     private readonly meetingMapper: MeetingMapper
   ) {}
 
+  public toDtoWithGroup(domain: UserDomainWithGroup): UserWithGroupDto {
+    const { meetings, ...user } = domain
+    return {
+      ...user,
+      meetings: meetings?.map((m) => this.meetingMapper.toDto(m)),
+    }
+  }
+
   public toDto(domain: UserDomain): UserDto {
     const { meetings, ...user } = domain
     return {
@@ -31,7 +43,10 @@ export class UserMapper {
     }
   }
 
-  public toDomain(userType: UserType, groups?: CognitoGroupDto[]): UserDomain {
+  private toDomainGeneric(
+    userType: UserType,
+    groups?: CognitoGroupDto[]
+  ): UserDomainWithGroup {
     assert(userType.Username)
     assert(userType.Attributes)
     const { Username, Attributes } = userType
@@ -49,11 +64,26 @@ export class UserMapper {
       phoneNumber: phoneNumber.Value,
       name: name.Value,
       id: id.Value,
-      groups,
+      groups: groups ?? [],
     }
   }
 
-  public jwtPayloadToDomain(cognitoJwtPayload: CognitoJwtPayload): UserDomain {
+  public toDomainWithGroup(
+    userType: UserType,
+    groups: CognitoGroupDto[]
+  ): UserDomainWithGroup {
+    return this.toDomainGeneric(userType, groups)
+  }
+
+  public toDomain(userType: UserType): UserDomain {
+    const domain = this.toDomainGeneric(userType)
+    const { groups, ...rest } = domain
+    return rest
+  }
+
+  public jwtPayloadToDomain(
+    cognitoJwtPayload: CognitoJwtPayload
+  ): UserDomainWithGroup {
     return {
       id: cognitoJwtPayload.sub,
       userName: cognitoJwtPayload['cognito:username'] as string,

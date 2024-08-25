@@ -1,12 +1,13 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { UserService } from '../../domain/serivce/user.service'
 import { UserMapper } from '../../mapper/user.mapper'
-import { UserDto } from '../dto/user.dto'
+import { UserWithGroupDto } from '../dto/user-with-group.dto'
 import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
-import { type UserDomain } from '../../domain/model/user.domain'
+import { type UserDomainWithGroup } from '../../domain/model/userDomainWithGroup'
 import { User } from '../../../auth/api/user.decorator'
 import { Auth } from '../../../auth/api/auth.decorator'
 import { CreateUserDto } from '../dto/create-user.dto'
+import { UserDto } from '../dto/user.dto'
 
 @Resolver()
 @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
@@ -16,13 +17,13 @@ export class UserResolver {
     private readonly mapper: UserMapper
   ) {}
 
-  @Query(() => UserDto)
+  @Query(() => UserWithGroupDto)
   async user(
-    @User() user: UserDomain
+    @User() user: UserDomainWithGroup
     // @Context()
     // context: { req: { headers: Record<string, string>; user: UserDomain }
   ) {
-    return this.mapper.toDto(user)
+    return this.mapper.toDtoWithGroup(user)
   }
 
   @Query(() => [UserDto])
