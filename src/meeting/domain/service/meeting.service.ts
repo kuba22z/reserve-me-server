@@ -138,6 +138,26 @@ export class MeetingService {
       )
   }
 
+  async findByIds(ids: number[]): Promise<MeetingDomain[]> {
+    return await this.prisma.meeting
+      .findMany({
+        where: { id: { in: ids } },
+        include: {
+          usersOnMeetings: true,
+          schedules: {
+            include: {
+              location: true,
+            },
+          },
+        },
+      })
+      .then((meetings) =>
+        meetings.map((meeting: MeetingModel) =>
+          this.meetingMapper.toDomain(meeting)
+        )
+      )
+  }
+
   async findAllByInterval(
     dateTimeInterval: DateTimeInterval,
     canceled?: boolean

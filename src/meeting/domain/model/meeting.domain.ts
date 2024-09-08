@@ -11,7 +11,7 @@ export class MeetingDomain {
   public priceFinal: Prisma.Decimal | null
   public createdByExternalRefId: string
   public priceExcepted: Prisma.Decimal
-  public userNames?: string[]
+  public userNames: string[]
   public createdAt: Date
   public updatedAt: Date
 

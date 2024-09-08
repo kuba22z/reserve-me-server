@@ -11,6 +11,7 @@ import { User } from '../../../auth/api/user.decorator'
 import { UserDomainWithGroup } from '../../../user/domain/model/userDomainWithGroup'
 import { RolePermission } from '../../../auth/api/role-permissions'
 import { ForbiddenException } from '@nestjs/common'
+import * as assert from 'assert'
 
 @Resolver()
 @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
@@ -44,7 +45,7 @@ export class MeetingResolver {
     @User() user: UserDomainWithGroup,
     @Args('meeting') createMeetingDto: CreateMeetingDto
   ): Promise<MeetingDto> {
-    const accessLevel = RolePermission.getPermissions(user.groups)
+    const accessLevel = RolePermission.getPermissions(user.groups, 'meeting')
 
     if (!accessLevel.createOther) {
       if (
@@ -67,8 +68,40 @@ export class MeetingResolver {
 
   @Mutation(() => MeetingDto)
   async updateMeeting(
+    @User() user: UserDomainWithGroup,
     @Args('meeting') updateMeetingDto: UpdateMeetingDto
   ): Promise<MeetingDto> {
+    const accessLevel = RolePermission.getPermissions(user.groups, 'meeting')
+    if (!accessLevel.updateOther) {
+      const meeting = await this.meetingService
+        .findByIds([updateMeetingDto.id])
+        .then((a) => {
+          const meeting = a.at(0)
+          assert(meeting)
+          return meeting
+        })
+      if (
+        !meeting.userNames.some((userName) => userName === user.userName) ||
+        // check if user releases his meeting, then he cant change the assignment of other users
+        // TODO this check is possibly not required because the user can assign
+        //  other users in one step and the he can release his meeting, so
+        //  this case can be evaded with two API-calls
+        (updateMeetingDto.userNames != null &&
+          !updateMeetingDto.userNames?.some(
+            (userName) => userName === user.userName
+          ) &&
+          JSON.stringify(
+            meeting.userNames
+              .filter((userName) => userName !== user.userName)
+              .sort()
+          ) === JSON.stringify(updateMeetingDto.userNames.sort()))
+      ) {
+        throw new ForbiddenException(
+          undefined,
+          'A client cant update meetings for other users'
+        )
+      }
+    }
     return await this.meetingService
       .update(updateMeetingDto)
       .then((meeting) => this.mapper.toDto(meeting))
@@ -76,8 +109,23 @@ export class MeetingResolver {
 
   @Mutation(() => CounterDto)
   async deleteMeetings(
+    @User() user: UserDomainWithGroup,
     @Args('ids', { type: () => [Int] }) ids: number[]
   ): Promise<CounterDto> {
+    const accessLevel = RolePermission.getPermissions(user.groups, 'meeting')
+    if (!accessLevel.deleteOther) {
+      const meetings = await this.meetingService.findByIds(ids)
+      if (
+        meetings.every((meeting) =>
+          meeting.userNames.some((userName) => userName === user.userName)
+        )
+      )
+        throw new ForbiddenException(
+          undefined,
+          'A client cant delete meetings for other users'
+        )
+    }
+
     return await this.meetingService.remove(ids)
   }
 }
