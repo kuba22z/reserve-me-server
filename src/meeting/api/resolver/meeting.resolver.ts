@@ -80,22 +80,7 @@ export class MeetingResolver {
           assert(meeting)
           return meeting
         })
-      if (
-        !meeting.userNames.some((userName) => userName === user.userName) ||
-        // check if user releases his meeting, then he cant change the assignment of other users
-        // TODO this check is possibly not required because the user can assign
-        //  other users in one step and the he can release his meeting, so
-        //  this case can be evaded with two API-calls
-        (updateMeetingDto.userNames != null &&
-          !updateMeetingDto.userNames?.some(
-            (userName) => userName === user.userName
-          ) &&
-          JSON.stringify(
-            meeting.userNames
-              .filter((userName) => userName !== user.userName)
-              .sort()
-          ) === JSON.stringify(updateMeetingDto.userNames.sort()))
-      ) {
+      if (!meeting.userNames.some((userName) => userName === user.userName)) {
         throw new ForbiddenException(
           undefined,
           'A client cant update meetings for other users'
