@@ -64,13 +64,14 @@ export class MeetingMapper {
   public toDomain(meeting: MeetingModel): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
     assert(schedules)
+    assert(meeting.usersOnMeetings)
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
       schedules: schedules.map((schedule) =>
         this.meetingScheduleMapper.toDomain(schedule)
       ),
-      userNames: meeting.usersOnMeetings?.map((u) => u.userName),
+      userNames: meeting.usersOnMeetings.map((u) => u.userName),
     })
   }
 

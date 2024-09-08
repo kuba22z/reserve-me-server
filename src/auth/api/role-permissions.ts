@@ -1,9 +1,12 @@
 import { CognitoGroupDto } from './dto/cognito-groups.dto'
 
 export namespace RolePermission {
-  export const getPermissions = (userGroups: readonly CognitoGroupDto[]) => {
+  export const getPermissions = (
+    userGroups: readonly CognitoGroupDto[],
+    domain: keyof AccessLevelByDomain
+  ) => {
     return mergeObjectsByBoolean(
-      userGroups.map((group) => rolePermissions[group].meeting)
+      userGroups.map((group) => rolePermissions[group][domain])
     )
   }
 
@@ -28,6 +31,8 @@ export namespace RolePermission {
 
 interface MeetingPermissons {
   createOther: boolean
+  updateOther: boolean
+  deleteOther: boolean
 }
 
 interface AccessLevelByDomain {
@@ -44,16 +49,22 @@ const rolePermissions: AccessLevelByRole = {
   [CognitoGroupDto.admin]: {
     meeting: {
       createOther: true,
+      updateOther: true,
+      deleteOther: true,
     },
   },
   [CognitoGroupDto.employee]: {
     meeting: {
       createOther: true,
+      updateOther: true,
+      deleteOther: true,
     },
   },
   [CognitoGroupDto.client]: {
     meeting: {
       createOther: false,
+      updateOther: false,
+      deleteOther: false,
     },
   },
 }
