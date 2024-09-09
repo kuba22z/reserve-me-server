@@ -101,8 +101,9 @@ export class MeetingResolver {
     if (!accessLevel.deleteOther) {
       const meetings = await this.meetingService.findByIds(ids)
       if (
-        meetings.every((meeting) =>
-          meeting.userNames.some((userName) => userName === user.userName)
+        meetings.every(
+          (meeting) =>
+            !meeting.userNames.some((userName) => userName === user.userName)
         )
       )
         throw new ForbiddenException(
