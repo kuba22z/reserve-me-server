@@ -18,10 +18,10 @@ import * as dayjs from 'dayjs'
 import { type Duration } from 'dayjs/plugin/duration'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
 import { MeetingScheduleMapper } from '../../mapper/meeting-schedule.mapper'
-import { type CounterDto } from '../../api/dto/counter.dto'
 import { UserService } from '../../../user/domain/serivce/user.service'
 import * as assert from 'assert'
 import { PeriodicScheduleService } from './periodic-schedules.service'
+import type { CounterDto } from '../../api/dto/counter.dto'
 
 @Injectable()
 export class MeetingService {
@@ -40,7 +40,9 @@ export class MeetingService {
     private readonly userService: UserService
   ) {}
 
-  async create(createMeetingDto: CreateMeetingDto): Promise<MeetingDomain> {
+  public async create(
+    createMeetingDto: CreateMeetingDto
+  ): Promise<MeetingDomain> {
     const periodicSchedules = this.computePeriodicSchedules(
       {
         from: createMeetingDto.schedule.startDate,
@@ -48,32 +50,124 @@ export class MeetingService {
       },
       dayjs.duration(createMeetingDto.repeatRate ?? 'P0D')
     )
-    return await this.prisma.$transaction(async (prisma) => {
-      return await this.findNotCanceledByIntervals(
-        prisma,
-        periodicSchedules,
-        createMeetingDto.schedule.locationId
+    await this.assertPeriodicSchedulesNotCollides(
+      createMeetingDto.schedule.locationId,
+      periodicSchedules
+    )
+
+    return await this.createMeeting(periodicSchedules, createMeetingDto)
+  }
+
+  public async update(
+    updateMeetingDto: UpdateMeetingDto
+  ): Promise<MeetingDomain> {
+    await this.assertLocationExists(updateMeetingDto.locationId)
+
+    if (
+      !updateMeetingDto.schedules ||
+      updateMeetingDto.schedules.length === 0
+    ) {
+      return await this.updateMeeting(updateMeetingDto, this.prisma)
+    }
+
+    const meetingsOverlap =
+      await this.assertSchedulesNotCollides(updateMeetingDto)
+
+    try {
+      return await this.updateMeeting(updateMeetingDto, this.prisma)
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientUnknownRequestError &&
+        error.message.includes(
+          'exclude_overlapping_meeting_schedules_for_each_location'
+        )
+      ) {
+        throw new ConflictException(
+          meetingsOverlap,
+          MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
+        )
+      }
+      throw error
+    }
+  }
+
+  public async findAll(): Promise<MeetingDomain[]> {
+    return await this.prisma.meeting
+      .findMany({
+        include: {
+          usersOnMeetings: true,
+          schedules: {
+            include: {
+              location: true,
+            },
+          },
+        },
+      })
+      .then((meetings) =>
+        meetings.map((meeting: MeetingModel) =>
+          this.meetingMapper.toDomain(meeting)
+        )
       )
-        .then((meetings) => meetings.map((m) => this.meetingMapper.toDomain(m)))
-        .then(async (meetings) => {
-          if (meetings.length === 0) {
-            return await this.createMeeting(
-              prisma,
-              periodicSchedules,
-              createMeetingDto
-            )
-          } else {
-            throw new ConflictException(
-              meetings.map((m) => this.meetingMapper.toDto(m)),
-              MeetingService.CREATE_MEETING_CONFLICT_MESSAGE
-            )
-          }
-        })
+  }
+
+  public async findByIds(ids: number[]): Promise<MeetingDomain[]> {
+    return await this.prisma.meeting
+      .findMany({
+        where: { id: { in: ids } },
+        include: {
+          usersOnMeetings: true,
+          schedules: {
+            include: {
+              location: true,
+            },
+          },
+        },
+      })
+      .then((meetings) =>
+        meetings.map((meeting: MeetingModel) =>
+          this.meetingMapper.toDomain(meeting)
+        )
+      )
+  }
+
+  public async findAllByInterval(
+    dateTimeInterval: DateTimeInterval,
+    canceled?: boolean
+  ) {
+    return await this.prisma.meeting
+      .findMany({
+        include: {
+          usersOnMeetings: true,
+          schedules: { include: { location: true } },
+        },
+        where: {
+          schedules: {
+            every: {
+              startDate: {
+                gte: dateTimeInterval.from, // Start of date range
+              },
+              endDate: {
+                lte: dateTimeInterval.to, // End of date range
+              },
+              canceled,
+            },
+          },
+        },
+      })
+      .then((meetings) =>
+        meetings.map((meetingModel: MeetingModel) =>
+          this.meetingMapper.toDomain(meetingModel)
+        )
+      )
+  }
+
+  public async remove(ids: number[]): Promise<CounterDto> {
+    return await this.prisma.meeting.deleteMany({
+      where: { id: { in: ids } },
     })
   }
 
   private async createMeeting(
-    prisma: Omit<PrismaClient, ITXClientDenyList>,
     schedules: DateTimeInterval[],
     createMeetingDto: CreateMeetingDto
   ): Promise<MeetingDomain> {
@@ -87,7 +181,7 @@ export class MeetingService {
       }
     )
     const { schedule, userNames, ...createOnlyMeeting } = createMeetingDto
-    const meeting: MeetingModel = await prisma.meeting.create({
+    const meeting: MeetingModel = await this.prisma.meeting.create({
       include: {
         schedules: { include: { location: true } },
         usersOnMeetings: true,
@@ -120,78 +214,7 @@ export class MeetingService {
     })
   }
 
-  async findAll(): Promise<MeetingDomain[]> {
-    return await this.prisma.meeting
-      .findMany({
-        include: {
-          usersOnMeetings: true,
-          schedules: {
-            include: {
-              location: true,
-            },
-          },
-        },
-      })
-      .then((meetings) =>
-        meetings.map((meeting: MeetingModel) =>
-          this.meetingMapper.toDomain(meeting)
-        )
-      )
-  }
-
-  async findByIds(ids: number[]): Promise<MeetingDomain[]> {
-    return await this.prisma.meeting
-      .findMany({
-        where: { id: { in: ids } },
-        include: {
-          usersOnMeetings: true,
-          schedules: {
-            include: {
-              location: true,
-            },
-          },
-        },
-      })
-      .then((meetings) =>
-        meetings.map((meeting: MeetingModel) =>
-          this.meetingMapper.toDomain(meeting)
-        )
-      )
-  }
-
-  async findAllByInterval(
-    dateTimeInterval: DateTimeInterval,
-    canceled?: boolean
-  ) {
-    return await this.prisma.meeting
-      .findMany({
-        include: {
-          usersOnMeetings: true,
-          schedules: { include: { location: true } },
-        },
-        where: {
-          schedules: {
-            every: {
-              startDate: {
-                gte: dateTimeInterval.from, // Start of date range
-              },
-              endDate: {
-                lte: dateTimeInterval.to, // End of date range
-              },
-              canceled,
-            },
-          },
-        },
-      })
-      .then((meetings) =>
-        meetings.map((meetingModel: MeetingModel) =>
-          this.meetingMapper.toDomain(meetingModel)
-        )
-      )
-  }
-
-  async findNotCanceledByIntervals(
-    prisma: Omit<PrismaClient, ITXClientDenyList>,
+  private async findNotCanceledByIntervals(
     interval: DateTimeInterval[],
     locationId: number
   ): Promise<MeetingModel[]> {
@@ -214,7 +237,7 @@ export class MeetingService {
           AND EXISTS (SELECT 1
                       FROM unnest(ARRAY [${Prisma.join(fromValues)}::timestamp], ARRAY [${Prisma.join(toValues)}::timestamp]) AS range(startDate, endDate)
                       WHERE (startDate, endDate) OVERLAPS ("MeetingSchedule"."startDate", "MeetingSchedule"."endDate"))`
-    const results: MeetingRawQuery[] = await prisma.$queryRaw(query)
+    const results: MeetingRawQuery[] = await this.prisma.$queryRaw(query)
     return results.map((result) => this.meetingMapper.toMeetingModel(result))
   }
 
@@ -244,9 +267,6 @@ export class MeetingService {
       data: {
         ...meetingUpdateInput,
         schedules: { updateMany: schedulesUpdateManyInput },
-        usersOnMeetings: {
-          updateMany: { where: { meetingId: updateMeetingDto.id }, data: {} },
-        },
       },
     })
 
@@ -282,28 +302,69 @@ export class MeetingService {
     return this.meetingMapper.toDomain(meeting)
   }
 
-  async update(updateMeetingDto: UpdateMeetingDto): Promise<MeetingDomain> {
-    if (updateMeetingDto.locationId) {
+  computePeriodicSchedules(
+    interval: DateTimeInterval,
+    repeatRate: Duration
+  ): DateTimeInterval[] {
+    if (repeatRate.asDays() <= 0) {
+      return [interval]
+    }
+
+    const numOfSchedules = Math.ceil(
+      PeriodicScheduleService.scheduleValidityPeriodInDays / repeatRate.asDays()
+    )
+    return Array.from({ length: numOfSchedules + 1 }, (_, num) => ({
+      from: dayjs
+        .utc(interval.from)
+        .add(num * repeatRate.asDays(), 'days')
+        .toDate(),
+      to: dayjs
+        .utc(interval.to)
+        .add(num * repeatRate.asDays(), 'days')
+        .toDate(),
+    }))
+  }
+
+  private async assertLocationExists(locationId: number | undefined) {
+    if (locationId) {
       await this.prisma.location
         .findUnique({
-          where: { id: updateMeetingDto.locationId },
+          where: { id: locationId },
           select: { id: true },
         })
         .then((location) => {
           if (!location) {
             throw new NotFoundException(
-              [{ locationId: updateMeetingDto.locationId }],
+              [{ locationId }],
               MeetingService.LOCATION_NOT_FOUND_MESSAGE
             )
           }
         })
     }
+  }
 
+  private async assertPeriodicSchedulesNotCollides(
+    scheduleLocationId: number,
+    periodicSchedules: DateTimeInterval[]
+  ) {
+    await this.findNotCanceledByIntervals(periodicSchedules, scheduleLocationId)
+      .then((meetings) => meetings.map((m) => this.meetingMapper.toDomain(m)))
+      .then(async (meetings) => {
+        if (meetings.length > 0) {
+          throw new ConflictException(
+            meetings.map((m) => this.meetingMapper.toDto(m)),
+            MeetingService.CREATE_MEETING_CONFLICT_MESSAGE
+          )
+        }
+      })
+  }
+
+  private async assertSchedulesNotCollides(updateMeetingDto: UpdateMeetingDto) {
     if (
       !updateMeetingDto.schedules ||
       updateMeetingDto.schedules.length === 0
     ) {
-      return await this.updateMeeting(updateMeetingDto, this.prisma)
+      return []
     }
 
     const schedulesToChangeRequest = updateMeetingDto.schedules
@@ -328,7 +389,6 @@ export class MeetingService {
       // here is [0] used because currently each schedule of a meeting should have the same locationId
       updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
     const meetingsOverlap = await this.findNotCanceledByIntervals(
-      this.prisma,
       schedulesToChangeRequest.length !== 0
         ? schedulesToChangeRequest
         : actualMeetingSchedule.map((s) => new DateTimeInterval(s)),
@@ -352,52 +412,7 @@ export class MeetingService {
         MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
       )
     }
-
-    try {
-      return await this.updateMeeting(updateMeetingDto, this.prisma)
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientUnknownRequestError &&
-        error.message.includes(
-          'exclude_overlapping_meeting_schedules_for_each_location'
-        )
-      ) {
-        throw new ConflictException(
-          meetingsOverlap,
-          MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
-        )
-      }
-      throw error
-    }
-  }
-
-  async remove(ids: number[]): Promise<CounterDto> {
-    return await this.prisma.meeting.deleteMany({
-      where: { id: { in: ids } },
-    })
-  }
-
-  public computePeriodicSchedules(
-    interval: DateTimeInterval,
-    repeatRate: Duration
-  ): DateTimeInterval[] {
-    if (repeatRate.asDays() <= 0) {
-      return [interval]
-    }
-
-    const numOfSchedules = Math.ceil(
-      PeriodicScheduleService.scheduleValidityPeriodInDays / repeatRate.asDays()
-    )
-    return Array.from({ length: numOfSchedules + 1 }, (_, num) => ({
-      from: dayjs
-        .utc(interval.from)
-        .add(num * repeatRate.asDays(), 'days')
-        .toDate(),
-      to: dayjs
-        .utc(interval.to)
-        .add(num * repeatRate.asDays(), 'days')
-        .toDate(),
-    }))
+    return meetingsOverlap
   }
 }
 
