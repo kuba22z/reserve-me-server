@@ -142,7 +142,7 @@ describe('MeetingResolver (e2e)', () => {
   })
 
   describe('updateMeeting', () => {
-    it('should update meeting', async () => {
+    it('should-update-meeting', async () => {
       // given
       const meetingSchedule1 = createMock<CreateMeetingScheduleDto>({
         startDate: new Date('2024-01-01T00:10:00+00:00'),
@@ -152,13 +152,14 @@ describe('MeetingResolver (e2e)', () => {
       const createMeetingDto1 = createMock<CreateMeetingDto>({
         schedule: meetingSchedule1,
       })
+
       const meeting1 = await isMeetingCreated(
         createMeeting(createMeetingDto1),
         createMeetingDto1
       )
 
       const updateMeetingSchedule1 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules![0].id,
+        id: meeting1.schedules?.[0].id,
         startDate: new Date('2024-01-01T00:00:00+00:00'),
         endDate: new Date('2024-01-01T01:00:00+00:00'),
       })
@@ -167,6 +168,7 @@ describe('MeetingResolver (e2e)', () => {
         priceExcepted: 10,
         schedules: [updateMeetingSchedule1],
       })
+
       // updateMeetingSchedule1 collides with meetingSchedule1, but it's the same meeting -> should update schedule
       await isMeetingUpdated(
         updateMeeting(updateMeetingDto1),
@@ -187,7 +189,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule2 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules![0].id,
+        id: meeting1.schedules?.[0].id,
         startDate: new Date('2024-01-01T01:00:00+00:00'),
         endDate: new Date('2024-01-01T02:00:00+00:00'),
       })
@@ -203,7 +205,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule3 = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules![0].id,
+        id: meeting1.schedules?.[0].id,
         startDate: new Date('2024-01-01T02:00:00+00:00'),
         endDate: new Date('2024-01-01T02:50:00+00:00'),
       })
@@ -247,7 +249,7 @@ describe('MeetingResolver (e2e)', () => {
       )
 
       const updateMeetingSchedule = createMock<UpdateMeetingScheduleDto>({
-        id: meeting1.schedules![0].id,
+        id: meeting1.schedules?.[0].id,
         startDate: new Date('2024-01-01T01:00:00+00:00'),
         endDate: new Date('2024-01-01T02:01:00+00:00'),
       })

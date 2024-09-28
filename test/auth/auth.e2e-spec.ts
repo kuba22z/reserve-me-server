@@ -15,6 +15,7 @@ import { Test as NestJsTest } from '@nestjs/testing'
 import type Test from 'supertest/lib/test'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 import { type TokenDto } from '../../src/auth/api/dto/token.dto'
+import { type UserWithGroupDto } from '../../src/user/api/dto/user-with-group.dto'
 
 const gqlPath = '/graphql'
 
@@ -46,11 +47,11 @@ describe('Auth Module : e2e', () => {
   })
 
   describe('authentication', () => {
-    it('employee should be able to access secured route', async () => {
+    it('employee-should-be-able-to-access-secured-route', async () => {
       await isEmployee(requestUser(authToken))
     })
 
-    it('employee should not be able to access secured route', async () => {
+    it('employee-should-not-be-able-to-access-secured-route', async () => {
       // TODO format this exception to default formation
       await shouldThrow(
         requestUser('123'),
@@ -96,7 +97,6 @@ describe('Auth Module : e2e', () => {
           phoneNumber
           userName
           name
-          groups
         }
       }
     `
@@ -116,7 +116,7 @@ describe('Auth Module : e2e', () => {
     return await res
       .expect((res) => {
         expect(res.body.data.user.password).toEqual(undefined)
-        const user = res.body.data.user as UserDto
+        const user = res.body.data.user as UserWithGroupDto
         expect(user.userName).toEqual(config.get('TEST_EMPLOYEE_USER_NAME'))
         expect(user.phoneNumber).toEqual(
           config.get('TEST_EMPLOYEE_PHONE_NUMBER')
