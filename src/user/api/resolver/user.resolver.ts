@@ -9,6 +9,7 @@ import { Auth } from '../../../auth/api/auth.decorator'
 import { CreateUserDto } from '../dto/create-user.dto'
 import { UserDto } from '../dto/user.dto'
 
+@Auth([CognitoGroupDto.admin, CognitoGroupDto.employee, CognitoGroupDto.client])
 @Resolver()
 export class UserResolver {
   constructor(
@@ -16,11 +17,6 @@ export class UserResolver {
     private readonly mapper: UserMapper
   ) {}
 
-  @Auth([
-    CognitoGroupDto.admin,
-    CognitoGroupDto.client,
-    CognitoGroupDto.employee,
-  ])
   @Query(() => UserWithGroupDto)
   async user(
     @User() user: UserDomainWithGroup
@@ -30,7 +26,6 @@ export class UserResolver {
     return this.mapper.toDtoWithGroup(user)
   }
 
-  @Auth([CognitoGroupDto.admin, CognitoGroupDto.employee])
   @Query(() => [UserDto])
   async usersByGroup(
     @Args('group', { type: () => CognitoGroupDto, nullable: true })
@@ -41,7 +36,6 @@ export class UserResolver {
       .then((users) => users.map((u) => this.mapper.toDto(u)))
   }
 
-  @Auth([CognitoGroupDto.admin, CognitoGroupDto.employee])
   @Query(() => [UserDto])
   async users() {
     return await this.userService
@@ -49,7 +43,6 @@ export class UserResolver {
       .then((users) => users.map((u) => this.mapper.toDto(u)))
   }
 
-  @Auth([CognitoGroupDto.admin, CognitoGroupDto.employee])
   @Mutation(() => UserDto)
   async createUser(@Args('user') user: CreateUserDto) {
     return await this.userService
