@@ -98,6 +98,9 @@ $ yarn run test
 # e2e tests
 $ yarn run test:e2e
 
+# run specific test
+$ yarn test:e2e -t "updateMeeting should-update-meeting"
+
 # test coverage
 $ yarn run test:cov
 ```

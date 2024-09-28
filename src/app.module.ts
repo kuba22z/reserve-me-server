@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { configurations } from './config'
 import { validateConfig } from './config-validation'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { validateConfig } from './config-validation'
     UserModule,
     LocationModule,
     AuthModule,
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [...configurations],

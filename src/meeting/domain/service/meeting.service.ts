@@ -21,6 +21,7 @@ import { MeetingScheduleMapper } from '../../mapper/meeting-schedule.mapper'
 import { type CounterDto } from '../../api/dto/counter.dto'
 import { UserService } from '../../../user/domain/serivce/user.service'
 import * as assert from 'assert'
+import { PeriodicScheduleService } from './periodic-schedules.service'
 
 @Injectable()
 export class MeetingService {
@@ -219,18 +220,65 @@ export class MeetingService {
 
   async updateMeeting(
     updateMeetingDto: UpdateMeetingDto,
-    schedulesToUpdate: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[],
     prisma: Omit<PrismaClient, ITXClientDenyList>
   ): Promise<MeetingDomain> {
-    const { schedules, id, locationId, ...updateMeetingDto2 } = updateMeetingDto
+    assert(updateMeetingDto)
+    const { schedules, id, locationId, userNames, ...meetingUpdateInput } =
+      updateMeetingDto
+    const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
+      schedules
+        ? schedules.map((s) => {
+            return {
+              where: { id: s.id },
+              data: {
+                ...s,
+                locationId,
+              },
+            }
+          })
+        : []
+
     const meeting: MeetingModel = await prisma.meeting.update({
       where: { id: updateMeetingDto.id },
       include: { schedules: true, usersOnMeetings: true },
       data: {
-        ...updateMeetingDto2,
-        schedules: { updateMany: schedulesToUpdate },
+        ...meetingUpdateInput,
+        schedules: { updateMany: schedulesUpdateManyInput },
+        usersOnMeetings: {
+          updateMany: { where: { meetingId: updateMeetingDto.id }, data: {} },
+        },
       },
     })
+
+    // TODO user names of a meeting are not updated currently -> update also usersOnMeetings when update meeting
+    // const existingUserNamesOnMeetingsToUpdate = await prisma.usersOnMeetings
+    //   .findMany({
+    //     where: {
+    //       meetingId: updateMeetingDto.id,
+    //     },
+    //   })
+    //   .then((a) => a.map((c) => c.userExternalRefId))
+    // const userOnMeetingsWithUserNames = await prisma.usersOnMeetings.findMany({
+    //   where: {
+    //     userName: { in: userNames },
+    //   },
+    // })
+    // const uniqueUserOnMeetingsWithUserNames =
+    //   userOnMeetingsWithUserNames.filter(
+    //     (obj, index, self) =>
+    //       index ===
+    //       self.findIndex((o) => o.userExternalRefId === obj.userExternalRefId)
+    //   )
+    //
+    // uniqueUserOnMeetingsWithUserNames.forEach((a) => {
+    //   await prisma.usersOnMeetings.update({
+    //     where: {
+    //       meetingId: updateMeetingDto.id,
+    //     },
+    //     data: {},
+    //   })
+    // })
+
     return this.meetingMapper.toDomain(meeting)
   }
 
@@ -255,7 +303,7 @@ export class MeetingService {
       !updateMeetingDto.schedules ||
       updateMeetingDto.schedules.length === 0
     ) {
-      return await this.updateMeeting(updateMeetingDto, [], this.prisma)
+      return await this.updateMeeting(updateMeetingDto, this.prisma)
     }
 
     const schedulesToChangeRequest = updateMeetingDto.schedules
@@ -277,7 +325,7 @@ export class MeetingService {
 
     const locationId =
       // TODO make locationId not unique for each schedule in a meeting
-      // here is [0] used because currently each schedule of a meeting sholud have the same locationId
+      // here is [0] used because currently each schedule of a meeting should have the same locationId
       updateMeetingDto.locationId ?? actualMeetingSchedule[0].locationId
     const meetingsOverlap = await this.findNotCanceledByIntervals(
       this.prisma,
@@ -304,23 +352,9 @@ export class MeetingService {
         MeetingService.UPDATE_MEETING_CONFLICT_MESSAGE
       )
     }
-    const schedulesUpdateManyInput: Prisma.MeetingScheduleUpdateManyWithWhereWithoutMeetingInput[] =
-      updateMeetingDto.schedules.map((s) => {
-        return {
-          where: { id: s.id },
-          data: {
-            ...s,
-            locationId,
-          },
-        }
-      })
 
     try {
-      return await this.updateMeeting(
-        updateMeetingDto,
-        schedulesUpdateManyInput,
-        this.prisma
-      )
+      return await this.updateMeeting(updateMeetingDto, this.prisma)
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientUnknownRequestError &&
@@ -351,8 +385,9 @@ export class MeetingService {
       return [interval]
     }
 
-    const validityPeriod = 365
-    const numOfSchedules = Math.ceil(validityPeriod / repeatRate.asDays())
+    const numOfSchedules = Math.ceil(
+      PeriodicScheduleService.scheduleValidityPeriodInDays / repeatRate.asDays()
+    )
     return Array.from({ length: numOfSchedules + 1 }, (_, num) => ({
       from: dayjs
         .utc(interval.from)

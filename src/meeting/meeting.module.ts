@@ -10,6 +10,7 @@ import { MeetingResolver } from './api/resolver/meeting.resolver'
 import { UserService } from '../user/domain/serivce/user.service'
 import { UserMapper } from '../user/mapper/user.mapper'
 import { HttpModule } from '@nestjs/axios'
+import { PeriodicScheduleService } from './domain/service/periodic-schedules.service'
 
 @Module({
   controllers: [MeetingController],
@@ -22,6 +23,7 @@ import { HttpModule } from '@nestjs/axios'
     MeetingResolver,
     UserService,
     UserMapper,
+    PeriodicScheduleService,
   ],
   imports: [PrismaModule, HttpModule],
 })

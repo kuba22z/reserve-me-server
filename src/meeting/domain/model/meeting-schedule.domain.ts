@@ -9,7 +9,7 @@ export class MeetingScheduleDomain {
   public cancellationReason?: string
   public locationId: number
   public location?: LocationDomain
-  public meeting?: MeetingDomain | null
+  public meeting?: MeetingDomain
   public createdAt: Date
   public updatedAt: Date
 
