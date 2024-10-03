@@ -23,7 +23,7 @@ export class EnvironmentVariables {
 
   @IsNotEmpty()
   @IsNumberString()
-  APP_PORT: string
+  PORT: string
 
   @IsNotEmpty()
   @IsString()

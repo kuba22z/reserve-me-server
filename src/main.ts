@@ -8,6 +8,7 @@ import * as duration from 'dayjs/plugin/duration'
 import * as utcPlugin from 'dayjs/plugin/utc'
 
 import * as dayjs from 'dayjs'
+import * as process from 'process'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -38,7 +39,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
-  await app.listen(3000)
+  const PORT = process.env.PORT ?? 3000
+  await app.listen(PORT)
 }
 
 void bootstrap()
