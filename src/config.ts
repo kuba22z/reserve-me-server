@@ -19,21 +19,23 @@ export enum Environment {
   Test = 'test',
 }
 
-export const AppConfig = registerAs(ConfigKey.App, () => ({
-  env: Environment[process.env.NODE_ENV! as keyof typeof Environment] || 'dev',
-  port: Number(process.env.APP_PORT!),
+const AppConfig = registerAs(ConfigKey.App, () => ({
+  env:
+    Environment[process.env.NODE_ENV! as keyof typeof Environment] ||
+    Environment.Dev,
+  port: Number(process.env.PORT!),
   appName: process.env.APP_NAME!,
   authEnabled: Boolean(process.env.AUTH_ENABLED!),
 }))
 
-export const DbConfig = registerAs(ConfigKey.Db, () => ({
+const DbConfig = registerAs(ConfigKey.Db, () => ({
   url: process.env.DATABASE_URL!,
   username: process.env.POSTGRES_USER!,
   password: process.env.POSTGRES_PASSWORD!,
   port: Number(process.env.DATABASE_PORT!),
 }))
 
-export const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({
+const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({
   userPoolId: process.env.COGNITO_USER_POOL_ID!,
   clientId: process.env.COGNITO_CLIENT_ID!,
   clientSecret: process.env.COGNITO_CLIENT_SECRET!,
@@ -42,17 +44,14 @@ export const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({
   profile: process.env.COGNITO_PROFILE!,
 }))
 
-export const CognitoTestUserConfig = registerAs(
-  ConfigKey.CognitoTestUser,
-  () => ({
-    userName: process.env.TEST_EMPLOYEE_USER_NAME!,
-    name: process.env.TEST_EMPLOYEE_NAME!,
-    password: process.env.TEST_EMPLOYEE_PASSWORD!,
-    phoneNumber: process.env.TEST_EMPLOYEE_PHONE_NUMBER!,
-  })
-)
+const CognitoTestUserConfig = registerAs(ConfigKey.CognitoTestUser, () => ({
+  userName: process.env.TEST_EMPLOYEE_USER_NAME!,
+  name: process.env.TEST_EMPLOYEE_NAME!,
+  password: process.env.TEST_EMPLOYEE_PASSWORD!,
+  phoneNumber: process.env.TEST_EMPLOYEE_PHONE_NUMBER!,
+}))
 
-export const ClientConfig = registerAs(ConfigKey.Client, () => ({
+const ClientConfig = registerAs(ConfigKey.Client, () => ({
   domain: process.env.CLIENT_DOMAIN!,
 }))
 

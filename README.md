@@ -36,7 +36,7 @@ $ yarn install
 
 #### Running the database
 ```bash
-docker compose up -d
+NODE_ENV=dev docker-compose up -d
 ```
 
 #### Generate initial database schema from prisma schema

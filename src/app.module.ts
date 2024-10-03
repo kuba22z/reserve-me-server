@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config'
 import { configurations } from './config'
 import { validateConfig } from './config-validation'
 import { ScheduleModule } from '@nestjs/schedule'
+import * as process from 'process'
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule'
       load: [...configurations],
       validate: validateConfig,
       expandVariables: true,
+      envFilePath: '.env.' + process.env.NODE_ENV,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
