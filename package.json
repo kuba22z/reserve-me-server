@@ -12,7 +12,7 @@
     "start:dev": "NODE_ENV=dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "deploy": "yarn install && yarn build && yarn start",
+    "deploy": "npm install && npm run build && npm run start",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -27,7 +27,6 @@
   },
   "engineStrict": true,
   "check-node-version": "node check-node-version.js",
-  "preinstall": "npm run check-node-version",
   "engines": {
     "node": ">=20.0.0"
   },
