@@ -9,6 +9,7 @@ import * as utcPlugin from 'dayjs/plugin/utc'
 
 import * as dayjs from 'dayjs'
 import * as process from 'process'
+import * as assert from 'assert'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -31,8 +32,9 @@ async function bootstrap() {
     .setVersion('0.1')
     .build()
 
+  assert(process.env.CLIENT_DOMAIN)
   app.enableCors({
-    origin: ['http://localhost:4200'],
+    origin: [process.env.CLIENT_DOMAIN],
     methods: ['GET', 'POST'],
     credentials: true,
   })
