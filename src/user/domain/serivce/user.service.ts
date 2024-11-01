@@ -13,7 +13,6 @@ import { InjectCognitoIdentityProvider } from '@nestjs-cognito/core'
 import * as assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../../config-validation'
-import { HttpService } from '@nestjs/axios'
 import { type CreateUserDto } from '../../api/dto/create-user.dto'
 
 @Injectable()
@@ -23,8 +22,7 @@ export class UserService {
     private readonly userMapper: UserMapper,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
     @InjectCognitoIdentityProvider()
-    private readonly cognitoClient: CognitoIdentityProvider,
-    private readonly httpService: HttpService
+    private readonly cognitoClient: CognitoIdentityProvider
   ) {}
 
   async create(user: CreateUserDto) {
@@ -103,16 +101,5 @@ export class UserService {
       .catch((e) => {
         throw new UnauthorizedException(undefined, 'Authentication failed.')
       })
-  }
-
-  async requestUserInfo(accessToken: string) {
-    return await this.httpService.axiosRef
-      .get(`${this.configService.get('COGNITO_DOMAIN')}/oauth2/userInfo`, {
-        headers: {
-          'Content-Type': 'application/x-amz-json-1.1',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then((a) => a.data)
   }
 }
