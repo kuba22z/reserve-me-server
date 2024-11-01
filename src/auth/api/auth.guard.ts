@@ -2,7 +2,6 @@ import {
   type CanActivate,
   type ExecutionContext,
   Injectable,
-  mixin,
   UnauthorizedException,
 } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
@@ -88,5 +87,5 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
       }
     }
   }
-  return mixin(AuthGuardMixin)
+  return AuthGuardMixin
 }

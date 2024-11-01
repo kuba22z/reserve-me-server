@@ -16,6 +16,7 @@ import type Test from 'supertest/lib/test'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 import { type TokenDto } from '../../src/auth/api/dto/token.dto'
 import { type UserWithGroupDto } from '../../src/user/api/dto/user-with-group.dto'
+import { AuthModule } from '../../src/auth/auth.module'
 
 const gqlPath = '/graphql'
 
@@ -28,15 +29,15 @@ describe('Auth Module : e2e', () => {
 
   beforeAll(async () => {
     const moduleFixture = await NestJsTest.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModule, AuthModule],
     }).compile()
 
     app = moduleFixture.createNestApplication()
-    config =
-      moduleFixture.get<ConfigService<EnvironmentVariables, true>>(
-        ConfigService
-      )
-    authService = moduleFixture.get<AuthService>(AuthService)
+    config = moduleFixture.get<
+      ConfigService,
+      ConfigService<EnvironmentVariables, true>
+    >(ConfigService)
+    authService = moduleFixture.get<AuthService, AuthService>(AuthService)
 
     await signIn()
     await app.init()
