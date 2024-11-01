@@ -5,36 +5,38 @@ import { AuthService } from './domain/service/auth.service'
 import { CognitoAuthModule } from '@nestjs-cognito/auth'
 import { AuthResolver } from './api/resolver/auth.resolver'
 import { AuthMapper } from './mapper/auth.mapper'
-import { fromIni } from '@aws-sdk/credential-providers'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { type EnvironmentVariables } from '../config-validation'
 import { UserService } from '../user/domain/serivce/user.service'
 import { UserMapper } from '../user/mapper/user.mapper'
 import { LocationMapper } from '../location/mapper/location.mapper'
 import { MeetingScheduleMapper } from '../meeting/mapper/meeting-schedule.mapper'
 import { MeetingMapper } from '../meeting/mapper/meeting.mapper'
+import { ConfigService } from '@nestjs/config'
+import { fromIni } from '@aws-sdk/credential-providers'
+import { type EnvironmentVariables } from '../config-validation'
 
-const configService = new ConfigService<EnvironmentVariables, true>()
 @Module({
   imports: [
     HttpModule,
-    ConfigModule.forRoot({
-      envFilePath: '.env.' + configService.get('NODE_ENV'),
-    }),
-    CognitoAuthModule.register({
-      jwtVerifier: {
-        userPoolId: configService.get('COGNITO_USER_POOL_ID'),
-        clientId: configService.get('COGNITO_CLIENT_ID'),
-        tokenUse: configService.get('COGNITO_TOKEN_USE'),
-        //   scope: ['openid'],
-      },
-      identityProvider: {
-        region: 'eu-central-1',
-        // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
-        credentials: fromIni({
-          profile: configService.get('COGNITO_PROFILE'),
-        }),
-      },
+    CognitoAuthModule.registerAsync({
+      imports: [],
+      useFactory: async (
+        config: ConfigService<EnvironmentVariables, true>
+      ) => ({
+        jwtVerifier: {
+          userPoolId: config.get('COGNITO_USER_POOL_ID'),
+          clientId: config.get('COGNITO_CLIENT_ID'),
+          tokenUse: config.get('COGNITO_TOKEN_USE'),
+          //   scope: ['openid'],
+        },
+        identityProvider: {
+          region: 'eu-central-1',
+          // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
+          credentials: fromIni({
+            profile: config.get('COGNITO_PROFILE'),
+          }),
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [

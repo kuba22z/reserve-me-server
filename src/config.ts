@@ -15,14 +15,14 @@ export enum ConfigKey {
 
 export enum Environment {
   Dev = 'dev',
-  Prod = 'prod',
-  Test = 'test',
+  Prod = 'production',
+  Local = 'local',
 }
 
 const AppConfig = registerAs(ConfigKey.App, () => ({
   env:
     Environment[process.env.NODE_ENV! as keyof typeof Environment] ||
-    Environment.Dev,
+    Environment.Local,
   port: Number(process.env.PORT!),
   appName: process.env.APP_NAME!,
   authEnabled: Boolean(process.env.AUTH_ENABLED!),
