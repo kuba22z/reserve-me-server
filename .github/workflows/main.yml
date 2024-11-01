@@ -26,8 +26,11 @@ jobs:
     needs: build  # Ensure that the deploy job runs after the build job
     if: github.ref == 'refs/heads/dev'  # Only run on 'dev' branch
     steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
       - name: Generate Deployment Package
-        run: ls
+        run: zip -r reserve-me-server-deploy.zip . -x '*.git*'
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
