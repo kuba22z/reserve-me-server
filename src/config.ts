@@ -30,9 +30,6 @@ const AppConfig = registerAs(ConfigKey.App, () => ({
 
 const DbConfig = registerAs(ConfigKey.Db, () => ({
   url: process.env.DATABASE_URL!,
-  username: process.env.POSTGRES_USER!,
-  password: process.env.POSTGRES_PASSWORD!,
-  port: Number(process.env.DATABASE_PORT!),
 }))
 
 const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({

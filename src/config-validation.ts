@@ -40,22 +40,6 @@ export class EnvironmentVariables {
 
   // Database
   @IsNotEmpty()
-  @IsNumberString()
-  DATABASE_PORT: string
-
-  @IsNotEmpty()
-  @IsString()
-  DATABASE_USER: string
-
-  @IsNotEmpty()
-  @IsString()
-  DATABASE_PASSWORD: string
-
-  @IsNotEmpty()
-  @IsString()
-  DATABASE_HOSTNAME: string
-
-  @IsNotEmpty()
   @IsString()
   DATABASE_URL: string
 
