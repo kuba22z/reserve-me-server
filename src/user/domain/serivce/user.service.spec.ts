@@ -6,11 +6,10 @@ import * as utcPlugin from 'dayjs/plugin/utc'
 import { UserMapper } from '../../mapper/user.mapper'
 import { HttpService } from '@nestjs/axios'
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider'
-import type { EnvironmentVariables } from '../../../config-validation'
-import { ConfigService } from '@nestjs/config'
 import { MeetingMapper } from '../../../meeting/mapper/meeting.mapper'
 import { MeetingScheduleMapper } from '../../../meeting/mapper/meeting-schedule.mapper'
 import { LocationMapper } from '../../../location/mapper/location.mapper'
+import { ConfigService } from '@nestjs/config'
 
 describe('UserService', () => {
   let service: UserService
@@ -49,12 +48,12 @@ describe('UserService', () => {
           provide: 'COGNITO_IDENTITY_PROVIDER_INSTANCE_TOKEN',
           useValue: {},
         },
-        ConfigService<EnvironmentVariables, true>,
+        ConfigService,
       ],
     }).compile()
 
-    service = module.get<UserService>(UserService)
-    userMapper = module.get<UserMapper>(UserMapper)
+    service = module.get<UserService, UserService>(UserService)
+    userMapper = module.get<UserMapper, UserMapper>(UserMapper)
   })
 
   it('should be defined', () => {

@@ -8,8 +8,8 @@ import * as duration from 'dayjs/plugin/duration'
 import * as utcPlugin from 'dayjs/plugin/utc'
 
 import * as dayjs from 'dayjs'
-import * as process from 'process'
-import * as assert from 'assert'
+import { ConfigService } from '@nestjs/config'
+import type { EnvironmentVariables } from './config-validation'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -32,17 +32,20 @@ async function bootstrap() {
     .setVersion('0.1')
     .build()
 
-  assert(process.env.CLIENT_DOMAIN)
+  const configService = app.get<
+    ConfigService,
+    ConfigService<EnvironmentVariables, true>
+  >(ConfigService)
+
   app.enableCors({
-    origin: [process.env.CLIENT_DOMAIN],
+    origin: [configService.get('CLIENT_DOMAIN')],
     methods: ['GET', 'POST'],
     credentials: true,
   })
 
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
-  const PORT = process.env.PORT ?? 3000
-  await app.listen(PORT)
+  await app.listen(configService.get('PORT'))
 }
 
 void bootstrap()
