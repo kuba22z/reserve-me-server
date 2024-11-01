@@ -29,7 +29,10 @@ const configService = new ConfigService<EnvironmentVariables, true>()
       load: [...configurations],
       validate: validateConfig,
       expandVariables: true,
-      envFilePath: '.env.' + configService.get('NODE_ENV'),
+      envFilePath:
+        configService.get('NODE_ENV') !== 'production'
+          ? '.env.' + configService.get('NODE_ENV')
+          : undefined,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
