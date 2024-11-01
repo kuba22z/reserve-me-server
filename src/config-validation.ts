@@ -40,20 +40,24 @@ export class EnvironmentVariables {
 
   // Database
   @IsNotEmpty()
-  @IsString()
-  DATABASE_URL: string
-
-  @IsNotEmpty()
   @IsNumberString()
   DATABASE_PORT: string
 
   @IsNotEmpty()
   @IsString()
-  POSTGRES_USER: string
+  DATABASE_USER: string
 
   @IsNotEmpty()
   @IsString()
-  POSTGRES_PASSWORD: string
+  DATABASE_PASSWORD: string
+
+  @IsNotEmpty()
+  @IsString()
+  DATABASE_HOSTNAME: string
+
+  @IsNotEmpty()
+  @IsString()
+  DATABASE_URL: string
 
   // COGNITO
   @IsNotEmpty()
