@@ -1,8 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app.module'
-
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common'
 import * as duration from 'dayjs/plugin/duration'
 import * as utcPlugin from 'dayjs/plugin/utc'
@@ -26,12 +24,6 @@ async function bootstrap() {
   dayjs.extend(duration)
   dayjs.extend(utcPlugin)
 
-  const config = new DocumentBuilder()
-    .setTitle('Reserve Me')
-    .setDescription('The Reserve Me API description')
-    .setVersion('0.1')
-    .build()
-
   const configService = app.get<
     ConfigService,
     ConfigService<EnvironmentVariables, true>
@@ -43,8 +35,6 @@ async function bootstrap() {
     credentials: true,
   })
 
-  const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, document)
   await app.listen(configService.get('PORT'))
 }
 
