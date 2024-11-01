@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
-import { type TokenDto } from '../../api/dto/token.dto'
 import { AuthMapper } from '../../mapper/auth.mapper'
 import { type CognitoTokenResponseDto } from '../../api/dto/cognito/cognito-token-response.dto'
 import { CognitoTokenRequestDto } from '../../api/dto/cognito/cognito-token-request.dto'
@@ -42,9 +41,7 @@ export class AuthService {
     private readonly cognitoClient: CognitoIdentityProvider
   ) {}
 
-  async requestCognitoAccessToken(
-    tokenRequest: TokenRequestDto
-  ): Promise<TokenDto> {
+  async requestCognitoAccessToken(tokenRequest: TokenRequestDto) {
     const clientSecretBasic =
       'Basic ' +
       btoa(
@@ -84,7 +81,7 @@ export class AuthService {
   }
 
   // https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_GlobalSignOut.html
-  async requestCognitoSignOut(accessToken: string): Promise<number> {
+  async requestCognitoSignOut(accessToken: string) {
     const command = new GlobalSignOutCommand({ AccessToken: accessToken })
     return await this.cognitoClient
       .send(command)
@@ -97,7 +94,7 @@ export class AuthService {
       })
   }
 
-  async requestCognitoSignOut2(): Promise<number> {
+  async requestCognitoSignOut2() {
     return await this.httpService.axiosRef
       .get(
         `${this.configService.get('COGNITO_DOMAIN')}/logout?scope=openid+profile+phone&response_type=code&client_id=${this.configService.get('COGNITO_CLIENT_ID')}&logout_uri=${this.configService.get('CLIENT_DOMAIN')}`
