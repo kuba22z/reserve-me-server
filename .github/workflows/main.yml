@@ -26,8 +26,8 @@ jobs:
      #
      # - name: Migrate asw-rds database
      #   run: npm run migrate:prod
-      - name: Build application
-        run: npm run build
+     # - name: Build application
+     #   run: npm run build
 
   deploy:
     runs-on: ubuntu-latest
