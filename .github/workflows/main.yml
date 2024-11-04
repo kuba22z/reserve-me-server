@@ -46,7 +46,7 @@ jobs:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: reserve-me-server
-          environment_name: reserve-me-server-dev
+          environment_name: reserve-me-server-dev2
           version_label: ${{ github.sha }}
           region: eu-central-1
           deployment_package: reserve-me-server-deploy.zip
