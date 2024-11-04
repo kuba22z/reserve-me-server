@@ -6,10 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "npx nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 
-    "start:prod": "nest start",
+    "start:prod": "npm run build && NODE_ENV=production node dist/src/main.js",
     "start:local": "NODE_ENV=local nest start --debug --watch",
     "start:dev": "NODE_ENV=dev nest start",
 
