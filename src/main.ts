@@ -29,11 +29,11 @@ async function bootstrap() {
     ConfigService<EnvironmentVariables, true>
   >(ConfigService)
 
-  app.enableCors({
-    origin: [configService.get('CLIENT_DOMAIN')],
-    methods: ['GET', 'POST'],
-    credentials: true,
-  })
+  // app.enableCors({
+  //   origin: [configService.get('CLIENT_DOMAIN')],
+  //   methods: ['GET', 'POST'],
+  //   credentials: true,
+  // })
 
   await app.listen(configService.get('PORT'))
 }
