@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { configurations } from './config'
 import { ScheduleModule } from '@nestjs/schedule'
+import { validateConfig } from './config-validation'
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { ScheduleModule } from '@nestjs/schedule'
     ConfigModule.forRoot({
       isGlobal: true,
       load: [...configurations],
-      // validate: validateConfig,
+      validate: validateConfig,
       expandVariables: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
