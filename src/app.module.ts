@@ -10,12 +10,11 @@ import { type GraphQLFormattedError } from 'graphql/error'
 import { type ErrorDto } from './common/api/dto/error.dto'
 import { LocationModule } from './location/location.module'
 import { AuthModule } from './auth/auth.module'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { configurations } from './config'
-import { type EnvironmentVariables, validateConfig } from './config-validation'
+import { validateConfig } from './config-validation'
 import { ScheduleModule } from '@nestjs/schedule'
 
-const configService = new ConfigService<EnvironmentVariables, true>()
 @Module({
   imports: [
     PrismaModule,
@@ -29,10 +28,6 @@ const configService = new ConfigService<EnvironmentVariables, true>()
       load: [...configurations],
       validate: validateConfig,
       expandVariables: true,
-      envFilePath:
-        configService.get('NODE_ENV') !== 'production'
-          ? '.env.' + configService.get('NODE_ENV')
-          : undefined,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
