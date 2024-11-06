@@ -8,27 +8,14 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+
     "start": "node src/server.js",
-    "start:local": "NODE_ENV=local nest start --debug --watch",
+    "start:local": "NODE_ENV=local nest start --watch",
+    "start:debug": "nest start --debug --watch",
     "start:dev": "NODE_ENV=dev nest start",
-    "migrate:local": "dotenv -e .env.local -- npx prisma migrate deploy",
-    "migrate:dev": "dotenv -e .env.dev -- npx prisma migrate deploy",
-    "deploy": "npm ci && npm run build && npm run start",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "pretest:e2e": "nest build -p tsconfig.test.json && cp ./test/jest-e2e.json ./dist-test/test/",
-    "test:e2e": "NODE_ENV=local jest --config ./dist-test/test/jest-e2e.json"
+    "start:prod": "nest start"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
-  "engineStrict": true,
-  "engines": {
-    "node": ">=20.0.0"
-  },
+
   "dependencies": {
     "@apollo/server": "^4.10.1",
     "@aws-sdk/client-cognito-identity-provider": "^3.556.0",
@@ -69,7 +56,7 @@
     "@nestjs/testing": "^10.3.3",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.16",
+    "@types/node": "^20.17.6",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.20.0",
