@@ -8,7 +8,6 @@ import { LocationModule } from './location/location.module'
 import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { configurations } from './config'
-import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import { ScheduleModule } from '@nestjs/schedule'
     UserModule,
     LocationModule,
     AuthModule,
-    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [...configurations],
