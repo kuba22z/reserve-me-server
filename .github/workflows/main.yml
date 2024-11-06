@@ -48,6 +48,7 @@ jobs:
           application_name: reserve-me-server
           environment_name: reserve-me-server-dev2
           version_label: ${{ github.sha }}
+
           region: eu-central-1
           deployment_package: reserve-me-server-deploy.zip
           use_existing_version_if_available: true
