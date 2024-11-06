@@ -25,6 +25,7 @@
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "jest-ts-auto-mock": "^2.1.0",
+    "nestjs-prisma": "^0.23.0",
     "prisma": "^5.10.2",
     "prisma-dbml-generator": "^0.12.0",
     "reflect-metadata": "^0.2.1",
