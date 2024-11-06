@@ -33,7 +33,6 @@ import { validateConfig } from './config-validation'
       driver: ApolloDriver,
       autoSchemaFile: true,
       sortSchema: true,
-      playground: true,
       formatError: (
         formattedError: GraphQLFormattedError
       ): GraphQLFormattedError | ErrorDto => {
