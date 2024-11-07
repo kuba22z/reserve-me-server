@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -19,13 +17,6 @@
     "alwaysStrict": true,
     "strictPropertyInitialization": false,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "plugins": [
-      {
-        "transform": "ts-auto-mock/transformer",
-        "cacheBetweenTests": false
-        //"features": ["random"]
-      }
-    ]
+    "noUnusedLocals": true
   }
 }

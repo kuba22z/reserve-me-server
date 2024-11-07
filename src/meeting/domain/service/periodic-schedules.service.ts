@@ -18,6 +18,21 @@ export class PeriodicScheduleService {
     private readonly meetingMapper: MeetingMapper
   ) {}
 
+  // @Cron(CronExpression.EVERY_DAY_AT_11PM)
+  // async handleCron() {
+  //   const schedulesToCreate = await this.nextSchedulesToCreate()
+  //   await this.prisma.meetingSchedule.createMany({
+  //     data: schedulesToCreate.map(({ schedule, meetingId }) => {
+  //       return {
+  //         meetingId,
+  //         locationId: schedule.locationId,
+  //         startDate: schedule.startDate,
+  //         endDate: schedule.endDate,
+  //       }
+  //     }),
+  //   })
+  // }
+
   async findPeriodicMeetings() {
     const meeting: MeetingModel[] = await this.prisma.meeting.findMany({
       include: {

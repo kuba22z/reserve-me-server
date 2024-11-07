@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "removeComments": true,
+    "declaration": false
+  },
+  "exclude": ["**/*spec.ts", "**/*test.ts", "prisma", "auto-mock-config.ts"]
+}
