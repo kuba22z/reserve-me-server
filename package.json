@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "npm install @nestjs/cli && npm run build && node src/server.js",
+    "start": "npm run build && node dist/src/main.js",
     "start:local": "NODE_ENV=local nest start --debug --watch",
     "start:dev": "NODE_ENV=dev nest start",
     "migrate:local": "dotenv -e .env.local -- npx prisma migrate deploy",
@@ -26,6 +26,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@nestjs/cli" : "^10.4.7",
     "@aws-sdk/client-cognito-identity-provider": "^3.556.0",
     "@aws-sdk/credential-providers": "^3.556.0",
     "@nestjs-cognito/auth": "^1.1.6",
