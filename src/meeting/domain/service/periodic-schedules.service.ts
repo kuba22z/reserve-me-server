@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
 import { PrismaService } from 'nestjs-prisma'
 import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
 import * as assert from 'assert'
@@ -18,21 +17,6 @@ export class PeriodicScheduleService {
     private readonly prisma: PrismaService,
     private readonly meetingMapper: MeetingMapper
   ) {}
-
-  @Cron(CronExpression.EVERY_DAY_AT_11PM)
-  async handleCron() {
-    const schedulesToCreate = await this.nextSchedulesToCreate()
-    await this.prisma.meetingSchedule.createMany({
-      data: schedulesToCreate.map(({ schedule, meetingId }) => {
-        return {
-          meetingId,
-          locationId: schedule.locationId,
-          startDate: schedule.startDate,
-          endDate: schedule.endDate,
-        }
-      }),
-    })
-  }
 
   async findPeriodicMeetings() {
     const meeting: MeetingModel[] = await this.prisma.meeting.findMany({
