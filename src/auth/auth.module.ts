@@ -11,7 +11,7 @@ import { LocationMapper } from '../location/mapper/location.mapper'
 import { MeetingScheduleMapper } from '../meeting/mapper/meeting-schedule.mapper'
 import { MeetingMapper } from '../meeting/mapper/meeting.mapper'
 import { ConfigService } from '@nestjs/config'
-import { fromIni } from '@aws-sdk/credential-providers'
+import { fromEnv } from '@aws-sdk/credential-providers'
 import { type EnvironmentVariables } from '../config-validation'
 
 @Module({
@@ -31,9 +31,10 @@ import { type EnvironmentVariables } from '../config-validation'
         identityProvider: {
           region: 'eu-central-1',
           // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
-          credentials: fromIni({
-            profile: config.get('COGNITO_PROFILE'),
-          }),
+          // credentials: fromIni({
+          //   profile: config.get('COGNITO_PROFILE'),
+          // }),
+          credentials: fromEnv(),
         },
       }),
       inject: [ConfigService],
