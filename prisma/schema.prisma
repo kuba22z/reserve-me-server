@@ -8,14 +8,14 @@ generator client {
 //   output   = "../prisma/fake-data.ts"
 // }
 
-generator dbml {
-  provider            = "prisma-dbml-generator"
-  output              = "../dbml"
-  projectName         = "reserve-me"
-  projectNote         = "Test pro ject description"
-  projectDatabaseType = "PostgreSQL"
-  outputName          = "schema.dbml"
-}
+// generator dbml {
+//   provider            = "prisma-dbml-generator"
+//   output              = "../dbml"
+//   projectName         = "reserve-me"
+//   projectNote         = "Test pro ject description"
+//   projectDatabaseType = "PostgreSQL"
+//   outputName          = "schema.dbml"
+// }
 
 // generator docs {
 //   provider = "node node_modules/prisma-docs-generator"
