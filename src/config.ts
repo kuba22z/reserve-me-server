@@ -38,7 +38,6 @@ const CognitoConfig = registerAs(ConfigKey.Cognito, () => ({
   clientSecret: process.env.COGNITO_CLIENT_SECRET!,
   tokenUse: process.env.COGNITO_TOKEN_USE! as CognitoTokenUse,
   domain: process.env.COGNITO_DOMAIN!,
-  profile: process.env.COGNITO_PROFILE!,
 }))
 
 const CognitoTestUserConfig = registerAs(ConfigKey.CognitoTestUser, () => ({

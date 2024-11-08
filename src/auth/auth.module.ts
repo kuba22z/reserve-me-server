@@ -31,9 +31,6 @@ import { type EnvironmentVariables } from '../config-validation'
         identityProvider: {
           region: 'eu-central-1',
           // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromini
-          // credentials: fromIni({
-          //   profile: config.get('COGNITO_PROFILE'),
-          // }),
           credentials: fromEnv(),
         },
       }),

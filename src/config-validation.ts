@@ -68,10 +68,6 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
-  COGNITO_PROFILE: string
-
-  @IsString()
-  @IsNotEmpty()
   TEST_EMPLOYEE_USER_NAME: string
 
   @IsString()
