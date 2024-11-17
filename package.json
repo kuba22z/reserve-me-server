@@ -11,6 +11,7 @@
     "deploy": "rm -rf node_modules package-lock.json && npm install --omit=dev && npm run start",
     "start:local": "NODE_ENV=local nest start --debug --watch",
     "start:dev": "NODE_ENV=dev nest start --watch",
+    "postinstall": "npx check-peer-dependencies",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
@@ -45,10 +46,10 @@
     "graphql": "^16.9.0",
     "graphql-tag": "^2.12.6",
     "nestjs-prisma": "^0.23.0",
-    "reflect-metadata": "^0.2.1",
-    "check-peer-dependencies": "^4.3.0"
+    "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
+    "check-peer-dependencies": "^4.3.0",
     "@nestjs/schematics": "^10.1.0",
     "@nestjs-cognito/testing": "^1.1.5",
     "@nestjs/testing": "^10.3.3",
