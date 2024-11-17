@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { AuthController } from './api/auth.controller'
 import { HttpModule } from '@nestjs/axios'
 import { AuthService } from './domain/service/auth.service'
 import { CognitoAuthModule } from '@nestjs-cognito/auth'
@@ -47,6 +46,5 @@ import { type EnvironmentVariables } from '../config-validation'
     MeetingScheduleMapper,
     MeetingMapper,
   ],
-  controllers: [AuthController],
 })
 export class AuthModule {}
