@@ -81,7 +81,7 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
 
     async verifyToken(token: string) {
       try {
-        return await this.jwtVerifier.verify(token)
+        return this.jwtVerifier.verify(token)
       } catch (e) {
         throw new UnauthorizedException(undefined, 'Authentication failed.')
       }
