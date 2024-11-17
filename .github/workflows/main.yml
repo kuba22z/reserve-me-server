@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install --omit=dev
+        run: npm install
      # TODO include this later
      # - name: Install dotenv-cli
      #   run: npm install -g dotenv-cli
