@@ -46,10 +46,10 @@
     "graphql": "^16.9.0",
     "graphql-tag": "^2.12.6",
     "nestjs-prisma": "^0.23.0",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "check-peer-dependencies": "^4.3.0"
   },
   "devDependencies": {
-    "check-peer-dependencies": "^4.3.0",
     "@nestjs/schematics": "^10.1.0",
     "@nestjs-cognito/testing": "^1.1.5",
     "@nestjs/testing": "^10.3.3",
