@@ -4,7 +4,7 @@ import { ObjectType } from '@nestjs/graphql'
 @ObjectType({ description: 'Meeting' })
 export class MeetingDto {
   public id: number
-  public repeatRate: string
+  public repeatRate?: string
   public priceFull?: number
   public discount: number
   public priceFinal?: number

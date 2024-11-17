@@ -46,11 +46,6 @@ export type MeetingRawQuery = Meeting &
     usersOnMeetingsCreatedAt: Date
     usersOnMeetingsUpdatedAt: Date
   }
-type ValidateShape<T, Shape> = T extends Shape
-  ? Exclude<keyof T, keyof Shape> extends never
-    ? T
-    : never
-  : never
 
 @Injectable()
 export class MeetingMapper {
@@ -119,7 +114,7 @@ export class MeetingMapper {
     }
   }
 
-  public toDto<T>(domain: ValidateShape<T, MeetingDomain>): MeetingDto {
+  public toDto(domain: MeetingDomain): MeetingDto {
     const {
       priceFinal,
       priceExcepted,
