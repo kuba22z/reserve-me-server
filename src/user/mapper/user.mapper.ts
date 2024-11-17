@@ -50,6 +50,7 @@ export class UserMapper {
     assert(userType.Username)
     assert(userType.Attributes)
     const { Username, Attributes } = userType
+    assert(Attributes)
     const phoneNumber = Attributes.find((a) => a.Name === 'phone_number')
     assert(phoneNumber)
     assert(phoneNumber.Value)
