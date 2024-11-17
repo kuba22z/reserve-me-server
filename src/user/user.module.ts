@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { UserController } from './api/controller/user.controller'
 import { UserService } from './domain/serivce/user.service'
 import { UserMapper } from './mapper/user.mapper'
 import { UserResolver } from './api/resolver/user.resolver'
@@ -19,6 +18,5 @@ import { HttpModule } from '@nestjs/axios'
     LocationMapper,
   ],
   imports: [PrismaModule, HttpModule],
-  controllers: [UserController],
 })
 export class UserModule {}

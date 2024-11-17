@@ -75,8 +75,8 @@ export class MeetingResolver {
     if (!accessLevel.updateOther) {
       const meeting = await this.meetingService
         .findByIds([updateMeetingDto.id])
-        .then((a) => {
-          const meeting = a.at(0)
+        .then((meetings) => {
+          const meeting = meetings.length > 0 ? meetings[0] : undefined
           assert(meeting)
           return meeting
         })
