@@ -1,15 +1,14 @@
 import { type INestApplication, Logger } from '@nestjs/common'
 import { removeAllFakeData } from '../../prisma/removeAll'
 import { createMock } from 'ts-auto-mock'
-import { PrismaService } from 'nestjs-prisma'
-import { type LocationModel } from '../../src/meeting/mapper/meeting.mapper'
+import { type LocationWithMeetingSchedules } from '../../src/meeting/mapper/meeting.mapper'
 import * as request from 'supertest'
 import { AppModule } from '../../src/app.module'
 import { type CreateMeetingDto } from '../../src/meeting/api/dto/create-meeting.dto'
 import type { CreateMeetingScheduleDto } from '../../src/meeting/api/dto/create-meeting-schedule.dto'
-import * as duration from 'dayjs/plugin/duration'
-import * as utcPlugin from 'dayjs/plugin/utc'
-import * as dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import utcPlugin from 'dayjs/plugin/utc'
+import dayjs from 'dayjs'
 import type Test from 'supertest/lib/test'
 import { Test as NestJsTest, type TestingModule } from '@nestjs/testing'
 import { type DateTimeInterval } from '../../src/meeting/domain/model/datetime-interval.domain'
@@ -21,16 +20,17 @@ import { MeetingService } from '../../src/meeting/domain/service/meeting.service
 import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
 import gql from 'graphql-tag'
 import { print } from 'graphql/language'
-import * as assert from 'assert'
+import assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../src/config-validation'
+import { PrismaService } from 'src/prisma.service'
 
 const gqlPath = '/graphql'
 
 describe('MeetingResolver (e2e)', () => {
   let app: INestApplication
-  let location1: LocationModel
-  let location2: LocationModel
+  let location1: LocationWithMeetingSchedules
+  let location2: LocationWithMeetingSchedules
   const prisma = new PrismaService()
   let config: ConfigService<EnvironmentVariables, true>
 
@@ -45,8 +45,14 @@ describe('MeetingResolver (e2e)', () => {
       .setLogger(new Logger())
       .compile()
     await removeAllFakeData()
-    location1 = createMock<LocationModel>({ id: 1, name: 'location1' })
-    location2 = createMock<LocationModel>({ id: 2, name: 'location2' })
+    location1 = createMock<LocationWithMeetingSchedules>({
+      id: 1,
+      name: 'location1',
+    })
+    location2 = createMock<LocationWithMeetingSchedules>({
+      id: 2,
+      name: 'location2',
+    })
     await prisma.location.createMany({ data: [location1, location2] })
     config = moduleFixture.get<
       ConfigService,

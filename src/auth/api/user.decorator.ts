@@ -1,7 +1,7 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { type UserDomainWithGroup } from '../../user/domain/model/userDomainWithGroup'
-import * as assert from 'assert'
+import assert from 'assert'
 
 export const User = createParamDecorator(
   (data: string, ctx: ExecutionContext): Partial<UserDomainWithGroup> => {

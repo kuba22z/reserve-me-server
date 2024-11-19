@@ -1,27 +1,23 @@
 import { Injectable } from '@nestjs/common'
 import { LocationMapper } from '../../location/mapper/location.mapper'
-import type { MeetingScheduleModel } from './meeting.mapper'
+import type { MeetingScheduleWithLocation } from './meeting.mapper'
 import { MeetingScheduleDomain } from '../domain/model/meeting-schedule.domain'
 import { MeetingScheduleDto } from '../api/dto/meeting-schedule.dto'
-
-// type ValidateShape<T, Shape> = T extends Shape
-//   ? Exclude<keyof T, keyof Shape> extends never
-//     ? T
-//     : never
-//   : never
 
 @Injectable()
 export class MeetingScheduleMapper {
   constructor(private readonly locationMapper: LocationMapper) {}
 
   // Map Meeting to MeetingEntity
-  public toDomain(schedule: MeetingScheduleModel): MeetingScheduleDomain {
+  public toDomain(
+    schedule: MeetingScheduleWithLocation
+  ): MeetingScheduleDomain {
     const { ...reduced } = schedule
     return new MeetingScheduleDomain({
       ...reduced,
       startDate: schedule.startDate,
       endDate: schedule.endDate,
-      location: this.locationMapper.toDomain(schedule.location!),
+      location: this.locationMapper.toDomain(schedule.location),
     })
   }
 
@@ -31,7 +27,7 @@ export class MeetingScheduleMapper {
       ...reduced,
       startDate: domain.startDate,
       endDate: domain.endDate,
-      location: this.locationMapper.toDto(domain.location!),
+      location: this.locationMapper.toDto(domain.location),
     })
   }
 }

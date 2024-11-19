@@ -11,7 +11,7 @@ import { User } from '../../../auth/api/user.decorator'
 import { UserDomainWithGroup } from '../../../user/domain/model/userDomainWithGroup'
 import { RolePermission } from '../../../auth/api/role-permissions'
 import { ForbiddenException } from '@nestjs/common'
-import * as assert from 'assert'
+import assert from 'assert'
 
 @Resolver()
 @Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])

@@ -2,10 +2,10 @@ import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
-import * as duration from 'dayjs/plugin/duration'
-import * as utcPlugin from 'dayjs/plugin/utc'
+import duration from 'dayjs/plugin/duration'
+import utcPlugin from 'dayjs/plugin/utc'
 
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import { ConfigService } from '@nestjs/config'
 import { type EnvironmentVariables } from './config-validation'
 

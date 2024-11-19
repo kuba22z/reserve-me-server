@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from 'nestjs-prisma'
-import { MeetingMapper, type MeetingModel } from '../../mapper/meeting.mapper'
-import * as assert from 'assert'
-import * as dayjs from 'dayjs'
+import { MeetingMapper } from '../../mapper/meeting.mapper'
+import assert from 'assert'
+import dayjs from 'dayjs'
 
 import { type MeetingScheduleDomain } from '../model/meeting-schedule.domain'
 import { type Duration } from 'dayjs/plugin/duration'
 import { type MeetingDomain } from '../model/meeting.domain'
+import { PrismaService } from '../../../prisma.service'
 
 @Injectable()
 export class PeriodicScheduleService {
@@ -34,14 +34,15 @@ export class PeriodicScheduleService {
   // }
 
   async findPeriodicMeetings() {
-    const meeting: MeetingModel[] = await this.prisma.meeting.findMany({
+    const meetings = await this.prisma.meeting.findMany({
       include: {
-        schedules: true,
+        schedules: { include: { location: true } },
+        usersOnMeetings: true,
       },
       where: { repeatRate: { not: null } },
     })
 
-    return meeting.map((a) => this.meetingMapper.toDomain(a as MeetingModel))
+    return meetings.map((meeting) => this.meetingMapper.toDomain(meeting))
   }
 
   async nextSchedulesToCreate() {

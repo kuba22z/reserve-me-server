@@ -1,41 +1,62 @@
 import {
-  type EmployeeSchedule,
-  type EmployeesOnMeetings,
   type Location,
   type Meeting,
   type MeetingSchedule,
-  type Service,
-  type ServicesBookedOnMeetings,
-  type ServicesProvidedOnMeetings,
+  type Prisma,
   type UsersOnMeetings,
 } from '@prisma/client'
 import { MeetingDomain } from '../domain/model/meeting.domain'
 import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
-import { type UsersOnMeetingsModel } from '../../user/mapper/user.mapper'
-import * as dayjs from 'dayjs'
-import * as assert from 'assert'
+import dayjs from 'dayjs'
 
-export type MeetingScheduleModel = MeetingSchedule & { location?: Location }
-export type MeetingModel = Meeting & { schedules?: MeetingScheduleModel[] } & {
-  usersOnMeetings?: UsersOnMeetingsModel[]
-}
+export type MeetingScheduleWithLocation = Prisma.MeetingScheduleGetPayload<{
+  include: { location: true }
+}>
 
-export type LocationModel = Location & { meetingSchedules?: MeetingSchedule[] }
-export type EmployeeScheduleModel = EmployeeSchedule & { location?: Location }
-export type EmployeesOnMeetingsModel = EmployeesOnMeetings & {
-  schedule?: EmployeeScheduleModel[]
-} & { meeting?: MeetingModel }
-export type ServiceModel = Service & {
-  servicesBookedOnMeetings?: ServicesBookedOnMeetingsModel[]
-} & { servicesProvidedOnMeetings?: ServicesProvidedOnMeetings[] }
-export type ServicesBookedOnMeetingsModel = ServicesBookedOnMeetings & {
-  meeting?: Meeting
-}
-export type ServicesProvidedOnMeetingsModel = ServicesProvidedOnMeetings & {
-  meeting?: Meeting
-}
+export type MeetingPrisma = Prisma.MeetingGetPayload<{
+  include: {
+    usersOnMeetings: true
+    schedules: {
+      include: {
+        location: true
+      }
+    }
+  }
+}>
+
+export type LocationWithMeetingSchedules = Prisma.LocationGetPayload<{
+  include: { meetingSchedules: true }
+}>
+
+export type EmployeeScheduleModel = Prisma.EmployeeScheduleGetPayload<{
+  include: { location: true }
+}>
+
+export type EmployeesOnMeetingsModel = Prisma.EmployeesOnMeetingsGetPayload<{
+  include: {
+    schedule: { include: { location: true } }
+    meeting: true
+  }
+}>
+
+export type ServiceModel = Prisma.ServiceGetPayload<{
+  include: {
+    servicesBookedOnMeetings: { include: { meeting: true } }
+    servicesProvidedOnMeetings: { include: { meeting: true } }
+  }
+}>
+
+export type ServicesBookedOnMeetingsModel =
+  Prisma.ServicesBookedOnMeetingsGetPayload<{
+    include: { meeting: true }
+  }>
+
+export type ServicesProvidedOnMeetingsModel =
+  Prisma.ServicesProvidedOnMeetingsGetPayload<{
+    include: { meeting: true }
+  }>
 
 export type MeetingRawQuery = Meeting &
   Omit<MeetingSchedule, 'createdAt' | 'updatedAt' | 'id'> & {
@@ -45,6 +66,9 @@ export type MeetingRawQuery = Meeting &
   } & Omit<UsersOnMeetings, 'createdAt' | 'updatedAt'> & {
     usersOnMeetingsCreatedAt: Date
     usersOnMeetingsUpdatedAt: Date
+  } & Omit<Location, 'id' | 'name'> & {
+    locationName: string
+    id: number
   }
 
 @Injectable()
@@ -56,10 +80,8 @@ export class MeetingMapper {
     //  private readonly clientMapper: UserMapper
   ) {}
 
-  public toDomain(meeting: MeetingModel): MeetingDomain {
+  public toDomain(meeting: MeetingPrisma): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
-    assert(schedules)
-    assert(meeting.usersOnMeetings)
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
@@ -70,7 +92,7 @@ export class MeetingMapper {
     })
   }
 
-  toMeetingModel(meetingRawQuery: MeetingRawQuery): MeetingModel {
+  toMeetingModel(meetingRawQuery: MeetingRawQuery): MeetingPrisma {
     const {
       canceled,
       cancellationReason,
@@ -85,6 +107,11 @@ export class MeetingMapper {
       userName,
       usersOnMeetingsCreatedAt,
       usersOnMeetingsUpdatedAt,
+      locationName,
+      houseNumber,
+      postalCode,
+      city,
+      street,
       ...meeting
     } = meetingRawQuery
     return {
@@ -100,6 +127,14 @@ export class MeetingMapper {
           startDate,
           endDate,
           locationId,
+          location: {
+            id: locationId,
+            name: locationName,
+            city,
+            street,
+            houseNumber,
+            postalCode,
+          },
         },
       ],
       usersOnMeetings: [
@@ -124,14 +159,13 @@ export class MeetingMapper {
       userNames,
       ...reduced
     } = domain
-    assert(userNames)
     return new MeetingDto({
       ...reduced,
       priceFinal: priceFinal?.toNumber(),
       priceExcepted: priceExcepted.toNumber(),
       discount: discount.toNumber(),
       priceFull: priceFull?.toNumber(),
-      repeatRate: domain.repeatRate?.toISOString(),
+      repeatRate: domain.repeatRate.toISOString(),
       schedules: domain.schedules.map((schedule) =>
         this.meetingScheduleMapper.toDto(schedule)
       ),
