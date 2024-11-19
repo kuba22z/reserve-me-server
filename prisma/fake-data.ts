@@ -1,9 +1,9 @@
 import {
   type EmployeeScheduleModel,
   type EmployeesOnMeetingsModel,
-  type LocationModel,
-  type MeetingModel,
-  type MeetingScheduleModel,
+  type LocationWithMeetingSchedules,
+  type MeetingPrisma,
+  type MeetingScheduleWithLocation,
   type ServiceModel,
   type ServicesBookedOnMeetingsModel,
   type ServicesProvidedOnMeetingsModel,
@@ -29,13 +29,13 @@ export const generateEmployeeSchedule = (
     repeatRate: undefined,
   })
 
-export const generateLocation = (): LocationModel =>
-  createMock<LocationModel>({
+export const generateLocation = (): LocationWithMeetingSchedules =>
+  createMock<LocationWithMeetingSchedules>({
     id,
   })
 
-export const generateMeeting = (): MeetingModel =>
-  createMock<MeetingModel>({
+export const generateMeeting = (): MeetingPrisma =>
+  createMock<MeetingPrisma>({
     id,
     repeatRate: undefined,
     priceExcepted: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
@@ -47,8 +47,8 @@ export const generateMeeting = (): MeetingModel =>
 export const generateMeetingSchedule = (
   locationId: number,
   meetingId: number
-): MeetingScheduleModel =>
-  createMock<MeetingScheduleModel>({
+): MeetingScheduleWithLocation =>
+  createMock<MeetingScheduleWithLocation>({
     id,
     startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
     endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
@@ -105,19 +105,19 @@ export const generateFakeData = (
 ): {
   employees: EmployeesOnMeetingsModel[]
   employeeSchedules: EmployeeScheduleModel[]
-  locations: LocationModel[]
-  meetings: MeetingModel[]
-  meetingSchedules: MeetingScheduleModel[]
+  locations: LocationWithMeetingSchedules[]
+  meetings: MeetingPrisma[]
+  meetingSchedules: MeetingScheduleWithLocation[]
   usersOnMeetings: UsersOnMeetingsModel[]
   services: ServiceModel[]
   servicesProvidedOnMeetings: ServicesProvidedOnMeetingsModel[]
   servicesBookedOnMeetings: ServicesBookedOnMeetingsModel[]
 } => {
   id = idParam
-  const locations: LocationModel[] = [generateLocation()]
+  const locations: LocationWithMeetingSchedules[] = [generateLocation()]
 
-  const meetings: MeetingModel[] = [generateMeeting()]
-  const meetingSchedules: MeetingScheduleModel[] = [
+  const meetings: MeetingPrisma[] = [generateMeeting()]
+  const meetingSchedules: MeetingScheduleWithLocation[] = [
     generateMeetingSchedule(locations[0].id, meetings[0].id),
   ]
   const employees: EmployeesOnMeetingsModel[] = [

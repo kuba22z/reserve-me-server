@@ -17,7 +17,7 @@ import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../config-validation'
 import { UserDomainWithGroup } from '../../user/domain/model/userDomainWithGroup'
 import * as process from 'process'
-import * as assert from 'assert'
+import assert from 'assert'
 
 export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
   @Injectable()
@@ -81,7 +81,7 @@ export const AuthGuard = (allowedGroups?: CognitoGroupDto[]) => {
 
     async verifyToken(token: string) {
       try {
-        return this.jwtVerifier.verify(token)
+        return await this.jwtVerifier.verify(token)
       } catch (e) {
         throw new UnauthorizedException(undefined, 'Authentication failed.')
       }

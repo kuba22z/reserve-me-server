@@ -18,7 +18,7 @@ import { type EnvironmentVariables } from '../../../config-validation'
 import { ConfigService } from '@nestjs/config'
 import * as crypto from 'crypto'
 import { type SignInRequestDto } from '../../api/dto/signin-request.dto'
-import * as assert from 'assert'
+import assert from 'assert'
 import { type TokenRequestDto } from '../../api/dto/token-request.dto'
 import { type CognitoGroupDto } from '../../api/dto/cognito-groups.dto'
 

@@ -1,15 +1,15 @@
 import { Test } from '@nestjs/testing'
 import { MeetingService } from './meeting.service'
 import { type MockFunctionMetadata, ModuleMocker } from 'jest-mock'
-import * as dayjs from 'dayjs'
-import { PrismaService } from 'nestjs-prisma'
+import dayjs from 'dayjs'
 import { MeetingMapper } from '../../mapper/meeting.mapper'
-import * as duration from 'dayjs/plugin/duration'
-import * as utcPlugin from 'dayjs/plugin/utc'
+import duration from 'dayjs/plugin/duration'
+import utcPlugin from 'dayjs/plugin/utc'
 import { createMock } from 'ts-auto-mock'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type MeetingDto } from '../../api/dto/meeting.dto'
 import { type MeetingScheduleDomain } from '../model/meeting-schedule.domain'
+import { PrismaService } from '../../../prisma.service'
 
 const moduleMocker = new ModuleMocker(global)
 

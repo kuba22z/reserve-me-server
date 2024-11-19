@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { PrismaModule, PrismaService } from 'nestjs-prisma'
 import { MeetingModule } from './meeting/meeting.module'
 import { UserModule } from './user/user.module'
 import { GraphQLModule } from '@nestjs/graphql'
@@ -20,7 +19,6 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
 @Module({
   imports: [
-    PrismaModule,
     MeetingModule,
     UserModule,
     LocationModule,
@@ -55,7 +53,7 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService],
 })
 export class AppModule {}
 

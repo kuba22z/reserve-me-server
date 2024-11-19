@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { type CognitoTokenResponseDto } from '../api/dto/cognito/cognito-token-response.dto'
 import { type TokenDto } from '../api/dto/token.dto'
 import { type AuthenticationResultType } from '@aws-sdk/client-cognito-identity-provider'
-import * as assert from 'assert'
+import assert from 'assert'
 import { type CognitoGroupDto } from '../api/dto/cognito-groups.dto'
 
 @Injectable()

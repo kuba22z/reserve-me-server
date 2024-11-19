@@ -10,7 +10,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider'
 import { CognitoGroupDto } from '../../../auth/api/dto/cognito-groups.dto'
 import { InjectCognitoIdentityProvider } from '@nestjs-cognito/core'
-import * as assert from 'assert'
+import assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../../config-validation'
 import { type CreateUserDto } from '../../api/dto/create-user.dto'

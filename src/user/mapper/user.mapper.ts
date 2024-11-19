@@ -1,23 +1,22 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import type { UsersOnMeetings } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import {
   type UserDomain,
   type UserDomainWithGroup,
 } from '../domain/model/userDomainWithGroup'
 import { type UserWithGroupDto } from '../api/dto/user-with-group.dto'
-import {
-  MeetingMapper,
-  type MeetingModel,
-} from '../../meeting/mapper/meeting.mapper'
+import { MeetingMapper } from '../../meeting/mapper/meeting.mapper'
 import { type CognitoJwtPayload } from 'aws-jwt-verify/jwt-model'
 import { type UserType } from '@aws-sdk/client-cognito-identity-provider'
 import { type CognitoGroupDto } from '../../auth/api/dto/cognito-groups.dto'
-import * as assert from 'assert'
+import assert from 'assert'
 import { type UserDto } from '../api/dto/user.dto'
 
-export type UsersOnMeetingsModel = UsersOnMeetings & {
-  meeting?: MeetingModel
-}
+export type UsersOnMeetingsModel = Prisma.UsersOnMeetingsGetPayload<{
+  include: {
+    meeting: true
+  }
+}>
 
 @Injectable()
 export class UserMapper {
