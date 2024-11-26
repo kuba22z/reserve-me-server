@@ -1,8 +1,5 @@
 import { Test, type TestingModule } from '@nestjs/testing'
 import { UserService } from './user.service'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import utcPlugin from 'dayjs/plugin/utc'
 import { UserMapper } from '../../mapper/user.mapper'
 import { HttpService } from '@nestjs/axios'
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider'
@@ -26,9 +23,6 @@ describe('UserService', () => {
   }
 
   beforeEach(async () => {
-    dayjs.extend(duration)
-    dayjs.extend(utcPlugin)
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,

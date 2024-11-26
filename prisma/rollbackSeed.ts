@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { seedId } from './seed'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
+import { seedId } from './fake-data'
 
 const prisma = new PrismaClient()
 

@@ -8,7 +8,7 @@ import { UserService } from '../user/domain/serivce/user.service'
 import { UserMapper } from '../user/mapper/user.mapper'
 import { HttpModule } from '@nestjs/axios'
 import { PeriodicScheduleService } from './domain/service/periodic-schedules.service'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from '../prisma.service'
 
 @Module({
   controllers: [],

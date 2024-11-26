@@ -14,6 +14,7 @@ import { configurations } from './config'
 import { validateConfig } from './config-validation'
 import * as dotenv from 'dotenv'
 import * as process from 'process'
+import { PrismaService } from './prisma.service'
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
@@ -53,10 +54,6 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}
-
-export const isPrismaError = (error: Error): boolean => {
-  return 'clientVersion' in error
-}

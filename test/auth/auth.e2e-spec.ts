@@ -6,7 +6,7 @@ import {
   CognitoTokenUse,
   type EnvironmentVariables,
 } from '../../src/config-validation'
-import * as request from 'supertest'
+import request from 'supertest'
 import gql from 'graphql-tag'
 import { type UserDto } from '../../src/user/api/dto/user.dto'
 import { CognitoGroupDto } from '../../src/auth/api/dto/cognito-groups.dto'

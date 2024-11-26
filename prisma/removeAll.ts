@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client'
 import type { ITXClientDenyList } from '@prisma/client/runtime/library'
-import { PrismaService } from 'nestjs-prisma'
 
 const prisma = new PrismaClient()
 
@@ -24,7 +23,7 @@ export const removeAllFakeData = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   try {
     // await prisma.$transaction(async (tx) => {
-    await deleteFakeData(new PrismaService())
+    await deleteFakeData(prisma)
     // })
   } catch (error) {
     console.log(error)
@@ -37,3 +36,4 @@ export const removeAllFakeData = async () => {
 removeAllFakeData().catch((error) => {
   console.error(error)
 })
+console.log('Removed!')
