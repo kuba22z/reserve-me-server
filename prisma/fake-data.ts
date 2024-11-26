@@ -1,156 +1,84 @@
+// Predefined hardcoded objects
 import {
-  type EmployeeScheduleModel,
-  type EmployeesOnMeetingsModel,
-  type LocationWithMeetingSchedules,
-  type MeetingPrisma,
-  type MeetingScheduleWithLocation,
-  type ServiceModel,
-  type ServicesBookedOnMeetingsModel,
-  type ServicesProvidedOnMeetingsModel,
-} from '../src/meeting/mapper/meeting.mapper'
-import { createMock } from 'ts-auto-mock'
-import { type UsersOnMeetingsModel } from '../src/user/mapper/user.mapper'
-import { Prisma } from '@prisma/client'
-import { faker } from '@faker-js/faker'
+  type EmployeeSchedule,
+  type EmployeesOnMeetings,
+  type Location,
+  type Meeting,
+  type MeetingSchedule,
+  type Service,
+  type UsersOnMeetings,
+} from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
 
-let id: number
+export const seedId = 1
 
-export const generateEmployeeSchedule = (
-  employeeId: number,
-  locationId: number
-): EmployeeScheduleModel =>
-  createMock<EmployeeScheduleModel>({
-    id,
-    employeeId,
-    locationId,
-    startDate: new Date(2018, 1, 5, 20, 30, 0, 0),
-    endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
-    canceled: false,
-    repeatRate: undefined,
-  })
-
-export const generateLocation = (): LocationWithMeetingSchedules =>
-  createMock<LocationWithMeetingSchedules>({
-    id,
-  })
-
-export const generateMeeting = (): MeetingPrisma =>
-  createMock<MeetingPrisma>({
-    id,
-    repeatRate: undefined,
-    priceExcepted: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
-    priceFinal: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
-    priceFull: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
-    discount: new Prisma.Decimal(0),
-  })
-
-export const generateMeetingSchedule = (
-  locationId: number,
-  meetingId: number
-): MeetingScheduleWithLocation =>
-  createMock<MeetingScheduleWithLocation>({
-    id,
-    startDate: new Date(2018, 1, 5, 21, 0, 0, 0),
-    endDate: new Date(2018, 1, 5, 22, 30, 0, 0),
-    canceled: false,
-    locationId,
-    meetingId,
-  })
-
-export const generateClientsOnMeetings = (
-  userExternalRefId: string,
-  meetingId: number
-): UsersOnMeetingsModel =>
-  createMock<UsersOnMeetingsModel>({
-    userExternalRefId,
-    meetingId,
-  })
-
-export const generateService = (): ServiceModel =>
-  createMock<ServiceModel>({
-    id,
-    price: new Prisma.Decimal(faker.number.float({ multipleOf: 2 })),
-  })
-
-export const generateServicesProvidedOnMeetings = (
-  serviceId: number,
-  meetingId: number
-): ServicesProvidedOnMeetingsModel =>
-  createMock<ServicesProvidedOnMeetingsModel>({
-    serviceId,
-    meetingId,
-  })
-
-export const generateServicesBookedOnMeetings = (
-  serviceId: number,
-  meetingId: number
-): ServicesBookedOnMeetingsModel =>
-  createMock<ServicesBookedOnMeetingsModel>({
-    serviceId,
-    meetingId,
-  })
-
-export const generateEmployeesOnMeetings = (
-  userExternalRefId: string,
-  meetingId: number
-): EmployeesOnMeetingsModel =>
-  createMock<EmployeesOnMeetingsModel>({
-    id,
-    userExternalRefId,
-    meetingId,
-  })
-
-export const generateFakeData = (
-  idParam: number
-): {
-  employees: EmployeesOnMeetingsModel[]
-  employeeSchedules: EmployeeScheduleModel[]
-  locations: LocationWithMeetingSchedules[]
-  meetings: MeetingPrisma[]
-  meetingSchedules: MeetingScheduleWithLocation[]
-  usersOnMeetings: UsersOnMeetingsModel[]
-  services: ServiceModel[]
-  servicesProvidedOnMeetings: ServicesProvidedOnMeetingsModel[]
-  servicesBookedOnMeetings: ServicesBookedOnMeetingsModel[]
-} => {
-  id = idParam
-  const locations: LocationWithMeetingSchedules[] = [generateLocation()]
-
-  const meetings: MeetingPrisma[] = [generateMeeting()]
-  const meetingSchedules: MeetingScheduleWithLocation[] = [
-    generateMeetingSchedule(locations[0].id, meetings[0].id),
-  ]
-  const employees: EmployeesOnMeetingsModel[] = [
-    generateEmployeesOnMeetings(id.toString(), meetings[0].id),
-  ]
-
-  const employeeSchedules: EmployeeScheduleModel[] = [
-    generateEmployeeSchedule(employees[0].id, locations[0].id),
-  ]
-
-  const clientsOnMeetings: UsersOnMeetingsModel[] = [
-    generateClientsOnMeetings(id.toString(), meetings[0].id),
-  ]
-  const services: ServiceModel[] = [generateService()]
-  const servicesProvidedOnMeetings: ServicesProvidedOnMeetingsModel[] = [
-    generateServicesProvidedOnMeetings(services[0].id, meetings[0].id),
-  ]
-  const servicesBookedOnMeetings: ServicesBookedOnMeetingsModel[] = [
-    generateServicesBookedOnMeetings(services[0].id, meetings[0].id),
-  ]
-
-  return {
-    employees,
-    employeeSchedules,
-    locations,
-    meetings,
-    meetingSchedules,
-    usersOnMeetings: clientsOnMeetings,
-    services,
-    servicesProvidedOnMeetings,
-    servicesBookedOnMeetings,
-  }
+export const location: Location = {
+  name: 'Main Conference Room',
+  street: '123 Business St.',
+  houseNumber: 10,
+  city: 'Berlin',
+  postalCode: '10115',
+  id: seedId,
 }
 
-// Export the method to generate fake data
-export default generateFakeData
+export const service: Service = {
+  name: 'Catering Service',
+  price: new Decimal(150.0),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  id: seedId,
+}
+
+export const meeting: Meeting = {
+  priceExcepted: new Decimal(500.0),
+  priceFull: new Decimal(600.0),
+  discount: new Decimal(0.1),
+  priceFinal: new Decimal(540.0),
+  createdByExternalRefId: 'admin-12345',
+  repeatRate: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  id: seedId,
+}
+
+export const usersOnMeeting: UsersOnMeetings = {
+  userExternalRefId: 'user-123',
+  meetingId: seedId, // Placeholder, will be updated after meeting creation
+  userName: 'John Doe',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const employeesOnMeeting: EmployeesOnMeetings = {
+  userExternalRefId: 'emp-123',
+  meetingId: seedId, // Placeholder, will be updated after meeting creation
+  userName: 'Alice Johnson',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  id: seedId,
+}
+
+export const meetingSchedule: MeetingSchedule = {
+  meetingId: seedId,
+  locationId: seedId,
+  startDate: new Date('2024-12-01T10:00:00Z'),
+  endDate: new Date('2024-12-01T12:00:00Z'),
+  canceled: false,
+  cancellationReason: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  id: seedId,
+}
+
+export const employeeSchedule: EmployeeSchedule = {
+  employeeId: seedId,
+  locationId: seedId,
+  startDate: new Date('2024-12-01T10:00:00Z'),
+  endDate: new Date('2024-12-01T12:00:00Z'),
+  canceled: false,
+  cancellationReason: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  repeatRate: null,
+  id: seedId,
+}
