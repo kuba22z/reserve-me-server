@@ -1,5 +1,3 @@
-import duration from 'dayjs/plugin/duration'
-import utcPlugin from 'dayjs/plugin/utc'
 import dayjs from 'dayjs'
 import { Test } from '@nestjs/testing'
 import { PeriodicScheduleService } from './periodic-schedules.service'
@@ -7,6 +5,8 @@ import { createMock } from 'ts-auto-mock'
 import type { MeetingScheduleDomain } from '../model/meeting-schedule.domain'
 import { type MeetingDomain } from '../model/meeting.domain'
 import { type MockFunctionMetadata, ModuleMocker } from 'jest-mock'
+import duration from 'dayjs/plugin/duration'
+import utcPlugin from 'dayjs/plugin/utc'
 
 const moduleMocker = new ModuleMocker(global)
 

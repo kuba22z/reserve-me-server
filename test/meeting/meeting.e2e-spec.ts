@@ -1,8 +1,7 @@
 import { type INestApplication, Logger } from '@nestjs/common'
 import { removeAllFakeData } from '../../prisma/removeAll'
 import { createMock } from 'ts-auto-mock'
-import { type LocationWithMeetingSchedules } from '../../src/meeting/mapper/meeting.mapper'
-import * as request from 'supertest'
+import request from 'supertest'
 import { AppModule } from '../../src/app.module'
 import { type CreateMeetingDto } from '../../src/meeting/api/dto/create-meeting.dto'
 import type { CreateMeetingScheduleDto } from '../../src/meeting/api/dto/create-meeting-schedule.dto'
@@ -14,7 +13,7 @@ import { Test as NestJsTest, type TestingModule } from '@nestjs/testing'
 import { type DateTimeInterval } from '../../src/meeting/domain/model/datetime-interval.domain'
 import { type UpdateMeetingDto } from '../../src/meeting/api/dto/update-meeting.dto'
 import { type MeetingDto } from '../../src/meeting/api/dto/meeting.dto'
-import { type MeetingSchedule } from '@prisma/client'
+import { type MeetingSchedule, type Prisma } from '@prisma/client'
 import { type ErrorDto } from '../../src/common/api/dto/error.dto'
 import { MeetingService } from '../../src/meeting/domain/service/meeting.service'
 import { type UpdateMeetingScheduleDto } from '../../src/meeting/api/dto/update-meeting-schedule.dto'
@@ -24,13 +23,14 @@ import assert from 'assert'
 import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../src/config-validation'
 import { PrismaService } from 'src/prisma.service'
+import { location } from '../../prisma/fake-data'
 
 const gqlPath = '/graphql'
 
 describe('MeetingResolver (e2e)', () => {
   let app: INestApplication
-  let location1: LocationWithMeetingSchedules
-  let location2: LocationWithMeetingSchedules
+  let location1: Prisma.LocationGetPayload<null>
+  let location2: Prisma.LocationGetPayload<null>
   const prisma = new PrismaService()
   let config: ConfigService<EnvironmentVariables, true>
 
@@ -45,14 +45,14 @@ describe('MeetingResolver (e2e)', () => {
       .setLogger(new Logger())
       .compile()
     await removeAllFakeData()
-    location1 = createMock<LocationWithMeetingSchedules>({
-      id: 1,
-      name: 'location1',
-    })
-    location2 = createMock<LocationWithMeetingSchedules>({
-      id: 2,
-      name: 'location2',
-    })
+    location1 = location
+    location1.id = 1
+    location1.name = 'location1'
+
+    location2 = { ...location }
+    location2.id = 2
+    location2.name = 'location2'
+
     await prisma.location.createMany({ data: [location1, location2] })
     config = moduleFixture.get<
       ConfigService,
@@ -64,6 +64,7 @@ describe('MeetingResolver (e2e)', () => {
   })
 
   afterAll(async () => {
+    await removeAllFakeData()
     await app.close()
   })
   afterEach(async () => {

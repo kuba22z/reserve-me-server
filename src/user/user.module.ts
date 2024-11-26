@@ -6,7 +6,7 @@ import { MeetingMapper } from '../meeting/mapper/meeting.mapper'
 import { MeetingScheduleMapper } from '../meeting/mapper/meeting-schedule.mapper'
 import { LocationMapper } from '../location/mapper/location.mapper'
 import { HttpModule } from '@nestjs/axios'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from '../prisma.service'
 
 @Module({
   providers: [

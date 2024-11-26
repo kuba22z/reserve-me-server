@@ -1,66 +1,72 @@
 import { PrismaClient } from '@prisma/client'
-import generateFakeData from './fake-data'
-import { type ITXClientDenyList } from '@prisma/client/runtime/library'
+import {
+  employeeSchedule,
+  employeesOnMeeting,
+  location,
+  meeting,
+  meetingSchedule,
+  service,
+  usersOnMeeting,
+} from './fake-data'
 
 const prisma = new PrismaClient()
 
-async function initializeDatabase(
-  tx: Omit<PrismaClient, ITXClientDenyList>,
-  id: number
-) {
-  const fakeData = generateFakeData(id)
+// Function to create data in the database
+async function createData() {
+  await prisma.$transaction(async (prisma) => {
+    // Create Location
+    const createdLocation = await prisma.location.create({
+      data: location,
+    })
 
-  await tx.location.createMany({
-    data: fakeData.locations,
-  })
-  await tx.meeting.createMany({
-    data: fakeData.meetings,
-  })
-  await tx.meetingSchedule.createMany({
-    data: fakeData.meetingSchedules,
-  })
-  await tx.employeesOnMeetings.createMany({
-    data: fakeData.employees,
-  })
-  await tx.employeeSchedule.createMany({
-    data: fakeData.employeeSchedules,
-  })
+    // Create Service
+    await prisma.service.create({
+      data: service,
+    })
 
-  await tx.usersOnMeetings.createMany({
-    data: fakeData.usersOnMeetings,
-  })
+    // Create Meeting
+    const createdMeeting = await prisma.meeting.create({
+      data: meeting,
+    })
 
-  await tx.service.createMany({
-    data: fakeData.services,
-  })
+    // Update the users and employees' meeting with correct meetingId
+    usersOnMeeting.meetingId = createdMeeting.id
+    await prisma.usersOnMeetings.create({
+      data: usersOnMeeting, // createdAt and updatedAt will be automatically handled by Prisma
+    })
 
-  await tx.servicesProvidedOnMeetings.createMany({
-    data: fakeData.servicesProvidedOnMeetings,
-  })
+    employeesOnMeeting.meetingId = createdMeeting.id
+    const createdEmployeeOnMeeting = await prisma.employeesOnMeetings.create({
+      data: employeesOnMeeting, // createdAt and updatedAt will be automatically handled by Prisma
+    })
 
-  await tx.servicesBookedOnMeetings.createMany({
-    data: fakeData.servicesBookedOnMeetings,
+    // Update the meeting schedule with correct meetingId and locationId
+    meetingSchedule.meetingId = createdMeeting.id
+    meetingSchedule.locationId = createdLocation.id
+    await prisma.meetingSchedule.create({
+      data: meetingSchedule,
+    })
+
+    // Update employee schedule with correct employeeId and locationId
+    employeeSchedule.employeeId = createdEmployeeOnMeeting.id
+    employeeSchedule.locationId = createdLocation.id
+    await prisma.employeeSchedule.create({
+      data: employeeSchedule,
+    })
+
+    console.log('Data created successfully!')
   })
-  // const addUsers = async () => await prisma.user.createMany({ data: users });
 }
-export const seed = async (id: number) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  await prisma.$transaction(async (tx) => {
-    await initializeDatabase(tx, id)
-  })
-  return id
-}
-export const seedId = 2
 
-seed(seedId)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .then((_) => {
-    console.log('Database seeded successfully!')
-  })
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
+// Call the function to create data
+createData()
+  .catch((error) => {
+    console.error('Error creating data:', error)
   })
   .finally(async () => {
     await prisma.$disconnect()
   })
+
+// removeAllFakeData().catch((error) => {
+//   console.error(error)
+// })
