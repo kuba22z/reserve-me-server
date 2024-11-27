@@ -17,13 +17,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+# TODO commit encrypted .env maybe?
+#      - name: Set env
+#        uses: cardinalby/export-env-action@v1
+#        with:
+#          envFile: '.env.local'
+#          expand: 'true'
 
       - name: Install dependencies
         run: npm ci
       - name: Execute unit tests
         run: npm run test:unit
-      - name: Execute e2e tests
-        run: npm run test:e2e
+# TODO: start docker container with postgres https://docs.github.com/en/actions/use-cases-and-examples/using-containerized-services/creating-postgresql-service-containers to execute e2e tests
+#      - name: Execute e2e tests
+#        run: npm run test:e2e
      # TODO include this later
      # - name: Install dotenv-cli
      #   run: npm install -g dotenv-cli
