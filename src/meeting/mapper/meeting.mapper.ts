@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
 import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
 
 export type MeetingScheduleWithLocation = Prisma.MeetingScheduleGetPayload<{
   include: { location: true }
@@ -82,6 +83,7 @@ export class MeetingMapper {
 
   public toDomain(meeting: MeetingPrisma): MeetingDomain {
     const { repeatRate, schedules, ...reduced } = meeting
+    dayjs.extend(duration)
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),

@@ -1,5 +1,4 @@
 import { type INestApplication, Logger } from '@nestjs/common'
-import { removeAllFakeData } from '../../prisma/removeAll'
 import { createMock } from 'ts-auto-mock'
 import request from 'supertest'
 import { AppModule } from '../../src/app.module'
@@ -24,6 +23,7 @@ import { ConfigService } from '@nestjs/config'
 import type { EnvironmentVariables } from '../../src/config-validation'
 import { PrismaService } from 'src/prisma.service'
 import { location } from '../../prisma/fake-data'
+import { deleteAllData } from '../../prisma/db-operations'
 
 const gqlPath = '/graphql'
 
@@ -44,7 +44,7 @@ describe('MeetingResolver (e2e)', () => {
     })
       .setLogger(new Logger())
       .compile()
-    await removeAllFakeData()
+    await deleteAllData(prisma)
     location1 = location
     location1.id = 1
     location1.name = 'location1'
@@ -64,7 +64,7 @@ describe('MeetingResolver (e2e)', () => {
   })
 
   afterAll(async () => {
-    await removeAllFakeData()
+    await deleteAllData(prisma)
     await app.close()
   })
   afterEach(async () => {

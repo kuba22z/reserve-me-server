@@ -2,10 +2,6 @@ import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
-import duration from 'dayjs/plugin/duration'
-import utcPlugin from 'dayjs/plugin/utc'
-
-import dayjs from 'dayjs'
 import { ConfigService } from '@nestjs/config'
 import { type EnvironmentVariables } from './config-validation'
 
@@ -19,10 +15,6 @@ async function bootstrap() {
   // useContainer(app.select(AppModule), { fallbackOnErrors: true })
 
   // app.useGlobalFilters(new PrismaClientExceptionFilter())
-
-  // extend dayjs with plugin globally
-  dayjs.extend(duration)
-  dayjs.extend(utcPlugin)
 
   const configService = app.get<
     ConfigService,
