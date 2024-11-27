@@ -18,6 +18,12 @@
     "strictPropertyInitialization": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "plugins": [
+      {
+        "transform": "ts-auto-mock/transformer",
+        "cacheBetweenTests": false
+      }
+    ]
   },
 }
