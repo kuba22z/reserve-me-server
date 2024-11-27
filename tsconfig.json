@@ -18,5 +18,6 @@
     "strictPropertyInitialization": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
+    "esModuleInterop": true
   },
 }

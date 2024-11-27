@@ -15,8 +15,13 @@ import { validateConfig } from './config-validation'
 import * as dotenv from 'dotenv'
 import * as process from 'process'
 import { PrismaService } from './prisma.service'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import duration from 'dayjs/plugin/duration'
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
+dayjs.extend(utc)
+dayjs.extend(duration)
 
 @Module({
   imports: [
