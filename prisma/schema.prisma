@@ -128,6 +128,7 @@ model Meeting {
   priceFull                  Decimal?                     @db.Decimal(8, 2)
   discount                   Decimal                      @default(0) @db.Decimal(3, 2)
   priceFinal                 Decimal?                     @db.Decimal(8, 2)
+  notes                      String
   createdByExternalRefId     String
   repeatRate                 String?
   usersOnMeetings            UsersOnMeetings[]

@@ -4,6 +4,7 @@ import { type CreateMeetingScheduleDto } from './create-meeting-schedule.dto'
 @InputType()
 export class CreateMeetingDto {
   public createdByExternalRefId: string
+  public notes: string
   public priceFull?: number | null
   public discount?: number
   public priceFinal?: number | null
