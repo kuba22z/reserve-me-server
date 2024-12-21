@@ -81,7 +81,7 @@ export class MeetingMapper {
   ) {}
 
   public toDomain(meeting: MeetingPrisma): MeetingDomain {
-    const { repeatRate, schedules, notes, ...reduced } = meeting
+    const { repeatRate, schedules, ...reduced } = meeting
     return new MeetingDomain({
       ...reduced,
       repeatRate: dayjs.duration(repeatRate ?? 'P0D'),
