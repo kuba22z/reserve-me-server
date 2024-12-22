@@ -3,6 +3,7 @@ import {
   employeeSchedule,
   employeesOnMeeting,
   location,
+  location2,
   meeting,
   meetingSchedule,
   service,
@@ -17,6 +18,9 @@ async function createData() {
     // Create Location
     const createdLocation = await prisma.location.create({
       data: location,
+    })
+    await prisma.location.create({
+      data: location2,
     })
 
     // Create Service

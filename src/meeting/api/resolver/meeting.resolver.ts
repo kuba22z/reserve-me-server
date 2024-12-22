@@ -14,13 +14,13 @@ import { ForbiddenException } from '@nestjs/common'
 import assert from 'assert'
 
 @Resolver()
-@Auth([CognitoGroupDto.admin, CognitoGroupDto.client, CognitoGroupDto.employee])
 export class MeetingResolver {
   constructor(
     private readonly meetingService: MeetingService,
     private readonly mapper: MeetingMapper
   ) {}
 
+  @Auth([CognitoGroupDto.admin, CognitoGroupDto.employee])
   @Query(() => [MeetingDto])
   async meetings(): Promise<MeetingDto[]> {
     return await this.meetingService
@@ -28,6 +28,25 @@ export class MeetingResolver {
       .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
   }
 
+  @Auth([
+    CognitoGroupDto.admin,
+    CognitoGroupDto.employee,
+    CognitoGroupDto.client,
+  ])
+  @Query(() => [MeetingDto])
+  async reservedMeetings(
+    @User() user: UserDomainWithGroup
+  ): Promise<MeetingDto[]> {
+    return await this.meetingService
+      .findAll()
+      .then((meetings) =>
+        meetings.map((meeting) =>
+          this.mapper.toReservedMeetingDto(meeting, user)
+        )
+      )
+  }
+
+  @Auth([CognitoGroupDto.admin, CognitoGroupDto.employee])
   @Query(() => [MeetingDto])
   async meetingsByInterval(
     @Args('from', { type: () => Date }) from: Date,
@@ -40,6 +59,11 @@ export class MeetingResolver {
       .then((meetings) => meetings.map((meeting) => this.mapper.toDto(meeting)))
   }
 
+  @Auth([
+    CognitoGroupDto.admin,
+    CognitoGroupDto.client,
+    CognitoGroupDto.employee,
+  ])
   @Mutation(() => MeetingDto)
   async createMeeting(
     @User() user: UserDomainWithGroup,
@@ -66,6 +90,11 @@ export class MeetingResolver {
       .then((meeting) => this.mapper.toDto(meeting))
   }
 
+  @Auth([
+    CognitoGroupDto.admin,
+    CognitoGroupDto.client,
+    CognitoGroupDto.employee,
+  ])
   @Mutation(() => MeetingDto)
   async updateMeeting(
     @User() user: UserDomainWithGroup,
@@ -92,6 +121,11 @@ export class MeetingResolver {
       .then((meeting) => this.mapper.toDto(meeting))
   }
 
+  @Auth([
+    CognitoGroupDto.admin,
+    CognitoGroupDto.client,
+    CognitoGroupDto.employee,
+  ])
   @Mutation(() => CounterDto)
   async deleteMeetings(
     @User() user: UserDomainWithGroup,
