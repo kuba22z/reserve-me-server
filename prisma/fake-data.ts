@@ -13,12 +13,21 @@ import { Decimal } from '@prisma/client/runtime/library'
 export const seedId = 1
 
 export const location: Location = {
-  name: 'Main Conference Room',
-  street: '123 Business St.',
-  houseNumber: 10,
-  city: 'Berlin',
-  postalCode: '10115',
+  name: 'korty górne',
+  street: 'ptasia',
+  houseNumber: 8,
+  city: 'Gorzów Wielkopolski',
+  postalCode: '12627',
   id: seedId,
+}
+
+export const location2: Location = {
+  name: 'korty dolne',
+  street: 'ptasia',
+  houseNumber: 8,
+  city: 'Gorzów Wielkopolski',
+  postalCode: '12627',
+  id: 2,
 }
 
 export const service: Service = {
@@ -38,6 +47,7 @@ export const meeting: Meeting = {
   repeatRate: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  notes: '',
   id: seedId,
 }
 

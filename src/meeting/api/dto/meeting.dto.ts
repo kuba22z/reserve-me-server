@@ -4,16 +4,16 @@ import { ObjectType } from '@nestjs/graphql'
 @ObjectType({ description: 'Meeting' })
 export class MeetingDto {
   public id: number
-  public notes: string
+  public notes?: string
   public repeatRate?: string
   public priceFull?: number
-  public discount: number
+  public discount?: number
   public priceFinal?: number
-  public createdByExternalRefId: string
-  public priceExcepted: number
-  public createdAt: Date
-  public updatedAt: Date
-  public userNames: string[]
+  public createdByExternalRefId?: string
+  public priceExcepted?: number
+  public createdAt?: Date
+  public updatedAt?: Date
+  public userNames?: string[]
   // TODO make schedules non optional
   public schedules?: MeetingScheduleDto[]
   // public employee?: Employee

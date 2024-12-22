@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common'
 import { MeetingScheduleMapper } from './meeting-schedule.mapper'
 import { MeetingDto } from '../api/dto/meeting.dto'
 import dayjs from 'dayjs'
+import { type UserDomainWithGroup } from '../../user/domain/model/userDomainWithGroup'
 
 export type MeetingScheduleWithLocation = Prisma.MeetingScheduleGetPayload<{
   include: { location: true }
@@ -90,6 +91,22 @@ export class MeetingMapper {
       ),
       userNames: meeting.usersOnMeetings.map((u) => u.userName),
     })
+  }
+
+  public toReservedMeetingDto(
+    meeting: MeetingDomain,
+    user: UserDomainWithGroup
+  ): MeetingDto {
+    const { id, schedules, userNames } = meeting
+    return {
+      id,
+      schedules: schedules.map((schedule) =>
+        this.meetingScheduleMapper.toDto(schedule)
+      ),
+      userNames: userNames.some((u) => u === user.userName)
+        ? userNames
+        : undefined,
+    }
   }
 
   toMeetingModel(meetingRawQuery: MeetingRawQuery): MeetingPrisma {
