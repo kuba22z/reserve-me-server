@@ -58,6 +58,7 @@ model EmployeesOnMeetings {
   meetingId         Int
   userName          String
   schedule          EmployeeSchedule[]
+  repeatRate        String?
   meeting           Meeting            @relation(fields: [meetingId], references: [id])
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -74,7 +75,6 @@ model EmployeeSchedule {
   endDate            DateTime
   canceled           Boolean             @default(false)
   cancellationReason String              @default("")
-  repeatRate         String?
   employee           EmployeesOnMeetings @relation(fields: employeeId, references: [id])
   location           Location            @relation(fields: [locationId], references: [id])
   createdAt          DateTime            @default(now())

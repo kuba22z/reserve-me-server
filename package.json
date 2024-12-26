@@ -22,6 +22,7 @@
     "test:e2e": "NODE_ENV=local jest --config ./dist-test/test/jest-e2e.json",
     "migrate:local": "dotenv -e .env.local -- npx prisma migrate deploy",
     "migrate:dev": "dotenv -e .env.dev -- npx prisma migrate deploy",
+    "create-migration:local":  "dotenv -e .env.local -- npx prisma migrate dev -n",
     "ts-patch:check": "ts-patch check",
     "ts-patch:help": "ts-patch /?",
     "db:removeAll": "dotenv -e .env.local -- ts-node prisma/removeAll.ts"
