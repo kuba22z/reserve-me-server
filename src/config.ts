@@ -49,6 +49,7 @@ const CognitoTestUserConfig = registerAs(ConfigKey.CognitoTestUser, () => ({
 
 const ClientConfig = registerAs(ConfigKey.Client, () => ({
   domain: process.env.CLIENT_DOMAIN!,
+  loginRedirectPath: process.env.CLIENT_LOGIN_REDIRECT_PATH,
 }))
 
 export const configurations = [

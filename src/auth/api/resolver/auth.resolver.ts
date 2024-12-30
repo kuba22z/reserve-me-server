@@ -31,7 +31,7 @@ export class AuthResolver {
     return await this.authService.requestCognitoSignOut(token)
   }
 
-  loginParameters = `response_type=code&client_id=${this.configService.get('COGNITO_CLIENT_ID')}&scope=openid+phone+profile+aws.cognito.signin.user.admin&redirect_uri=${this.configService.get('CLIENT_DOMAIN')}/api/auth/token`
+  loginParameters = `response_type=code&client_id=${this.configService.get('COGNITO_CLIENT_ID')}&scope=openid+phone+profile+aws.cognito.signin.user.admin&redirect_uri=${this.configService.get('CLIENT_DOMAIN') + this.configService.get('CLIENT_LOGIN_REDIRECT_PATH')}`
   // alternative: "/oauth2/authorize" Endpoint instead of "login" if you want that no user change is possible and no extra ui is showed
   loginUrl = `${this.configService.get('COGNITO_DOMAIN')}/login?${this.loginParameters}`
 
