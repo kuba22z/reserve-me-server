@@ -38,6 +38,10 @@ export class EnvironmentVariables {
   @IsString()
   CLIENT_DOMAIN: string
 
+  @IsNotEmpty()
+  @IsString()
+  CLIENT_LOGIN_REDIRECT_PATH: string
+
   // Database
   @IsNotEmpty()
   @IsString()

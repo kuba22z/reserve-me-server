@@ -57,7 +57,8 @@ export class AuthService {
           code: tokenRequest.authorizationCode,
           refresh_token: tokenRequest.refreshToken,
           redirect_uri:
-            this.configService.get('CLIENT_DOMAIN') + '/api/auth/token',
+            this.configService.get('CLIENT_DOMAIN') +
+            this.configService.get('CLIENT_LOGIN_REDIRECT_PATH'),
         }),
         {
           headers: {
